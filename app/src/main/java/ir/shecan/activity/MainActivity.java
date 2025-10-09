@@ -16,12 +16,20 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 
-import ir.shecan.Shecan;
 import ir.shecan.R;
-
+import ir.shecan.Shecan;
 import ir.shecan.fragment.AboutFragment;
 import ir.shecan.fragment.DNSTestFragment;
 import ir.shecan.fragment.HomeFragment;
@@ -32,15 +40,6 @@ import ir.shecan.service.ShecanVpnService;
 import ir.shecan.util.Logger;
 import ir.shecan.util.server.DNSServerHelper;
 import ir.shecan.util.server.LocaleHelper;
-
-import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 /**
  * Shecan Project
@@ -171,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private int fetchPrimaryDarkColor() {
         TypedValue typedValue = new TypedValue();
-        getTheme().resolveAttribute(R.attr.colorPrimaryDark, typedValue, true);
+        getTheme().resolveAttribute(R.color.colorPrimaryDark, typedValue, true);
         return typedValue.data;
     }
 

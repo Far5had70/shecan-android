@@ -36,6 +36,8 @@ import com.pushpole.sdk.PushPole;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.sentry.Sentry;
+import io.sentry.android.core.SentryAndroid;
 import ir.shecan.activity.MainActivity;
 import ir.shecan.service.CoreApiResponseListener;
 import ir.shecan.service.BaseApiResponseListener;
@@ -120,6 +122,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
         Logger.init();
 
+        addSentry();
         initData();
         initPushPole();
         initCheckIP();
@@ -386,6 +389,19 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
     public void updateLocale() {
         setLocale(LanguageHelper.getLanguage());
+    }
+
+    public void addSentry() {
+        SentryAndroid.init(this, options -> {
+            options.setEnableExternalConfiguration(true);
+            options.setDebug(true);
+        });
+
+        try {
+            throw new Exception("Test error from Android!");
+        } catch (Exception e) {
+            Sentry.captureException(e);
+        }
     }
 
     private void setLocale(String lang) {
