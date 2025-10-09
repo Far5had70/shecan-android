@@ -394,14 +394,14 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     public void addSentry() {
         SentryAndroid.init(this, options -> {
             options.setEnableExternalConfiguration(true);
-            options.setDebug(true);
+            options.setDebug(false);
         });
 
-        try {
-            throw new Exception("Test error from Android!");
-        } catch (Exception e) {
-            Sentry.captureException(e);
-        }
+//        try {
+//            throw new Exception("Test error from Android!");
+//        } catch (Exception e) {
+//            Sentry.captureException(e);
+//        }
     }
 
     private void setLocale(String lang) {
