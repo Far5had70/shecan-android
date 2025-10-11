@@ -54,3 +54,6 @@
 
 # Keep MiniDNS classes
 -keep class de.measite.minidns.** { *; }
+
+# Suppress warning about missing SLF4J binding
+-dontwarn org.slf4j.impl.StaticLoggerBinder

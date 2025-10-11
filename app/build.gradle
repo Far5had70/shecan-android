@@ -11,17 +11,18 @@ android {
     namespace "ir.shecan"
     compileSdkVersion 34
     defaultConfig {
-        applicationId "ir.shecan"
+        applicationId "co.bonyan.shecan"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 10101
-        versionName "1.1.01"
+        versionCode 10102
+        versionName "1.1.02"
 
         buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        setProperty("archivesBaseName", applicationId + "-v" + versionCode + "(" + versionName + ")")
     }
     buildTypes {
         release {
@@ -82,3 +83,11 @@ dependencies {
 
 }
 
+sentry {
+    autoUploadProguardMapping.set(true)
+    includeProguardMapping.set(true)
+    url.set("https://sentry.hamravesh.com/")
+    org.set("shecan-dns")
+    projectName.set("9149")
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN")) //setx SENTRY_AUTH_TOKEN "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"
+}
