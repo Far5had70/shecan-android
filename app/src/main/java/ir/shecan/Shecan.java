@@ -24,7 +24,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
@@ -61,6 +60,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 
 /**
  * Shecan Project
@@ -77,8 +78,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     static {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                FirebaseCrash.report(e);
+            public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         });
     }
@@ -144,33 +145,37 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     }
 
     private void initPushPole() {
-        PushPole.initialize(this, true);
+        new Thread(() -> {
+            try {
+                PushPole.initialize(this, true);
 
-        PushPole.setNotificationListener(new PushPole.NotificationListener() {
-            @Override
-            public void onNotificationReceived(@NonNull NotificationData notificationData) {
+                PushPole.setNotificationListener(new PushPole.NotificationListener() {
+                    @Override
+                    public void onNotificationReceived(@NonNull NotificationData notificationData) {
+                    }
+
+                    @Override
+                    public void onNotificationClicked(@NonNull NotificationData notificationData) {
+                    }
+
+                    @Override
+                    public void onNotificationButtonClicked(@NonNull NotificationData notificationData, @NonNull NotificationButtonData notificationButtonData) {
+                    }
+
+                    @Override
+                    public void onCustomContentReceived(@NonNull JSONObject jsonObject) {
+                    }
+
+                    @Override
+                    public void onNotificationDismissed(@NonNull NotificationData notificationData) {
+                    }
+                });
+            } catch (Exception e) {
+                Log.e("PushPoleInit", "Initialization failed", e);
             }
-
-            @Override
-            public void onNotificationClicked(@NonNull NotificationData notificationData) {
-
-            }
-
-            @Override
-            public void onNotificationButtonClicked(@NonNull NotificationData notificationData, @NonNull NotificationButtonData notificationButtonData) {
-
-            }
-
-            @Override
-            public void onCustomContentReceived(@NonNull JSONObject jsonObject) {
-            }
-
-            @Override
-            public void onNotificationDismissed(@NonNull NotificationData notificationData) {
-
-            }
-        });
+        }).start();
     }
+
 
     private void initDirectory(String dir) {
         File directory = new File(dir);

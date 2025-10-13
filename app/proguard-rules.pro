@@ -48,6 +48,10 @@
 -keep class org.pcap4j.util.** { *; }
 
 -keep class com.pushpole.sdk.** { *; }
+-keepattributes Signature
+-dontwarn sun.misc
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
 
 # Keep native methods if Pcap4j is using JNI
 -keepclasseswithmembernames class * { native <methods>; }
