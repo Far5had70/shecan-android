@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:name="ir.shecan.Shecan"
@@ -118,6 +117,12 @@
         <meta-data
             android:name="io.sentry.session-replay.session-sample-rate"
             android:value="0.1" />
+        <meta-data
+            android:name="io.sentry.traces-sample-rate"
+            android:value="0.2" />
+        <meta-data
+            android:name="io.sentry.attach-threads"
+            android:value="false" />
 
     </application>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

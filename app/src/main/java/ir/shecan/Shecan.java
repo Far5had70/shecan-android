@@ -6,14 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -35,12 +32,21 @@ import com.pushpole.sdk.PushPole;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.sentry.Sentry;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import io.sentry.android.core.SentryAndroid;
 import ir.shecan.activity.MainActivity;
-import ir.shecan.service.CoreApiResponseListener;
 import ir.shecan.service.BaseApiResponseListener;
 import ir.shecan.service.ConnectionStatusApiListener;
+import ir.shecan.service.CoreApiResponseListener;
 import ir.shecan.service.ShecanVpnService;
 import ir.shecan.service.VolleyHelper;
 import ir.shecan.util.Configurations;
@@ -50,18 +56,6 @@ import ir.shecan.util.Rule;
 import ir.shecan.util.server.DNSServer;
 import ir.shecan.util.server.DNSServerHelper;
 import ir.shecan.util.server.LocaleHelper;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
-
 
 /**
  * Shecan Project
@@ -76,11 +70,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
  */
 public class Shecan extends Application implements ConnectionStatusApiListener {
     static {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
-                FirebaseCrashlytics.getInstance().recordException(e);
-            }
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+//                FirebaseCrashlytics.getInstance().recordException(e);
         });
     }
 
@@ -94,8 +85,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         add(new DNSServer("pro.shecan.ir", R.string.server_shecan_pro_secondary, 53));
     }};
 
-    public static final List<Rule> RULES = new ArrayList<Rule>() {{
-    }};
+    public static final List<Rule> RULES = new ArrayList<Rule>() {};
 
     public static final String[] DEFAULT_TEST_DOMAINS = new String[]{
             "check.shecan.ir"
@@ -105,7 +95,6 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
     public static String rulePath = null;
     public static String logPath = null;
-    private static String configPath = null;
 
     private static Shecan instance = null;
     private SharedPreferences prefs;
@@ -171,7 +160,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                     }
                 });
             } catch (Exception e) {
-                Log.e("PushPoleInit", "Initialization failed", e);
+                Logger.logException(e);
             }
         }).start();
     }
@@ -188,24 +177,25 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     }
 
     private void initData() {
-        PreferenceManager.setDefaultValues(this, R.xml.perf_settings, false);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = getSharedPreferences("app_preferences", Context.MODE_PRIVATE);
 
         String path;
         if (getExternalFilesDir(null) != null) {
-            path = getExternalFilesDir(null).getPath();
+            path = Objects.requireNonNull(getExternalFilesDir(null)).getPath();
         } else {
             path = getFilesDir().getPath();
         }
+
         rulePath = path + "/rules/";
         logPath = path + "/logs/";
-        configPath = path + "/config.json";
+        String configPath = path + "/config.json";
 
         initDirectory(rulePath);
         initDirectory(logPath);
 
-        if (configPath != null) {
-            configurations = Configurations.load(new File(configPath));
+        File configFile = new File(configPath);
+        if (configFile.exists()) {
+            configurations = Configurations.load(configFile);
         } else {
             configurations = new Configurations();
         }
@@ -251,11 +241,9 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         }
     }
 
-    public static boolean activateService(Context context) {
+    public static void activateService(Context context) {
         Intent intent = VpnService.prepare(context);
-        if (intent != null) {
-            return false;
-        } else {
+        if (intent == null) {
             if (ShecanVpnService.isProMode()) {
                 ShecanVpnService.primaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getProPrimary());
                 ShecanVpnService.secondaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getProSecondary());
@@ -265,7 +253,6 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
             }
 
             context.startService(Shecan.getServiceIntent(context).setAction(ShecanVpnService.ACTION_ACTIVATE));
-            return true;
         }
     }
 
@@ -275,45 +262,38 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         StringRequest stringRequest = new StringRequest(
                 Request.Method.GET,
                 apiUrl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        String result = response;
-                        if (!result.trim().equals(ShecanVpnService.getDynamicIp().trim())) {
-                            ShecanVpnService.callCoreAPI(context, new CoreApiResponseListener() {
-                                @Override
-                                public void onSuccess(String response) {
-                                    ShecanVpnService.callConnectionStatusAPI(context, Shecan.this, null);
-                                }
+                response -> {
+                    if (!response.trim().equals(ShecanVpnService.getDynamicIp().trim())) {
+                        ShecanVpnService.callCoreAPI(context, new CoreApiResponseListener() {
+                            @Override
+                            public void onSuccess(String response) {
+                                ShecanVpnService.callConnectionStatusAPI(context, Shecan.this, null);
+                            }
 
-                                @Override
-                                public void onError(String errorMessage) {
+                            @Override
+                            public void onError(String errorMessage) {
 
-                                }
+                            }
 
-                                @Override
-                                public void onInvalid() {
-                                    ShecanVpnService.callConnectionStatusAPI(context, Shecan.this, null);
-                                }
+                            @Override
+                            public void onInvalid() {
+                                ShecanVpnService.callConnectionStatusAPI(context, Shecan.this, null);
+                            }
 
-                                @Override
-                                public void onOutOfRange() {
+                            @Override
+                            public void onOutOfRange() {
 
-                                }
+                            }
 
-                                @Override
-                                public void onInTheRange() {
+                            @Override
+                            public void onInTheRange() {
 
-                                }
-                            });
-                        }
+                            }
+                        });
                     }
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // todo: handle error
-                    }
+                error -> {
+                    // todo: handle error
                 }
         );
 
@@ -420,24 +400,24 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         return instance;
     }
 
-    public static void changeLanguageType(String locale) {
-        getInstance().setLocale(locale);
-    }
+//    public static void changeLanguageType(String locale) {
+//        getInstance().setLocale(locale);
+//    }
 
-    public static Locale getLanguageType(Context context) {
-
-        if (instance != null) { // Use currently edited context instance to get locale
-            context = instance;
-        }
-
-        Resources resources = context.getResources();
-        Configuration config = resources.getConfiguration();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return config.getLocales().get(0);
-        } else {
-            return config.locale;
-        }
-    }
+//    public static Locale getLanguageType(Context context) {
+//
+//        if (instance != null) { // Use currently edited context instance to get locale
+//            context = instance;
+//        }
+//
+//        Resources resources = context.getResources();
+//        Configuration config = resources.getConfiguration();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            return config.getLocales().get(0);
+//        } else {
+//            return config.locale;
+//        }
+//    }
 
     @Override
     protected void attachBaseContext(Context base) {

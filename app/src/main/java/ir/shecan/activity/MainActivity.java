@@ -1,7 +1,6 @@
 package ir.shecan.activity;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -16,6 +15,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -24,6 +25,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
@@ -76,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ToolbarFragment currentFragment;
 
+    private ActivityResultLauncher<Intent> vpnPermissionLauncher;
+
     public static MainActivity getInstance() {
         return instance;
     }
@@ -87,16 +91,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
 
         instance = this;
-
         setContentView(R.layout.activity_main);
+
+        vpnPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        onVpnPermissionGranted();
+                    }
+                }
+        );
 
         AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
         appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-
-        //setSupportActionBar(toolbar); //causes toolbar issues
-
         DrawerLayout drawer = findViewById(R.id.main_drawer_layout);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -108,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         handleIntent(getIntent());
-
     }
 
 
@@ -116,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (currentFragment == null || fragmentClass != currentFragment.getClass()) {
             try {
                 ToolbarFragment fragment = (ToolbarFragment) fragmentClass.newInstance();
-                FragmentManager fm = getFragmentManager();
+                FragmentManager fm = getSupportFragmentManager();
                 fm.beginTransaction().replace(R.id.id_content, fragment).commit();
 
                 currentFragment = fragment;
@@ -160,12 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
+        return (int) Math.ceil(25 * getResources().getDisplayMetrics().density);
     }
 
     private int fetchPrimaryDarkColor() {
@@ -199,22 +202,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onNewIntent(intent);
 
         handleIntent(intent);
-    }
-
-    public void activateService() {
-        Intent intent = VpnService.prepare(Shecan.getInstance());
-        if (intent != null) {
-            startActivityForResult(intent, 0);
-        } else {
-            onActivityResult(0, Activity.RESULT_OK, null);
-        }
-
-        long activateCounter = Shecan.configurations.getActivateCounter();
-        if (activateCounter == -1) {
-            return;
-        }
-        activateCounter++;
-        Shecan.configurations.setActivateCounter(activateCounter);
     }
 
     @Override
@@ -338,4 +325,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getApplicationContext().setTheme(themeId);
     }
 
+    public void activateService() {
+        Intent intent = VpnService.prepare(Shecan.getInstance());
+        if (intent != null) {
+            vpnPermissionLauncher.launch(intent);
+        } else {
+            onVpnPermissionGranted();
+        }
+
+        long activateCounter = Shecan.configurations.getActivateCounter();
+        if (activateCounter != -1) {
+            Shecan.configurations.setActivateCounter(++activateCounter);
+        }
+    }
+
+    private void onVpnPermissionGranted() {
+        if (ShecanVpnService.isProMode()) {
+            ShecanVpnService.primaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getProPrimary());
+            ShecanVpnService.secondaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getProSecondary());
+        } else {
+            ShecanVpnService.primaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getPrimary());
+            ShecanVpnService.secondaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getSecondary());
+        }
+
+        Shecan.getInstance().startService(
+                Shecan.getServiceIntent(getApplicationContext()).setAction(ShecanVpnService.ACTION_ACTIVATE)
+        );
+        Shecan.updateShortcut(getApplicationContext());
+    }
 }

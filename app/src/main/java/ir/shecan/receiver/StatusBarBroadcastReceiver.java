@@ -3,11 +3,12 @@ package ir.shecan.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import java.lang.reflect.Method;
+
 import ir.shecan.Shecan;
 import ir.shecan.activity.MainActivity;
 import ir.shecan.util.Logger;
-
-import java.lang.reflect.Method;
 
 /**
  * Shecan Project
