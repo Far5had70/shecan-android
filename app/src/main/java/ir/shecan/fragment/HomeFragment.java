@@ -9,6 +9,8 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -503,10 +505,15 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         if (ShecanVpnService.isDynamicIPMode()) {
             if (scheduler != null && !scheduler.isShutdown()) scheduler.shutdownNow();
             scheduler = Executors.newSingleThreadScheduledExecutor();
+            // Schedule a background task that POSTS to the main thread rather than calling fragment methods directly.
             scheduler.schedule(() -> {
-                if (isAdded() && !isRemoving()) {
-                    ShecanVpnService.callConnectionStatusAPI(requireContext(), HomeFragment.this, null);
-                }
+                // post to main (UI) thread
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    // now we are on UI thread, it's safe to check fragment state and call requireContext()
+                    if (isAdded() && !isRemoving()) {
+                        ShecanVpnService.callConnectionStatusAPI(requireContext(), HomeFragment.this, null);
+                    }
+                });
             }, 20, TimeUnit.SECONDS);
         } else {
             isConnectBtnEnabled = true;

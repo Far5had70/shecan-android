@@ -73,13 +73,6 @@ public class UdpProvider extends Provider {
                 } catch (Exception ignored) {}
                 mBlockFd = null;
             }
-            if (this.descriptor != null) {
-                try {
-                    this.descriptor.close();
-                } catch (Exception ignored) {}
-                this.descriptor = null;
-            }
-            // Close any pending sockets in dnsIn
             dnsIn.closeAll();
             // clear deviceWrites
             synchronized (deviceWrites) {
@@ -228,6 +221,8 @@ public class UdpProvider extends Provider {
         try {
             length = inputStream.read(packet);
         } catch (IOException e) {
+            Logger.logException(e);
+            running = false;
             throw new ShecanVpnService.VpnNetworkException("Cannot read from device", e);
         }
 

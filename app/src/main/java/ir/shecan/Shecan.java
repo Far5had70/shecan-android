@@ -25,9 +25,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
-import com.pushpole.sdk.NotificationButtonData;
-import com.pushpole.sdk.NotificationData;
-import com.pushpole.sdk.PushPole;
+//import com.pushpole.sdk.NotificationButtonData;
+//import com.pushpole.sdk.NotificationData;
+//import com.pushpole.sdk.PushPole;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,11 +69,11 @@ import ir.shecan.util.server.LocaleHelper;
  * (at your option) any later version.
  */
 public class Shecan extends Application implements ConnectionStatusApiListener {
-    static {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-//                FirebaseCrashlytics.getInstance().recordException(e);
-        });
-    }
+//    static {
+//        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+////                FirebaseCrashlytics.getInstance().recordException(e);
+//        });
+//    }
 
     private static final String SHORTCUT_ID_ACTIVATE = "shortcut_activate";
 
@@ -85,7 +85,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         add(new DNSServer("pro.shecan.ir", R.string.server_shecan_pro_secondary, 53));
     }};
 
-    public static final List<Rule> RULES = new ArrayList<Rule>() {};
+    public static final List<Rule> RULES = new ArrayList<Rule>() {
+    };
 
     public static final String[] DEFAULT_TEST_DOMAINS = new String[]{
             "check.shecan.ir"
@@ -114,7 +115,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
         addSentry();
         initData();
-        initPushPole();
+//        initPushPole();
         initCheckIP();
 
         updateLocale();
@@ -133,37 +134,41 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         }, 20000);
     }
 
-    private void initPushPole() {
-        new Thread(() -> {
-            try {
-                PushPole.initialize(this, true);
-
-                PushPole.setNotificationListener(new PushPole.NotificationListener() {
-                    @Override
-                    public void onNotificationReceived(@NonNull NotificationData notificationData) {
-                    }
-
-                    @Override
-                    public void onNotificationClicked(@NonNull NotificationData notificationData) {
-                    }
-
-                    @Override
-                    public void onNotificationButtonClicked(@NonNull NotificationData notificationData, @NonNull NotificationButtonData notificationButtonData) {
-                    }
-
-                    @Override
-                    public void onCustomContentReceived(@NonNull JSONObject jsonObject) {
-                    }
-
-                    @Override
-                    public void onNotificationDismissed(@NonNull NotificationData notificationData) {
-                    }
-                });
-            } catch (Exception e) {
-                Logger.logException(e);
-            }
-        }).start();
-    }
+//    private void initPushPole() {
+//        try {
+//            new Handler(getMainLooper()).post(() -> {
+//                try {
+//                    PushPole.initialize(this, true);
+//
+//                    PushPole.setNotificationListener(new PushPole.NotificationListener() {
+//                        @Override
+//                        public void onNotificationReceived(@NonNull NotificationData notificationData) {
+//                        }
+//
+//                        @Override
+//                        public void onNotificationClicked(@NonNull NotificationData notificationData) {
+//                        }
+//
+//                        @Override
+//                        public void onNotificationButtonClicked(@NonNull NotificationData notificationData, @NonNull NotificationButtonData notificationButtonData) {
+//                        }
+//
+//                        @Override
+//                        public void onCustomContentReceived(@NonNull JSONObject jsonObject) {
+//                        }
+//
+//                        @Override
+//                        public void onNotificationDismissed(@NonNull NotificationData notificationData) {
+//                        }
+//                    });
+//                } catch (Exception e) {
+//                    Logger.logException(e);
+//                }
+//            });
+//        } catch (Exception e) {
+//            Logger.logException(e);
+//        }
+//    }
 
 
     private void initDirectory(String dir) {

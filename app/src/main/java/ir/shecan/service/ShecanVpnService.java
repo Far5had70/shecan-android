@@ -249,13 +249,6 @@ public class ShecanVpnService extends VpnService implements Runnable {
         activated = false;
         boolean shouldRefresh = false;
         try {
-            if (this.descriptor != null) {
-                try {
-                    this.descriptor.close();
-                } catch (IOException ignored) {
-                }
-                this.descriptor = null;
-            }
             if (mThread != null) {
                 running = false;
                 shouldRefresh = true;
@@ -275,9 +268,23 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
                 if (mThread.isAlive()) {
                     mThread.interrupt();
+                    try {
+                        mThread.join(2000);
+                    } catch (InterruptedException ignored) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
                 mThread = null;
             }
+
+            if (this.descriptor != null) {
+                try {
+                    this.descriptor.close();
+                } catch (IOException ignored) {
+                }
+                this.descriptor = null;
+            }
+
             if (notification != null) {
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 if (notificationManager != null) notificationManager.cancel(NOTIFICATION_ACTIVATED);

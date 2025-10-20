@@ -47,7 +47,7 @@
 -keep class org.pcap4j.core.** { *; }
 -keep class org.pcap4j.util.** { *; }
 
--keep class com.pushpole.sdk.** { *; }
+#-keep class com.pushpole.sdk.** { *; }
 -keepattributes Signature
 -dontwarn sun.misc
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
