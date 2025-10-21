@@ -106,7 +106,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onResume() {
         super.onResume();
         fetchData();
-        updateUserInterface();
+//        updateUserInterface();
     }
 
     private void setupLinkUpdater() {

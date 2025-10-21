@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 ToolbarFragment fragment = (ToolbarFragment) fragmentClass.newInstance();
                 FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().replace(R.id.id_content, fragment).commit();
+                fm.beginTransaction().replace(R.id.id_content, fragment).commitAllowingStateLoss();
 
                 currentFragment = fragment;
             } catch (Exception e) {
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawer.closeDrawer(GravityCompat.START);
         } else if (!(currentFragment instanceof HomeFragment)) {
             switchFragment(HomeFragment.class, true);
-            recreate();
+//            recreate();
         } else {
             super.onBackPressed();
         }

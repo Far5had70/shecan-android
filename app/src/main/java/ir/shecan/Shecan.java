@@ -385,7 +385,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         SentryAndroid.init(this, options -> {
             options.setDsn("https://38ff2bbf9f30b0896c9b311ab4e647b8@sentry.hamravesh.com/9149");
             options.setEnvironment("production");
-            options.setTracesSampleRate(0.2);
+            options.setTracesSampleRate(0.0);
             options.setEnableExternalConfiguration(true);
             options.setDebug(false);
         });

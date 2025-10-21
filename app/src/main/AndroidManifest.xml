@@ -126,14 +126,10 @@
         <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="true" />
         <meta-data android:name="io.sentry.attach-screenshot" android:value="true" />
         <meta-data android:name="io.sentry.attach-view-hierarchy" android:value="true" />
-        <meta-data android:name="io.sentry.traces.sample-rate" android:value="1.0" />
         <meta-data android:name="io.sentry.traces.profiling.session-sample-rate" android:value="1.0" />
         <meta-data android:name="io.sentry.traces.profiling.lifecycle" android:value="trace" />
         <meta-data android:name="io.sentry.traces.profiling.start-on-app-start" android:value="true" />
         <meta-data android:name="io.sentry.session-replay.on-error-sample-rate" android:value="1.0" />
         <meta-data android:name="io.sentry.session-replay.session-sample-rate" android:value="0.1" />
-        <meta-data android:name="io.sentry.traces-sample-rate" android:value="0.2" />
-        <meta-data android:name="io.sentry.attach-threads" android:value="false" />
-
     </application>
 </manifest>

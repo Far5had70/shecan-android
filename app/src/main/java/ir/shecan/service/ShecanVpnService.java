@@ -249,11 +249,15 @@ public class ShecanVpnService extends VpnService implements Runnable {
         activated = false;
         boolean shouldRefresh = false;
         try {
-            if (mThread != null) {
+            // Take a snapshot to avoid races (mThread might change concurrently)
+            Thread t = mThread;
+            if (t != null) {
+                // mark running false so provider loops see it
                 running = false;
                 shouldRefresh = true;
+
+                // stop provider first (if exists)
                 if (provider != null) {
-                    // stop provider first, then shutdown resources
                     try {
                         provider.stop();
                     } catch (Exception ex) {
@@ -264,15 +268,35 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     } catch (Exception ex) {
                         Logger.logException(ex);
                     }
-                } else if (mThread.isAlive()) {
-                    mThread.interrupt();
-                    try {
-                        mThread.join(2000);
-                    } catch (InterruptedException ignored) {
-                        Thread.currentThread().interrupt();
-                    }
+                    // optional: set provider = null; // if you want to free reference
                 }
-                mThread = null;
+
+                // Only interrupt/join if we're NOT the same thread (avoid self-join deadlock)
+                if (t != Thread.currentThread()) {
+                    try {
+                        if (t.isAlive()) {
+                            t.interrupt();
+                            try {
+                                t.join(2000);
+                            } catch (InterruptedException ignored) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.logException(ex);
+                    }
+                } else {
+                    // We're being called from inside the worker thread itself (no join)
+                    Log.d(TAG, "stopThread called from the worker thread; skipping join to avoid deadlock");
+                }
+
+                // Clear the reference AFTER we've handled the thread (use compare-and-set style)
+                if (mThread == t) {
+                    mThread = null;
+                } else {
+                    // another thread replaced it meanwhile; still safe to set to null to avoid leaks
+                    mThread = null;
+                }
             }
 
             if (this.descriptor != null) {
@@ -292,18 +316,24 @@ public class ShecanVpnService extends VpnService implements Runnable {
         } catch (Exception e) {
             Logger.logException(e);
         }
-        stopSelf();
-
-        if (shouldRefresh) {
-            Logger.info("shecan service has stopped");
+        // stop the service (safe to call from background thread)
+        try {
+            stopSelf();
+        } catch (Exception ignored) {
         }
 
         if (shouldRefresh) {
-            Context applicationContext = getApplicationContext();
-            Intent intent = new Intent(applicationContext, MainActivity.class)
-                    .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_SERVICE_DONE);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            applicationContext.startActivity(intent);
+            Logger.info("shecan service has stopped");
+            // Launch UI update on main thread (UI-safe)
+            try {
+                Context applicationContext = getApplicationContext();
+                Intent intent = new Intent(applicationContext, MainActivity.class)
+                        .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_SERVICE_DONE);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                applicationContext.startActivity(intent);
+            } catch (Exception ex) {
+                Logger.logException(ex);
+            }
         }
     }
 
