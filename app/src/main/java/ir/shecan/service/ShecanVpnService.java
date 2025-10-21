@@ -264,9 +264,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     } catch (Exception ex) {
                         Logger.logException(ex);
                     }
-                }
-
-                if (mThread.isAlive()) {
+                } else if (mThread.isAlive()) {
                     mThread.interrupt();
                     try {
                         mThread.join(2000);

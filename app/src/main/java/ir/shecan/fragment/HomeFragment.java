@@ -516,12 +516,15 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 });
             }, 20, TimeUnit.SECONDS);
         } else {
-            isConnectBtnEnabled = true;
-            if (ShecanVpnService.isActivated()) shouldShowSupportDialog = true;
-            Shecan.deactivateService(requireContext());
-            isApiSuccess = false;
-            stopCountdown();
-            stopBlinkAnimation();
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (!isAdded() || isRemoving()) return;
+                isConnectBtnEnabled = true;
+                if (ShecanVpnService.isActivated()) shouldShowSupportDialog = true;
+                Shecan.deactivateService(requireContext());
+                isApiSuccess = false;
+                stopCountdown();
+                stopBlinkAnimation();
+            });
         }
     }
 
