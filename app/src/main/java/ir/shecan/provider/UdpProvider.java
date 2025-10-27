@@ -376,12 +376,12 @@ public class UdpProvider extends Provider {
         try {
             parsedPacket = (IpPacket) IpSelector.newPacket(packetData, 0, packetData.length);
         } catch (Exception e) {
-            Log.i(TAG, "handleDnsRequest: Discarding invalid IP packet", e);
+            Log.w(TAG, "handleDnsRequest: Discarding invalid IP packet", e);
             return;
         }
 
         if (!(parsedPacket.getPayload() instanceof UdpPacket)) {
-            Log.i(TAG, "handleDnsRequest: Discarding unknown packet type " + parsedPacket.getPayload());
+            Log.i(TAG, "handleDnsRequest: Discarding non-UDP packet type: " + parsedPacket.getPayload());
             return;
         }
 
@@ -409,19 +409,34 @@ public class UdpProvider extends Provider {
         }
 
         UdpPacket parsedUdp = (UdpPacket) parsedPacket.getPayload();
+        byte[] dnsRawData;
 
-        if (parsedUdp.getPayload() == null) {
-            Log.i(TAG, "handleDnsRequest: Sending UDP packet without payload: " + parsedUdp);
-
-            DatagramPacket outPacket = new DatagramPacket(new byte[0], 0, 0, mappedAddr,
-                    destPort);
-            forwardPacket(outPacket, null);
+        // ✅ جلوگیری از RuntimeException هنگام استخراج RawData
+        try {
+            if (parsedUdp.getPayload() == null) {
+                Log.w(TAG, "handleDnsRequest: UDP payload is null, sending empty packet");
+                DatagramPacket outPacket = new DatagramPacket(new byte[0], 0, 0, mappedAddr, destPort);
+                forwardPacket(outPacket, null);
+                return;
+            }
+            dnsRawData = parsedUdp.getPayload().getRawData();
+        } catch (RuntimeException re) {
+            Logger.logException(re);
+            Log.w(TAG, "handleDnsRequest: Dropping packet due to RuntimeException while extracting UDP payload");
             return;
         }
 
-        byte[] dnsRawData = parsedUdp.getPayload().getRawData();
         if (dnsRawData == null || dnsRawData.length == 0) {
             Log.i(TAG, "handleDnsRequest: empty DNS raw data");
+            return;
+        }
+
+        // ✅ چک اندازه هدر DNS
+        if (dnsRawData.length < 12) {
+            Log.w(TAG, "handleDnsRequest: DNS packet too small (" + dnsRawData.length + " bytes). Dropping.");
+            if (Shecan.getPrefs().getBoolean("settings_debug_output", false)) {
+                Logger.debug("Bad DNS payload (too small): " + Arrays.toString(dnsRawData));
+            }
             return;
         }
 
@@ -431,23 +446,32 @@ public class UdpProvider extends Provider {
             if (Shecan.getPrefs().getBoolean("settings_debug_output", false)) {
                 Logger.debug(dnsMsg.toString());
             }
-        } catch (IOException e) {
-            Log.i(TAG, "handleDnsRequest: Discarding non-DNS or invalid packet", e);
+        } catch (IOException | RuntimeException e) {
+            // گرفتن خطاهای minidns و pcap4j (مثلاً ArrayIndexOutOfBounds)
+            Logger.logException(e);
+            Log.w(TAG, "handleDnsRequest: Discarding malformed DNS packet: " + e.getClass().getSimpleName());
+            if (Shecan.getPrefs().getBoolean("settings_debug_output", false)) {
+                Logger.debug("Malformed DNS payload bytes: " + Arrays.toString(dnsRawData));
+            }
             return;
         }
+
         if (dnsMsg.getQuestion() == null) {
             Log.i(TAG, "handleDnsRequest: Discarding DNS packet with no query " + dnsMsg);
             return;
         }
+
         String dnsQueryName = dnsMsg.getQuestion().name.toString();
 
         try {
-            Logger.info("Provider: Resolving " + dnsQueryName + " Type: " + dnsMsg.getQuestion().type.name() + " Sending to " + mappedAddr + ":" + destPort);
-            DatagramPacket outPacket = new DatagramPacket(dnsRawData, 0, dnsRawData.length, mappedAddr,
-                    destPort);
+            Logger.info("Provider: Resolving " + dnsQueryName + " Type: " +
+                    dnsMsg.getQuestion().type.name() + " Sending to " + mappedAddr + ":" + destPort);
+
+            DatagramPacket outPacket = new DatagramPacket(dnsRawData, 0, dnsRawData.length, mappedAddr, destPort);
             forwardPacket(outPacket, parsedPacket);
         } catch (Exception e) {
             Logger.logException(e);
+            Log.e(TAG, "handleDnsRequest: Failed to forward DNS packet: " + e.getMessage());
         }
     }
 

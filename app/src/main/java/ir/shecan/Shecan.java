@@ -257,7 +257,12 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                 ShecanVpnService.secondaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getSecondary());
             }
 
-            context.startService(Shecan.getServiceIntent(context).setAction(ShecanVpnService.ACTION_ACTIVATE));
+            Intent serviceIntent = Shecan.getServiceIntent(context).setAction(ShecanVpnService.ACTION_ACTIVATE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
+            }
         }
     }
 

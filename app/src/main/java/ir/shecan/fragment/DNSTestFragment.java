@@ -176,10 +176,23 @@ public class DNSTestFragment extends ToolbarFragment {
                             .setQrFlag(false);
 
                     long startTime = System.currentTimeMillis();
-                    DNSMessage response = dnsQuery.query(message.build(), InetAddress.getByName(server.getAddress()), server.getPort());
+
+                    InetAddress inetAddress;
+                    try {
+                        // تلاش برای resolve آدرس از ورودی کاربر
+                        inetAddress = InetAddress.getByName(server.getAddress());
+                    } catch (Exception ex) {
+                        Logger.logException(ex);
+                        testText.append("\n").append(getString(R.string.test_failed))
+                                .append(" (Cannot resolve or fallback address invalid)");
+                        mHandler.obtainMessage(DnsTestHandler.MSG_DISPLAY_STATUS, testText.toString()).sendToTarget();
+                        return testText;
+                    }
+
+                    DNSMessage response = dnsQuery.query(message.build(), inetAddress, server.getPort());
                     long endTime = System.currentTimeMillis();
 
-                    if (!response.answerSection.isEmpty()) {
+                    if (response != null && !response.answerSection.isEmpty()) {
                         for (Record record : response.answerSection) {
                             if (record.getPayload().getType() == type) {
                                 testText.append("\n").append(getString(R.string.test_result_resolved)).append(" ").append(record.getPayload().toString());
@@ -189,7 +202,8 @@ public class DNSTestFragment extends ToolbarFragment {
                                 append(endTime - startTime).append(" ms");
                         succ = true;
                     }
-                } catch (SocketTimeoutException ignored){
+                } catch (SocketTimeoutException ignored) {
+                    Logger.debug("DNS query timeout for server: " + server.getAddress());
                 } catch (Exception e) {
                     Logger.logException(e);
                 }

@@ -17,6 +17,7 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -360,7 +361,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void activateService() {
         Intent intent = VpnService.prepare(Shecan.getInstance());
         if (intent != null) {
-            vpnPermissionLauncher.launch(intent);
+            // بررسی وجود Activity مقصد
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                vpnPermissionLauncher.launch(intent);
+            } else {
+                Log.e(TAG, "VPN permission activity not found! Device may not support VPN dialogs.");
+                // نمایش پیغام کاربرپسند به جای کرش
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "دستگاه شما از VPN داخلی پشتیبانی نمی‌کند.", Toast.LENGTH_LONG).show();
+                });
+            }
         } else {
             onVpnPermissionGranted();
         }
