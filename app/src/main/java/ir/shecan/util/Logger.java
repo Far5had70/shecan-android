@@ -64,7 +64,7 @@ public class Logger {
 
     public static void logException(Throwable e) {
         error(getExceptionMessage(e));
-        Sentry.captureException(e);
+//        Sentry.captureException(e);
         createBreadcrumb("logException", e.getMessage(), SentryLevel.FATAL);
     }
 

@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import de.measite.minidns.DNSMessage;
@@ -391,12 +392,31 @@ public class UdpProvider extends Provider {
             return;
         }
 
-        Pair<String, Integer> destination = service.dnsServers.get(destAddr.getHostAddress());
+        // defensive snapshot of dnsServers to avoid NPE if service clears it concurrently
+        Pair<String, Integer> destination;
+        try {
+            // grab reference once (avoid race where service.dnsServers becomes null)
+            final Map<String, Pair<String,Integer>> dnsServersRef = service.dnsServers;
+            if (dnsServersRef == null) {
+                Logger.error("handleDnsRequest: dnsServers map is null (VPN shutting down or not initialized). Dropping packet for " + destAddr.getHostAddress());
+                return;
+            }
+
+            destination = dnsServersRef.get(destAddr.getHostAddress());
+        } catch (ClassCastException cce) {
+            Logger.logException(cce);
+            Logger.error("handleDnsRequest: unexpected dnsServers type. Dropping packet for " + destAddr.getHostAddress());
+            return;
+        } catch (Exception ex) {
+            Logger.logException(ex);
+            Logger.error("handleDnsRequest: error reading dnsServers for " + destAddr.getHostAddress());
+            return;
+        }
+
         if (destination == null) {
             Logger.error("handleDnsRequest: No DNS mapping for " + destAddr.getHostAddress());
             return;
         }
-
         InetAddress mappedAddr;
         int destPort;
         try {

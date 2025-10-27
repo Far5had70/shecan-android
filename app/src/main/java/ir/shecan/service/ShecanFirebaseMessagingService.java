@@ -13,6 +13,10 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Objects;
+
+import ir.shecan.R;
+
 public class ShecanFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCM_Service";
@@ -22,8 +26,8 @@ public class ShecanFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        String title = "Default Title";
-        String body = "Default Body";
+        String title = "";
+        String body = "";
 
         // 1. اگر notification payload موجود است
         if (remoteMessage.getNotification() != null) {
@@ -39,6 +43,10 @@ public class ShecanFirebaseMessagingService extends FirebaseMessagingService {
             if (remoteMessage.getData().containsKey("body")) {
                 body = remoteMessage.getData().get("body");
             }
+        }
+
+        if (Objects.requireNonNull(title).isEmpty() || Objects.requireNonNull(body).isEmpty()) {
+            return;
         }
 
         showNotification(title, body);
@@ -82,7 +90,7 @@ public class ShecanFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setAutoCancel(true)
