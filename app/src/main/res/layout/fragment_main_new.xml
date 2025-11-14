@@ -380,12 +380,16 @@
 <!--                    app:layout_constraintTop_toTopOf="@+id/topGuideLine" />-->
 
                 <LinearLayout
+                    android:id="@+id/chooseConfig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="50dp"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/bg_select_config_ripple">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -404,7 +408,6 @@
 
                 <ir.shecan.widget.ServiceStatusView
                     android:id="@+id/servicePanel"
-                    android:layout_marginTop="16dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 

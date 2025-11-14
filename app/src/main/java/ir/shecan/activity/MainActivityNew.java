@@ -151,9 +151,9 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 });
 
         CustomBottomBar bar = findViewById(R.id.customBar);
-        bar.addItem("خانه", R.drawable.ic_github, R.drawable.ic_home);
-        bar.addItem("پروفایل", R.drawable.ic_github, R.drawable.ic_home);
-        bar.addItem("تنظیمات", R.drawable.ic_github, R.drawable.ic_home);
+        bar.addItem("کانکشن\u200Cها", R.drawable.ic_connection_inactive, R.drawable.ic_connection_inactive);
+        bar.addItem("اتصال", R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_inactive);
+        bar.addItem("تنظیمات", R.drawable.ic_setting_inactive, R.drawable.ic_setting_inactive);
         bar.setOnItemSelected(index -> {
             switch (index){
                 case 0:

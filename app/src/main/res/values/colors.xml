@@ -27,6 +27,8 @@
     <color name="buttonCircleGradientStartColor">#F5FAF9</color>
     <color name="buttonCircleGradientEndColor">#CCD9D6</color>
     <color name="buttonBackgroundColor">#C4CFCD</color>
+    <color name="rippleColor">#22000000</color>
+    <color name="rippleMaskColor">#33000000</color>
 
 
     <color name="homeBackgroundDark">#0E221F</color>

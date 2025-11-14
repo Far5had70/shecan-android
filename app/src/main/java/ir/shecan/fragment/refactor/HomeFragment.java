@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -90,6 +91,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         binding.vpnButton.setOnClickListener(view -> {
             binding.vpnButton.showLoading(!binding.vpnButton.isLoading());
+        });
+
+        binding.chooseConfig.setOnClickListener(v -> {
+            Log.d("test","test");
         });
 
         binding.servicePanel.setStatus(
