@@ -38,7 +38,7 @@ import de.measite.minidns.Question;
 import de.measite.minidns.Record;
 import ir.shecan.R;
 import ir.shecan.Shecan;
-import ir.shecan.activity.MainActivity;
+import ir.shecan.activity.MainActivityNew;
 import ir.shecan.fragment.DNSQuery;
 import ir.shecan.provider.Provider;
 import ir.shecan.provider.TcpProvider;
@@ -125,7 +125,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
                         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
 
-                        Intent mainIntent = new Intent(this, MainActivity.class);
+                        Intent mainIntent = new Intent(this, MainActivityNew.class);
                         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                         int pendingIntentFlag = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -175,8 +175,8 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     Shecan.updateShortcut(applicationContext);
 
                     // Use application context to start activity to avoid leaking activity instances
-                    Intent launchIntent = new Intent(applicationContext, MainActivity.class)
-                            .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_SERVICE_DONE);
+                    Intent launchIntent = new Intent(applicationContext, MainActivityNew.class)
+                            .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_SERVICE_DONE);
                     launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     applicationContext.startActivity(launchIntent);
 
@@ -327,8 +327,8 @@ public class ShecanVpnService extends VpnService implements Runnable {
             // Launch UI update on main thread (UI-safe)
             try {
                 Context applicationContext = getApplicationContext();
-                Intent intent = new Intent(applicationContext, MainActivity.class)
-                        .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_SERVICE_DONE);
+                Intent intent = new Intent(applicationContext, MainActivityNew.class)
+                        .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_SERVICE_DONE);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 applicationContext.startActivity(intent);
             } catch (Exception ex) {
@@ -380,7 +380,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     .setSession("shecan");
 
             // Configure intent: use proper flags depending on API
-            Intent configIntent = new Intent(this, MainActivity.class).putExtra(MainActivity.LAUNCH_FRAGMENT, MainActivity.FRAGMENT_SETTINGS);
+            Intent configIntent = new Intent(this, MainActivityNew.class).putExtra(MainActivityNew.LAUNCH_FRAGMENT, MainActivityNew.FRAGMENT_SETTINGS);
             int configPendingFlags = PendingIntent.FLAG_ONE_SHOT;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                 configPendingFlags |= PendingIntent.FLAG_IMMUTABLE;

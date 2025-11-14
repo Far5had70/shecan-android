@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import ir.shecan.Shecan;
-import ir.shecan.activity.MainActivity;
+import ir.shecan.activity.MainActivityNew;
 import ir.shecan.util.Logger;
 
 /**
@@ -35,8 +35,8 @@ public class StatusBarBroadcastReceiver extends BroadcastReceiver {
             }
 
             if (action.equals(STATUS_BAR_BTN_SETTINGS_CLICK_ACTION)) {
-                Intent settingsIntent = new Intent(context, MainActivity.class)
-                        .putExtra(MainActivity.LAUNCH_FRAGMENT, MainActivity.FRAGMENT_SETTINGS)
+                Intent settingsIntent = new Intent(context, MainActivityNew.class)
+                        .putExtra(MainActivityNew.LAUNCH_FRAGMENT, MainActivityNew.FRAGMENT_SETTINGS)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 context.startActivity(settingsIntent);

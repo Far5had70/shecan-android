@@ -102,5 +102,6 @@
     <string name="contact_support">ارتباط با پشتیبانی</string>
     <string name="empty_link_updater_error">لطفا لینک بروزرسان خود را وارد کنید</string>
     <string name="false_link_updater_error">لینک وارد شده اشتباه است</string>
+    <string name="selected_config">کانفیگ انتخاب شده</string>
 
 </resources>

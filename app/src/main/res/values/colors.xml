@@ -8,4 +8,36 @@
     <color name="disconnectButtonBorder">#3D1F3F</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+
+    <!--   New Design   -->
+    <color name="homeBackground">#F3F8F7</color>
+    <color name="selectedConfigColor">#7B968C</color>
+    <color name="bottomNavigationActiveTextColor">#27453A</color>
+    <color name="bottomNavigationInactiveTextColor">#8D9C96</color>
+    <color name="selectedConfigTopColor">#FCFCFC</color>
+    <color name="selectedConfigBottomColor">#FCFCFC</color>
+    <color name="selectedConfigRadiusColor">#F4F8F6</color>
+    <color name="selectedConfigTitleTextColor">#8D9C96</color>
+    <color name="selectedConfigBodyTextColor">#27453A</color>
+    <color name="toolbarLogoTitle">#061F16</color>
+    <color name="buttonRingCircleColor">#DEE5E3</color>
+    <color name="buttonRingBackgroundColor">#E8EFEE</color>
+    <color name="buttonPowerGradientStartColor">#FF000000</color>
+    <color name="buttonPowerGradientEndColor">#33000000</color>
+    <color name="buttonCircleGradientStartColor">#F5FAF9</color>
+    <color name="buttonCircleGradientEndColor">#CCD9D6</color>
+    <color name="buttonBackgroundColor">#C4CFCD</color>
+
+
+    <color name="homeBackgroundDark">#0E221F</color>
+    <color name="selectedConfigTopColorDark">#0D1E1B</color>
+    <color name="selectedConfigBottomColorDark">#09261F</color>
+    <color name="selectedConfigRadiusColorDark">#33FFFFFF</color>
+    <color name="buttonRingCircleColorDark">#000000</color>
+    <color name="buttonRingBackgroundColorDark">#1B2924</color>
+    <color name="buttonPowerGradientStartColorDark">#FFFFFFFF</color>
+    <color name="buttonPowerGradientEndColorDark">#33FFFFFF</color>
+    <color name="buttonCircleGradientStartColorDark">#FF1E413C</color>
+    <color name="buttonCircleGradientEndColorDark">#FF0E221F</color>
+    <color name="buttonBackgroundColorDark">#05140E</color>
 </resources>

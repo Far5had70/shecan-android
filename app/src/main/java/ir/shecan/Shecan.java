@@ -43,7 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import io.sentry.android.core.SentryAndroid;
-import ir.shecan.activity.MainActivity;
+import ir.shecan.activity.MainActivityNew;
 import ir.shecan.service.BaseApiResponseListener;
 import ir.shecan.service.ConnectionStatusApiListener;
 import ir.shecan.service.CoreApiResponseListener;
@@ -361,8 +361,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                     .setLongLabel(notice)
                     .setShortLabel(notice)
                     .setIcon(Icon.createWithResource(context, R.mipmap.ic_launcher))
-                    .setIntent(new Intent(context, MainActivity.class).setAction(Intent.ACTION_VIEW)
-                            .putExtra(MainActivity.LAUNCH_ACTION, activate ? MainActivity.LAUNCH_ACTION_DEACTIVATE : MainActivity.LAUNCH_ACTION_ACTIVATE))
+                    .setIntent(new Intent(context, MainActivityNew.class).setAction(Intent.ACTION_VIEW)
+                            .putExtra(MainActivityNew.LAUNCH_ACTION, activate ? MainActivityNew.LAUNCH_ACTION_DEACTIVATE : MainActivityNew.LAUNCH_ACTION_ACTIVATE))
                     .build();
             ShortcutManager shortcutManager = (ShortcutManager) context.getSystemService(SHORTCUT_SERVICE);
             shortcutManager.addDynamicShortcuts(Collections.singletonList(info));

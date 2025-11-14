@@ -23,15 +23,15 @@ import ir.shecan.R;
  * (at your option) any later version.
  */
 abstract public class ToolbarFragment extends Fragment {
-    protected Toolbar toolbar;
-    protected Menu menu;
+//    protected Toolbar toolbar;
+//    protected Menu menu;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        menu = ((NavigationView) getActivity().findViewById(R.id.nav_view)).getMenu();
-        toolbar = getActivity().findViewById(R.id.toolbar);
-        toolbar.getMenu().clear();
+//        menu = ((NavigationView) getActivity().findViewById(R.id.nav_view)).getMenu();
+//        toolbar = getActivity().findViewById(R.id.toolbar);
+//        toolbar.getMenu().clear();
         checkStatus();
     }
 
@@ -39,8 +39,8 @@ abstract public class ToolbarFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        toolbar = null;
-        menu = null;
+//        toolbar = null;
+//        menu = null;
     }
 
     public abstract void checkStatus();

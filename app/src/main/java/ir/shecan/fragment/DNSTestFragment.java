@@ -247,8 +247,8 @@ public class DNSTestFragment extends ToolbarFragment {
 
     @Override
     public void checkStatus() {
-        menu.findItem(R.id.nav_dns_test).setChecked(true);
-        toolbar.setTitle(R.string.action_dns_test);
+//        menu.findItem(R.id.nav_dns_test).setChecked(true);
+//        toolbar.setTitle(R.string.action_dns_test);
     }
 
     @Override

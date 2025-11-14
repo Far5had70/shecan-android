@@ -1,4 +1,4 @@
-package ir.shecan.fragment;
+package ir.shecan.fragment.refactor;
 
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -6,6 +6,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -33,19 +34,21 @@ import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
-import ir.shecan.activity.MainActivity;
-import ir.shecan.databinding.FragmentMainBinding;
+import ir.shecan.activity.MainActivityNew;
+import ir.shecan.databinding.FragmentMainNewBinding;
+import ir.shecan.databinding.SelectedConfigViewBinding;
 import ir.shecan.dialog.ContactSupportDialog;
 import ir.shecan.dialog.RenewalDialog;
 import ir.shecan.dialog.UpdateDialog;
+import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.service.BaseApiResponseListener;
 import ir.shecan.service.ConnectionStatusApiListener;
 import ir.shecan.service.CoreApiResponseListener;
 import ir.shecan.service.ShecanVpnService;
 import ir.shecan.util.AnimationUtils;
 import ir.shecan.util.AppUtils;
-import ir.shecan.util.ImageUtils;
 import ir.shecan.util.PersianTools;
+import ir.shecan.widget.ServiceStatusView;
 
 /**
  * Refactored HomeFragment
@@ -57,7 +60,7 @@ import ir.shecan.util.PersianTools;
  */
 public class HomeFragment extends ToolbarFragment implements CoreApiResponseListener, ConnectionStatusApiListener {
 
-    private FragmentMainBinding binding;
+    private FragmentMainNewBinding binding;
 
     // non-static UI state
     private boolean isUpdateVersionCheck = false;
@@ -71,10 +74,12 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     private int countdownValue = 80; // default for dynamic mode
 
+    private AnimationDrawable loadingAnimation;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentMainBinding.inflate(inflater, container, false);
+        binding = FragmentMainNewBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         // initialize views using binding
@@ -83,8 +88,39 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         setupDonatePadding();
         setupMainButton();
 
-        // collapse pro layout initially
-        AnimationUtils.collapse(binding.proModeExpandLayout);
+        binding.vpnButton.setOnClickListener(view -> {
+            binding.vpnButton.showLoading(!binding.vpnButton.isLoading());
+        });
+
+        binding.servicePanel.setStatus(
+                new ServiceStatusView.ServiceStatus("طلایی", "982341", "1404/06/28")
+        );
+
+        binding.servicePanel.setOnClickListener(view -> {
+            if (binding.servicePanel.isPurchased()) {
+                binding.servicePanel.setStatus(
+                        new ServiceStatusView.ServiceStatus("رایگان")
+                );
+            } else {
+                binding.servicePanel.setStatus(
+                        new ServiceStatusView.ServiceStatus("طلایی", "982341", "1404/06/28")
+                );
+            }
+        });
+
+//        binding.loadingImage.setBackgroundResource(R.drawable.animation_button_loading_dark);
+//        loadingAnimation = (AnimationDrawable) binding.loadingImage.getBackground();
+//        binding.loadingImage.post(() -> loadingAnimation.start());
+//        AnimationUtils.collapse(binding.proModeExpandLayout);
+//
+//        binding.loadingImage.setOnClickListener(view -> {
+//            if (loadingAnimation != null && loadingAnimation.isRunning()) {
+//                loadingAnimation.stop();
+//            } else {
+//                loadingAnimation.start();
+//            }
+//        });
+
 
         return root;
     }
@@ -97,8 +133,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void checkStatus() {
-        menu.findItem(R.id.nav_home).setChecked(true);
-        toolbar.setTitle("");
         updateUserInterface();
     }
 
@@ -218,12 +252,12 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                     }
                 } else {
                     isConnectBtnEnabled = false;
-                    startActivity(new Intent(requireActivity(), MainActivity.class)
-                            .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_ACTIVATE));
+                    startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                            .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
                 }
             } else {
-                startActivity(new Intent(requireActivity(), MainActivity.class)
-                        .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_ACTIVATE));
+                startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                        .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
             }
         });
     }
@@ -262,17 +296,17 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void loadBanner() {
-        if (!isAdded()) return;
-        final String imageUrl = Shecan.ShecanInfo.getBannerImageUrl();
-        if (!imageUrl.isEmpty()) {
-            ImageUtils.INSTANCE.loadImage(requireContext(), imageUrl, binding.bannerImageView);
-        }
-        binding.bannerImageView.setOnClickListener(v -> {
-            String url = Shecan.ShecanInfo.getBannerLink();
-            if (!url.isEmpty() && isAdded()) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-            }
-        });
+//        if (!isAdded()) return;
+//        final String imageUrl = Shecan.ShecanInfo.getBannerImageUrl();
+//        if (!imageUrl.isEmpty()) {
+//            ImageUtils.INSTANCE.loadImage(requireContext(), imageUrl, binding.bannerImageView);
+//        }
+//        binding.bannerImageView.setOnClickListener(v -> {
+//            String url = Shecan.ShecanInfo.getBannerLink();
+//            if (!url.isEmpty() && isAdded()) {
+//                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+//            }
+//        });
     }
 
     private void checkIsUpdateAvailable() {
@@ -339,7 +373,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private void setUiForConnected(boolean isDynamicMode) {
         if (!isAdded()) return;
         final Context ctx = requireContext();
-        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_on));
+//        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_on));
         binding.buttonActivate.setBackground(ContextCompat.getDrawable(ctx, R.drawable.cloud_disconnected));
         binding.imageLogo.setBackgroundResource(R.drawable.home_logo);
         binding.textShecanStatus.setText(isDynamicMode ? R.string.shecan_status_pro_dynamic_active
@@ -355,7 +389,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private void setUiForDisconnected() {
         if (!isAdded()) return;
         final Context ctx = requireContext();
-        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_off));
+//        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_off));
         binding.buttonActivate.setBackground(ContextCompat.getDrawable(ctx, R.drawable.cloud_connected));
         binding.imageLogo.setBackgroundResource(R.drawable.home_logo_white);
         binding.textShecanStatus.setText(R.string.shecan_status_deactive);
@@ -373,7 +407,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         shouldShowSupportDialog = false;
         final Context ctx = requireContext();
 
-        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_off));
+//        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_off));
         binding.buttonActivate.setBackground(ContextCompat.getDrawable(ctx, R.drawable.cloud_connected));
         binding.buttonActivate.setAlpha(isConnectBtnEnabled ? 1f : 0.5f);
         binding.imageLogo.setBackgroundResource(R.drawable.home_logo_white);
@@ -455,8 +489,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onSuccess(String response) {
         if (!isAdded()) return;
-        startActivity(new Intent(requireActivity(), MainActivity.class)
-                .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_ACTIVATE));
+        startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
     }
 
     @Override
@@ -481,8 +515,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onInTheRange() {
         if (isAdded()) {
             Shecan.setStaticIPMode();
-            startActivity(new Intent(requireActivity(), MainActivity.class)
-                    .putExtra(MainActivity.LAUNCH_ACTION, MainActivity.LAUNCH_ACTION_ACTIVATE));
+            startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                    .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
         }
         stopBlinkAnimation();
     }

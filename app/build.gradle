@@ -22,6 +22,7 @@ android {
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
         setProperty("archivesBaseName", applicationId + "-v" + versionCode + "(" + versionName + ")")
     }

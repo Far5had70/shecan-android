@@ -34,6 +34,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -41,7 +42,7 @@ import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.fragment.AboutFragment;
 import ir.shecan.fragment.DNSTestFragment;
-import ir.shecan.fragment.HomeFragment;
+import ir.shecan.fragment.refactor.HomeFragment;
 import ir.shecan.fragment.LogFragment;
 import ir.shecan.fragment.SettingsFragment;
 import ir.shecan.fragment.ToolbarFragment;
@@ -49,6 +50,7 @@ import ir.shecan.service.ShecanVpnService;
 import ir.shecan.util.Logger;
 import ir.shecan.util.server.DNSServerHelper;
 import ir.shecan.util.server.LocaleHelper;
+import ir.shecan.widget.CustomBottomBar;
 
 /**
  * Shecan Project
@@ -61,16 +63,16 @@ import ir.shecan.util.server.LocaleHelper;
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  */
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String TAG = "DMainActivity";
+public class MainActivityNew extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "DMainActivityNew";
 
-    public static final String LAUNCH_ACTION = "ir.shecan.activity.MainActivity.LAUNCH_ACTION";
+    public static final String LAUNCH_ACTION = "ir.shecan.activity.MainActivityNew.LAUNCH_ACTION";
     public static final int LAUNCH_ACTION_NONE = 0;
     public static final int LAUNCH_ACTION_ACTIVATE = 1;
     public static final int LAUNCH_ACTION_DEACTIVATE = 2;
     public static final int LAUNCH_ACTION_SERVICE_DONE = 3;
 
-    public static final String LAUNCH_FRAGMENT = "ir.shecan.activity.MainActivity.LAUNCH_FRAGMENT";
+    public static final String LAUNCH_FRAGMENT = "ir.shecan.activity.MainActivityNew.LAUNCH_FRAGMENT";
     public static final int FRAGMENT_NONE = -1;
     public static final int FRAGMENT_HOME = 0;
     public static final int FRAGMENT_DNS_TEST = 1;
@@ -79,15 +81,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public static final int FRAGMENT_LOG = 6;
 
-    public static final String LAUNCH_NEED_RECREATE = "ir.shecan.activity.MainActivity.LAUNCH_NEED_RECREATE";
+    public static final String LAUNCH_NEED_RECREATE = "ir.shecan.activity.MainActivityNew.LAUNCH_NEED_RECREATE";
 
-    private static MainActivity instance = null;
+    private static MainActivityNew instance = null;
 
     private ToolbarFragment currentFragment;
 
     private ActivityResultLauncher<Intent> vpnPermissionLauncher;
 
-    public static MainActivity getInstance() {
+    public static MainActivityNew getInstance() {
         return instance;
     }
 
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
 
         instance = this;
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_new);
 
         vpnPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -112,16 +114,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
         appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        DrawerLayout drawer = findViewById(R.id.main_drawer_layout);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        DrawerLayout drawer = findViewById(R.id.main_drawer_layout);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        drawer.addDrawerListener(toggle);
+//        toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+//        NavigationView navigationView = findViewById(R.id.nav_view);
+//        navigationView.setNavigationItemSelectedListener(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -148,6 +149,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 }
                             });
                 });
+
+        CustomBottomBar bar = findViewById(R.id.customBar);
+        bar.addItem("خانه", R.drawable.ic_github, R.drawable.ic_home);
+        bar.addItem("پروفایل", R.drawable.ic_github, R.drawable.ic_home);
+        bar.addItem("تنظیمات", R.drawable.ic_github, R.drawable.ic_home);
+        bar.setOnItemSelected(index -> {
+            switch (index){
+                case 0:
+                    switchFragment(AboutFragment.class, true);
+                    break;
+                case 1:
+                    switchFragment(HomeFragment.class, true);
+                    break;
+                case 2:
+                    switchFragment(AboutFragment.class, true);
+                    break;
+            }
+        });
+
+        bar.select(1);
+
+//        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+//        bottomNav.setItemIconTintList(null);
+//        bottomNav.setItemTextColor(null);
+//        bottomNav.setOnNavigationItemSelectedListener(item -> {
+//            ToolbarFragment selected = null;
+//            switch (item.getItemId()) {
+//                case R.id.nav_settings:
+//                    selected = new SettingsFragment();
+//                    break;
+//                case R.id.nav_connect:
+//                    selected = new SettingsFragment();
+//                    break;
+//                case R.id.nav_connections:
+//                    selected = new SettingsFragment();
+//                    break;
+//            }
+//            if (selected != null) {
+////                getSupportFragmentManager().beginTransaction()
+////                        .replace(R.id.nav_host_fragment, selected)
+////                        .addToBackStack(null)
+////                        .commit();
+//            }
+//            return true;
+//        });
 
         handleIntent(getIntent());
     }
@@ -212,10 +258,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.main_drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (!(currentFragment instanceof HomeFragment)) {
+        if (!(currentFragment instanceof HomeFragment)) {
             switchFragment(HomeFragment.class, true);
 //            recreate();
         } else {
@@ -283,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (intent.getBooleanExtra(LAUNCH_NEED_RECREATE, false)) {
             if (fragment != FRAGMENT_NONE)
-                getIntent().putExtra(MainActivity.LAUNCH_FRAGMENT, fragment);
+                getIntent().putExtra(MainActivityNew.LAUNCH_FRAGMENT, fragment);
             recreate();
             return;
         }
@@ -332,10 +375,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 switchFragment(LogFragment.class, false);
                 break;
         }
-
-        DrawerLayout drawer = findViewById(R.id.main_drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-
         InputMethodManager imm = (InputMethodManager) Shecan.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(findViewById(R.id.id_content).getWindowToken(), 0);
         return true;

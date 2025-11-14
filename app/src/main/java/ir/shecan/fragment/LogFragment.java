@@ -63,10 +63,10 @@ public class LogFragment extends ToolbarFragment implements Toolbar.OnMenuItemCl
 
     @Override
     public void checkStatus() {
-        menu.findItem(R.id.nav_log).setChecked(true);
-        toolbar.setTitle(R.string.action_log);
-        toolbar.inflateMenu(R.menu.log);
-        toolbar.setOnMenuItemClickListener(this);
+//        menu.findItem(R.id.nav_log).setChecked(true);
+//        toolbar.setTitle(R.string.action_log);
+//        toolbar.inflateMenu(R.menu.log);
+//        toolbar.setOnMenuItemClickListener(this);
     }
 
     @Override

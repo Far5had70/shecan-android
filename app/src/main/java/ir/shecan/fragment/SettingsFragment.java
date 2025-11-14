@@ -35,8 +35,8 @@ public class SettingsFragment extends ToolbarFragment {
 
     @Override
     public void checkStatus() {
-        menu.findItem(R.id.nav_settings).setChecked(true);
-        toolbar.setTitle(R.string.action_settings);
+//        menu.findItem(R.id.nav_settings).setChecked(true);
+//        toolbar.setTitle(R.string.action_settings);
     }
 
     @Override

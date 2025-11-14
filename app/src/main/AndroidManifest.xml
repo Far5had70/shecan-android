@@ -39,7 +39,7 @@
         <!-- Main Activity -->
 
         <activity
-            android:name="ir.shecan.activity.MainActivity"
+            android:name="ir.shecan.activity.MainActivityNew"
             android:configChanges="keyboard|keyboardHidden|screenLayout|uiMode|orientation|screenSize|smallestScreenSize|locale|layoutDirection"
             android:exported="true"
             android:launchMode="singleTask"
