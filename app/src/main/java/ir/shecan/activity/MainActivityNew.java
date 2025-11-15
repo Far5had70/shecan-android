@@ -42,6 +42,7 @@ import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.fragment.AboutFragment;
 import ir.shecan.fragment.DNSTestFragment;
+import ir.shecan.fragment.refactor.ConfigListFragment;
 import ir.shecan.fragment.refactor.HomeFragment;
 import ir.shecan.fragment.LogFragment;
 import ir.shecan.fragment.SettingsFragment;
@@ -151,13 +152,13 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 });
 
         CustomBottomBar bar = findViewById(R.id.customBar);
-        bar.addItem("کانکشن\u200Cها", R.drawable.ic_connection_inactive, R.drawable.ic_connection_inactive);
-        bar.addItem("اتصال", R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_inactive);
-        bar.addItem("تنظیمات", R.drawable.ic_setting_inactive, R.drawable.ic_setting_inactive);
+        bar.addItem(getString(R.string.connections), R.drawable.ic_connection_inactive, R.drawable.ic_connection_inactive);
+        bar.addItem(getString(R.string.connect), R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_inactive);
+        bar.addItem(getString(R.string.setting), R.drawable.ic_setting_inactive, R.drawable.ic_setting_inactive);
         bar.setOnItemSelected(index -> {
-            switch (index){
+            switch (index) {
                 case 0:
-                    switchFragment(AboutFragment.class, true);
+                    switchFragment(ConfigListFragment.class, true);
                     break;
                 case 1:
                     switchFragment(HomeFragment.class, true);

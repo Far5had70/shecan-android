@@ -29,6 +29,8 @@
     <color name="buttonBackgroundColor">#C4CFCD</color>
     <color name="rippleColor">#22000000</color>
     <color name="rippleMaskColor">#33000000</color>
+    <color name="serviceRowTitleColor">#8D9C96</color>
+    <color name="serviceRowBodyColor">#27453A</color>
 
 
     <color name="homeBackgroundDark">#0E221F</color>
@@ -42,4 +44,7 @@
     <color name="buttonCircleGradientStartColorDark">#FF1E413C</color>
     <color name="buttonCircleGradientEndColorDark">#FF0E221F</color>
     <color name="buttonBackgroundColorDark">#05140E</color>
+    <color name="menuBackground">#555</color>
+    <color name="connectionIsReadyColor">#8D9C96</color>
+    <color name="connectionIsActiveColor">#009B63</color>
 </resources>

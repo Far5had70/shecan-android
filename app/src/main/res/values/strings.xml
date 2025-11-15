@@ -117,4 +117,15 @@
     <string name="expire_date">تاریخ انقضا</string>
     <string name="serviceType">نوع سرویس</string>
     <string name="orderNo">کد سفارش</string>
+    <string name="connections">کانکشن‌ها</string>
+    <string name="connect">اتصال</string>
+    <string name="setting">تنظیمات</string>
+    <string name="newConnection">جدید</string>
+    <string name="expiring">در حال انقضا...</string>
+    <string name="waitingForActivate">در انتظار فعال</string>
+    <string name="active">فعال</string>
+    <string name="readyToConnect">آماده اتصال</string>
+    <string name="free">رایگان</string>
+    <string name="gold">طلایی</string>
+    <string name="bronze">برنزی</string>
 </resources>
