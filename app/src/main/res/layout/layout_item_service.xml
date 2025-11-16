@@ -9,8 +9,8 @@
     <!-- Green half-oval -->
     <View
         android:id="@+id/greenHalfOval"
-        android:layout_width="5dp"
-        android:layout_height="25dp"
+        android:layout_width="7dp"
+        android:layout_height="35dp"
         android:background="@drawable/bg_half_oval_green"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

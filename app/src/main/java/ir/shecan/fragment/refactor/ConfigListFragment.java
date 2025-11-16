@@ -18,6 +18,7 @@ import java.util.List;
 import ir.shecan.R;
 import ir.shecan.ServiceItem;
 import ir.shecan.adapter.ServiceAdapter;
+import ir.shecan.bottomSheet.SubscriptionBottomSheet;
 import ir.shecan.databinding.FragmentConfigListBinding;
 import ir.shecan.fragment.ToolbarFragment;
 
@@ -40,7 +41,8 @@ public class ConfigListFragment extends ToolbarFragment {
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(new ServiceAdapter(serviceItems, item -> {
-
+            SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
+            bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
         }));
 
         return binding.getRoot();

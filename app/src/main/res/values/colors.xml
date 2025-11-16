@@ -47,4 +47,5 @@
     <color name="menuBackground">#555</color>
     <color name="connectionIsReadyColor">#8D9C96</color>
     <color name="connectionIsActiveColor">#009B63</color>
+    <color name="transparent">#00000000</color>
 </resources>

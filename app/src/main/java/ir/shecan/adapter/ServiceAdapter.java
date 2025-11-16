@@ -1,6 +1,8 @@
 package ir.shecan.adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -15,6 +17,8 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
 
     private final List<ServiceItem> items;
     private final OnMoreClickListener listener;
+
+    private int selectedPosition = -1;
 
     public interface OnMoreClickListener {
         void onMoreClicked(ServiceItem item);
@@ -34,17 +38,27 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
             this.binding = binding;
         }
 
-        public void bind(ServiceItem item, OnMoreClickListener listener) {
+        public void bind(ServiceItem item, boolean isSelected, OnMoreClickListener listener) {
 
             binding.txtOrderCode.setText(item.getOrderCode());
             binding.txtServiceType.setText(item.getServiceType());
-
             binding.txtStatus.setText(item.getStatusText());
             binding.txtStatus.setTextColor(item.getStatusColor());
-
             binding.statusBoxIcon.setImageResource(item.getStatusIcon());
 
+            if (isSelected) {
+                binding.greenHalfOval.setVisibility(View.VISIBLE);
+                binding.getRoot().setBackgroundColor(Color.parseColor("#E3F7F2"));
+            } else {
+                binding.greenHalfOval.setVisibility(View.INVISIBLE);
+                binding.getRoot().setBackgroundColor(Color.WHITE);
+            }
+
             binding.btnOptions.setOnClickListener(v -> listener.onMoreClicked(item));
+
+            binding.getRoot().setOnClickListener(v -> {
+                listener.onMoreClicked(item);
+            });
         }
     }
 
@@ -59,7 +73,15 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ServiceAdapter.ViewHolder holder, int position) {
-        holder.bind(items.get(position), listener);
+
+        boolean isSelected = position == selectedPosition;
+
+        holder.bind(items.get(position), isSelected, item -> {
+            selectedPosition = holder.getAdapterPosition();
+            notifyDataSetChanged();
+
+            listener.onMoreClicked(item);
+        });
     }
 
     @Override
