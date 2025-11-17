@@ -47,6 +47,7 @@ import ir.shecan.fragment.refactor.HomeFragment;
 import ir.shecan.fragment.LogFragment;
 import ir.shecan.fragment.SettingsFragment;
 import ir.shecan.fragment.ToolbarFragment;
+import ir.shecan.fragment.refactor.ProfileFragment;
 import ir.shecan.service.ShecanVpnService;
 import ir.shecan.util.Logger;
 import ir.shecan.util.server.DNSServerHelper;
@@ -164,7 +165,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                     switchFragment(HomeFragment.class, true);
                     break;
                 case 2:
-                    switchFragment(AboutFragment.class, true);
+                    switchFragment(ProfileFragment.class, true);
                     break;
             }
         });

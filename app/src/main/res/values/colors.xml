@@ -11,6 +11,7 @@
 
     <!--   New Design   -->
     <color name="homeBackground">#F3F8F7</color>
+    <color name="profileBackground">#071711</color>
     <color name="selectedConfigColor">#7B968C</color>
     <color name="bottomNavigationActiveTextColor">#27453A</color>
     <color name="bottomNavigationInactiveTextColor">#8D9C96</color>

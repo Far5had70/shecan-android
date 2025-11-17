@@ -1,13 +1,21 @@
 package ir.shecan.bottomSheet;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.util.Objects;
+
+import ir.shecan.R;
 import ir.shecan.databinding.BottomSheetSubscriptionBinding;
 
 public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
@@ -23,6 +31,19 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = BottomSheetSubscriptionBinding.inflate(inflater, container, false);
         return binding.getRoot();
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.parseColor("#80000000"))); // 50% مشکی
+        return dialog;
+    }
+
+    @Override
+    public int getTheme() {
+        return R.style.AppTheme;
     }
 
     @Override
