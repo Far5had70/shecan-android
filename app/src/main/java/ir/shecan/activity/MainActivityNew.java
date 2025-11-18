@@ -25,6 +25,7 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
@@ -201,7 +202,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     }
 
 
-    private void switchFragment(Class fragmentClass, boolean isHome) {
+    public void switchFragment(Class fragmentClass, boolean isHome) {
         if (currentFragment == null || fragmentClass != currentFragment.getClass()) {
             try {
                 ToolbarFragment fragment = (ToolbarFragment) fragmentClass.newInstance();
@@ -393,11 +394,11 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
-    private void applyTheme() {
-        int themeId = ShecanVpnService.isActivated() ? R.style.AppTheme : R.style.AppTheme_Dark;
-        setTheme(themeId);
-        getApplicationContext().setTheme(themeId);
-    }
+//    private void applyTheme() {
+//        int themeId = ShecanVpnService.isActivated() ? R.style.AppTheme : R.style.AppTheme_Dark;
+//        setTheme(themeId);
+//        getApplicationContext().setTheme(themeId);
+//    }
 
     public void activateService() {
         Intent intent = VpnService.prepare(Shecan.getInstance());
@@ -435,5 +436,10 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 Shecan.getServiceIntent(getApplicationContext()).setAction(ShecanVpnService.ACTION_ACTIVATE)
         );
         Shecan.updateShortcut(getApplicationContext());
+    }
+
+    private void applyTheme() {
+        int mode = getSharedPreferences("settings", MODE_PRIVATE).getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        AppCompatDelegate.setDefaultNightMode(mode);
     }
 }

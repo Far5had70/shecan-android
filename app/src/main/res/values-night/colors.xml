@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="homeBackground">#0E221F</color>
+    <color name="selectedConfigTopColor">#0D1E1B</color>
+    <color name="selectedConfigBottomColor">#09261F</color>
+    <color name="selectedConfigRadiusColor">#33FFFFFF</color>
+    <color name="buttonRingCircleColor">#000000</color>
+    <color name="buttonRingBackgroundColor">#1B2924</color>
+    <color name="buttonPowerGradientStartColor">#FFFFFFFF</color>
+    <color name="buttonPowerGradientEndColor">#33FFFFFF</color>
+    <color name="buttonCircleGradientStartColor">#FF1E413C</color>
+    <color name="buttonCircleGradientEndColor">#FF0E221F</color>
+    <color name="buttonBackgroundColor">#05140E</color>
+
+
+</resources>

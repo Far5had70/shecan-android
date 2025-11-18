@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ir.shecan.R;
+import ir.shecan.activity.MainActivityNew;
 import ir.shecan.adapter.ProfileAdapter;
 import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.fragment.ToolbarFragment;
@@ -42,22 +43,22 @@ public class ProfileFragment extends ToolbarFragment {
         ProfileAdapter adapter = new ProfileAdapter(list, (position, item) -> {
             switch (position) {
                 case 0:
-                    // حساب کاربری
+//                    openFragment(AccountFragment.class);
                     break;
                 case 1:
-                    // ظاهر برنامه
+                    openFragment(ThemeFragment.class);
                     break;
                 case 2:
-                    // تراکنش‌ها
+//                    openFragment(TransactionFragment.class);
                     break;
                 case 3:
-                    // دامنه‌ها
+//                    openFragment(DomainSupportFragment.class);
                     break;
                 case 4:
-                    // تیکت‌ها
+//                    openFragment(TicketFragment.class);
                     break;
                 case 5:
-                    // درباره
+//                    openFragment(AboutFragment.class);
                     break;
             }
         });
@@ -66,12 +67,15 @@ public class ProfileFragment extends ToolbarFragment {
         binding.recyclerView.setAdapter(adapter);
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    private void openFragment(Class fragmentClass) {
+        if (getActivity() instanceof MainActivityNew) {
+            ((MainActivityNew) getActivity()).switchFragment(fragmentClass, false);
+        }
     }
 
     @Override
-    public void checkStatus() { }
+    public void checkStatus() {
+
+    }
 }
+

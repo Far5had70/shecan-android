@@ -32,21 +32,11 @@
     <color name="rippleMaskColor">#33000000</color>
     <color name="serviceRowTitleColor">#8D9C96</color>
     <color name="serviceRowBodyColor">#27453A</color>
-
-
-    <color name="homeBackgroundDark">#0E221F</color>
-    <color name="selectedConfigTopColorDark">#0D1E1B</color>
-    <color name="selectedConfigBottomColorDark">#09261F</color>
-    <color name="selectedConfigRadiusColorDark">#33FFFFFF</color>
-    <color name="buttonRingCircleColorDark">#000000</color>
-    <color name="buttonRingBackgroundColorDark">#1B2924</color>
-    <color name="buttonPowerGradientStartColorDark">#FFFFFFFF</color>
-    <color name="buttonPowerGradientEndColorDark">#33FFFFFF</color>
-    <color name="buttonCircleGradientStartColorDark">#FF1E413C</color>
-    <color name="buttonCircleGradientEndColorDark">#FF0E221F</color>
-    <color name="buttonBackgroundColorDark">#05140E</color>
     <color name="menuBackground">#555</color>
     <color name="connectionIsReadyColor">#8D9C96</color>
     <color name="connectionIsActiveColor">#009B63</color>
     <color name="transparent">#00000000</color>
+
+
+
 </resources>
