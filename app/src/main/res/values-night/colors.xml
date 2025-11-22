@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="white">#000000</color>
+    <color name="black">#FFFFFF</color>
     <color name="homeBackground">#0E221F</color>
     <color name="selectedConfigTopColor">#0D1E1B</color>
     <color name="selectedConfigBottomColor">#09261F</color>
@@ -11,6 +13,19 @@
     <color name="buttonCircleGradientStartColor">#FF1E413C</color>
     <color name="buttonCircleGradientEndColor">#FF0E221F</color>
     <color name="buttonBackgroundColor">#05140E</color>
+    <color name="themeCardSelectedBackgroundColor">#143126</color>
+    <color name="themeCardUnSelectedBackgroundColor">#091813</color>
+    <color name="themeCardRadiusBackgroundColor">#143126</color>
+    <color name="toolbarLogoTitle">#F0FFF9</color>
+    <color name="profileBackground">#071711</color>
+    <color name="primaryTextColor">#C7DBD4</color>
+    <color name="greenSecondaryTextColor">#7B968C</color>
+    <color name="dividerColor">#DFE8E5</color>
+    <color name="authorizeRadiusColor">#182823</color>
+    <color name="authorizeBackgroundColor">#0E221B</color>
+    <color name="authorizeDividerColor">#2B3A35</color>
+    <color name="textFieldAuthorizeColor">#25FFFFFF</color>
+
 
 
 </resources>

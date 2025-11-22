@@ -11,7 +11,7 @@
 
     <!--   New Design   -->
     <color name="homeBackground">#F3F8F7</color>
-    <color name="profileBackground">#071711</color>
+    <color name="profileBackground">#FFFFFF</color>
     <color name="selectedConfigColor">#7B968C</color>
     <color name="bottomNavigationActiveTextColor">#27453A</color>
     <color name="bottomNavigationInactiveTextColor">#8D9C96</color>
@@ -36,7 +36,18 @@
     <color name="connectionIsReadyColor">#8D9C96</color>
     <color name="connectionIsActiveColor">#009B63</color>
     <color name="transparent">#00000000</color>
-
+    <color name="themeCardSelectedBackgroundColor">#DFE8E6</color>
+    <color name="themeCardUnSelectedBackgroundColor">#FFFFFF</color>
+    <color name="themeCardRadiusBackgroundColor">#143126</color>
+    <color name="serviceCardBackgroundColor">#F3F8F7</color>
+    <color name="primaryTextColor">#27453A</color>
+    <color name="greenSecondaryTextColor">#8D9C96</color>
+    <color name="dividerColor">#DFE8E5</color>
+    <color name="authorizeRadiusColor">#EBEBEB</color>
+    <color name="authorizeBackgroundColor">#FEFEFE</color>
+    <color name="authorizeDividerColor">#E4E4E4</color>
+    <color name="textFieldAuthorizeColor">#25000000</color>
+    <color name="red">#F44336</color>
 
 
 </resources>

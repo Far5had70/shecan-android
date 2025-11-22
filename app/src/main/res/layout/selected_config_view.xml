@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/selectedConfigBodyTextColor"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 tools:text="۲۹۳۲۸۶۴" />
@@ -112,7 +112,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/selectedConfigBodyTextColor"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 tools:text="برنزی" />
@@ -145,7 +145,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/selectedConfigBodyTextColor"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 tools:text="۱۴۰۴/۰۶/۲۸" />

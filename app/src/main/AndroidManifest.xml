@@ -62,6 +62,7 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+        <activity android:name="ir.shecan.activity.LoginActivity" />
 
         <!-- Receivers -->
         <receiver

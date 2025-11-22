@@ -33,6 +33,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -160,13 +161,13 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         bar.setOnItemSelected(index -> {
             switch (index) {
                 case 0:
-                    switchFragment(ConfigListFragment.class, true);
+                    switchFragment(ConfigListFragment.class, true, false);
                     break;
                 case 1:
-                    switchFragment(HomeFragment.class, true);
+                    switchFragment(HomeFragment.class, true, false);
                     break;
                 case 2:
-                    switchFragment(ProfileFragment.class, true);
+                    switchFragment(ProfileFragment.class, true, false);
                     break;
             }
         });
@@ -202,48 +203,66 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     }
 
 
-    public void switchFragment(Class fragmentClass, boolean isHome) {
-        if (currentFragment == null || fragmentClass != currentFragment.getClass()) {
-            try {
-                ToolbarFragment fragment = (ToolbarFragment) fragmentClass.newInstance();
-                FragmentManager fm = getSupportFragmentManager();
-                fm.beginTransaction().replace(R.id.id_content, fragment).commitAllowingStateLoss();
+    public void switchFragment(Class fragmentClass, boolean isHome, boolean isAdd) {
 
-                currentFragment = fragment;
-            } catch (Exception e) {
-                Logger.logException(e);
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        try {
+            ToolbarFragment fragment = (ToolbarFragment) fragmentClass.newInstance();
+
+            if (isAdd) {
+                // حالت ADD
+                if (currentFragment != null) {
+                    ft.hide(currentFragment); // فرگمنت قبلی مخفی می‌شود
+                }
+                ft.add(R.id.id_content, fragment); // add به جای replace
+            } else {
+                // حالت REPLACE قبلی
+                ft.replace(R.id.id_content, fragment);
             }
+
+            ft.commitAllowingStateLoss();
+            currentFragment = fragment;
+
+        } catch (Exception e) {
+            Logger.logException(e);
         }
 
+        // --- ادامه تنظیمات UI مثل قبل ---
         Window window = getWindow();
         CoordinatorLayout coordinatorLayout = findViewById(R.id.id_content);
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)
-                coordinatorLayout.getLayoutParams();
+        CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) coordinatorLayout.getLayoutParams();
         AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
 
         if (isHome) {
-            window.getDecorView()
-                    .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            window.getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
             if (!hasPermanentMenuKey()) {
                 window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
             }
+
             appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
             params.setBehavior(null);
 
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+
             window.setStatusBarColor(fetchPrimaryDarkColor());
             appBarLayout.setPadding(0, 0, 0, 0);
             params.setBehavior(new AppBarLayout.ScrollingViewBehavior());
-            window.getDecorView()
-                    .setFitsSystemWindows(true);
-            window.getDecorView()
-                    .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
+            window.getDecorView().setFitsSystemWindows(true);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         }
+
         coordinatorLayout.requestLayout();
     }
+
 
     private boolean hasPermanentMenuKey() {
         return ViewConfiguration.get(getApplicationContext()).hasPermanentMenuKey();
@@ -262,7 +281,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     @Override
     public void onBackPressed() {
         if (!(currentFragment instanceof HomeFragment)) {
-            switchFragment(HomeFragment.class, true);
+            switchFragment(HomeFragment.class, true, false);
 //            recreate();
         } else {
             super.onBackPressed();
@@ -336,23 +355,23 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
 
         switch (fragment) {
             case FRAGMENT_ABOUT:
-                switchFragment(AboutFragment.class, false);
+                switchFragment(AboutFragment.class, false, false);
                 break;
             case FRAGMENT_DNS_TEST:
-                switchFragment(DNSTestFragment.class, false);
+                switchFragment(DNSTestFragment.class, false, false);
                 break;
             case FRAGMENT_HOME:
-                switchFragment(HomeFragment.class, true);
+                switchFragment(HomeFragment.class, true, false);
                 break;
             case FRAGMENT_SETTINGS:
-                switchFragment(SettingsFragment.class, false);
+                switchFragment(SettingsFragment.class, false, false);
                 break;
             case FRAGMENT_LOG:
-                switchFragment(LogFragment.class, false);
+                switchFragment(LogFragment.class, false, false);
                 break;
         }
         if (currentFragment == null) {
-            switchFragment(HomeFragment.class, true);
+            switchFragment(HomeFragment.class, true, false);
         }
     }
 
@@ -363,19 +382,19 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
 
         switch (id) {
             case R.id.nav_about:
-                switchFragment(AboutFragment.class, false);
+                switchFragment(AboutFragment.class, false, false);
                 break;
             case R.id.nav_dns_test:
-                switchFragment(DNSTestFragment.class, false);
+                switchFragment(DNSTestFragment.class, false, false);
                 break;
             case R.id.nav_home:
-                switchFragment(HomeFragment.class, true);
+                switchFragment(HomeFragment.class, true, false);
                 break;
             case R.id.nav_settings:
-                switchFragment(SettingsFragment.class, false);
+                switchFragment(SettingsFragment.class, false, false);
                 break;
             case R.id.nav_log:
-                switchFragment(LogFragment.class, false);
+                switchFragment(LogFragment.class, false, false);
                 break;
         }
         InputMethodManager imm = (InputMethodManager) Shecan.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
