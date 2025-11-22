@@ -41,6 +41,7 @@
     <color name="themeCardRadiusBackgroundColor">#143126</color>
     <color name="serviceCardBackgroundColor">#F3F8F7</color>
     <color name="primaryTextColor">#27453A</color>
+    <color name="greenPrimaryTextColor">#27453A</color>
     <color name="greenSecondaryTextColor">#8D9C96</color>
     <color name="dividerColor">#DFE8E5</color>
     <color name="authorizeRadiusColor">#EBEBEB</color>

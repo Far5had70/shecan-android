@@ -131,4 +131,5 @@
     <string name="lightMode">حالت روشن</string>
     <string name="darkMode">حالت تاریک</string>
     <string name="systemSetting">طبق تنظیمات سیستم</string>
+    <string name="phoneOrEmail">شماره همراه یا ایمیل</string>
 </resources>
