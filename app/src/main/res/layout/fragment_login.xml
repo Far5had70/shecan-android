@@ -10,8 +10,10 @@
         android:background="@color/authorizeBackgroundColor">
 
         <ImageView
+            android:id="@+id/iconToolbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:transitionName="toolbar_logo"
             android:src="@drawable/toolbar_logo_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -135,5 +137,14 @@
         </FrameLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+
+    <!-- include the custom view -->
+    <ir.shecan.widget.AgreeView
+        android:id="@+id/agreementView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"/>
 
 </FrameLayout>

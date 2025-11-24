@@ -132,4 +132,8 @@
     <string name="darkMode">حالت تاریک</string>
     <string name="systemSetting">طبق تنظیمات سیستم</string>
     <string name="phoneOrEmail">شماره همراه یا ایمیل</string>
+    <string name="sendAgain">ارسال مجدد</string>
+    <string name="confirm">تأیید</string>
+    <string name="loginWithOtp">ورود با رمز یکبار مصرف</string>
+    <string name="inputOtpCode">لطفا رمز پیامک شده را وارد کنید</string>
 </resources>

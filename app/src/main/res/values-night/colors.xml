@@ -26,6 +26,7 @@
     <color name="authorizeBackgroundColor">#071711</color>
     <color name="authorizeDividerColor">#2B3A35</color>
     <color name="textFieldAuthorizeColor">#25FFFFFF</color>
+    <color name="backButtonBackground">#0DFFFFFF</color>
 
 
 
