@@ -3,6 +3,7 @@ package ir.shecan.fragment.refactor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +15,23 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiEndpoint;
+import ir.shecan.api.ApiRepository;
+import ir.shecan.api.HttpMethod;
+import ir.shecan.databinding.FragmentChangePasswordBinding;
 import ir.shecan.databinding.FragmentPasswordBinding;
+import ir.shecan.modelDio.ExistApiInput;
+import ir.shecan.modelDio.VerifyApiInput;
+import ir.shecan.modelDto.ExistApiViewModel;
+import ir.shecan.modelDto.VerifyApiViewModel;
 
 public class PasswordFragment extends Fragment {
+
+    private String identifier;
+
+    public PasswordFragment(String identifier) {
+        this.identifier = identifier;
+    }
 
     private FragmentPasswordBinding binding;
 
@@ -34,6 +49,12 @@ public class PasswordFragment extends Fragment {
         binding.iconBackImg.setOnClickListener(view -> {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
+
+        binding.iconBackImg.setAlpha(0f);
+        binding.iconBackImg.animate()
+                .alpha(1f)
+                .setDuration(1000)
+                .start();
 
         setupTypingAnimation();
 
@@ -56,6 +77,22 @@ public class PasswordFragment extends Fragment {
 
             params.height = finalHeight;
             binding.bottomFrameLayout.setLayoutParams(params);
+        });
+
+        binding.btnContinue.setOnClickListener(view -> {
+            ApiRepository repo = new ApiRepository(requireContext());
+            VerifyApiInput input = new VerifyApiInput(binding.edtPassword.getText().toString(), identifier);
+            repo.<VerifyApiViewModel, VerifyApiInput>request(
+                    "verify_" + input.getIdentifier(),
+                    input,
+                    ApiEndpoint.VERIFY.getPath(),
+                    HttpMethod.POST,
+                    false,
+                    (response, fromCache) -> {
+                        Log.e("TAG", "onCreateView: " + response.getApiKey() );
+                    },
+                    VerifyApiViewModel.class
+            );
         });
 
         return binding.getRoot();
@@ -82,9 +119,6 @@ public class PasswordFragment extends Fragment {
         };
 
         binding.edtPassword.setOnKeyListener(typingListener);
-        binding.edtRepeatPassword.setOnKeyListener(typingListener);
-
         binding.edtPassword.setOnFocusChangeListener(focusListener);
-        binding.edtRepeatPassword.setOnFocusChangeListener(focusListener);
     }
 }

@@ -4,6 +4,7 @@
 package ir.shecan.api;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -72,7 +73,20 @@ public class APIManager {
                         cache.put(cacheKey, model);
                         listener.onReceived(model, false);
                     },
-                    error -> listener.onReceived(null, false)
+                    error -> {
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            try {
+                                String body = new String(error.networkResponse.data, "UTF-8");
+                                JSONObject obj = new JSONObject(body);
+                                String errorMessage = obj.optString("error", "خطای ناشناخته");
+                                Log.e("API_ERROR", "Message: " + errorMessage);
+//                                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        listener.onReceived(null, false);
+                    }
             );
 
             requestQueue.add(request);

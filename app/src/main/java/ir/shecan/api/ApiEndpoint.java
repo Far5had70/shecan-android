@@ -2,6 +2,7 @@ package ir.shecan.api;
 
 public enum ApiEndpoint {
     OTP_EXISTS("/api/auth/exists"),
+    VERIFY("/api/auth/verify"),
     LOGIN("/api/auth/login"),
     REGISTER("/api/auth/register"),
     USERS_LIST("/api/users");

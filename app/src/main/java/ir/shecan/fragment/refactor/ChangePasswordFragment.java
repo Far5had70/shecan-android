@@ -1,6 +1,8 @@
 package ir.shecan.fragment.refactor;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +14,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
-import ir.shecan.databinding.FragmentSignUpBinding;
+import ir.shecan.databinding.FragmentChangePasswordBinding;
 
-public class SignUpFragment extends Fragment {
+public class ChangePasswordFragment extends Fragment {
 
-    private FragmentSignUpBinding binding;
+    private FragmentChangePasswordBinding binding;
+
+    private final Handler typingHandler = new Handler(Looper.getMainLooper());
+    private Runnable typingStoppedRunnable;
 
     @Nullable
     @Override
@@ -24,19 +29,13 @@ public class SignUpFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentSignUpBinding.inflate(inflater, container, false);
+        binding = FragmentChangePasswordBinding.inflate(inflater, container, false);
 
         binding.iconBackImg.setOnClickListener(view -> {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
 
-        binding.btnPassword.setOnClickListener(view -> {
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainer, new ChangePasswordFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
+        setupTypingAnimation();
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 
@@ -59,8 +58,33 @@ public class SignUpFragment extends Fragment {
             binding.bottomFrameLayout.setLayoutParams(params);
         });
 
-
-
         return binding.getRoot();
+    }
+
+    private void setupTypingAnimation() {
+
+        typingStoppedRunnable = () -> {
+            binding.mascot.setImageResource(R.drawable.ic_shecan_normal);
+        };
+
+        View.OnFocusChangeListener focusListener = (v, hasFocus) -> {
+            if (!hasFocus) {
+                binding.mascot.setImageResource(R.drawable.ic_shecan_normal);
+            }
+        };
+
+        View.OnKeyListener typingListener = (v, keyCode, event) -> {
+            binding.mascot.setImageResource(R.drawable.ic_shecan_hide_eye);
+            typingHandler.removeCallbacks(typingStoppedRunnable);
+            typingHandler.postDelayed(typingStoppedRunnable, 500);
+
+            return false;
+        };
+
+        binding.edtPassword.setOnKeyListener(typingListener);
+        binding.edtRepeatPassword.setOnKeyListener(typingListener);
+
+        binding.edtPassword.setOnFocusChangeListener(focusListener);
+        binding.edtRepeatPassword.setOnFocusChangeListener(focusListener);
     }
 }

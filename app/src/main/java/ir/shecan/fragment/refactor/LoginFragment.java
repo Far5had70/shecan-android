@@ -99,7 +99,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void goToLoginWithPasswordFragment() {
-        OtpFragment otpFragment = new OtpFragment();
+        PasswordFragment otpFragment = new PasswordFragment(binding.edtPhoneNumber.getText().toString());
         route(otpFragment);
     }
 
