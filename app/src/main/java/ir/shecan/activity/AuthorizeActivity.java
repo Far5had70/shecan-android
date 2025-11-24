@@ -35,25 +35,6 @@ public class AuthorizeActivity extends AppCompatActivity {
 
         // Load first fragment
         loadFragment(new LoginFragment(), false);
-
-        // Dynamic height (shared logic)
-        binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-
-            int screenHeight = binding.getRoot().getHeight();
-            int fiftyDp = (int) TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    170,
-                    getResources().getDisplayMetrics()
-            );
-
-            int finalHeight = screenHeight - fiftyDp;
-
-            RelativeLayout.LayoutParams params =
-                    (RelativeLayout.LayoutParams) binding.bottomFrameLayout.getLayoutParams();
-
-            params.height = finalHeight;
-            binding.bottomFrameLayout.setLayoutParams(params);
-        });
     }
 
     // ---------------- Fragment Loader ----------------

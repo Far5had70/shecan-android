@@ -26,13 +26,13 @@
         android:textColor="@color/black"
         android:paddingBottom="24dp"/>
 
-    <!-- OTP 6 Digits -->
     <LinearLayout
         android:id="@+id/otpContainer"
         android:orientation="horizontal"
         android:gravity="center"
         android:layoutDirection="ltr"
-        android:layout_width="wrap_content"
+        android:weightSum="6"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <EditText android:id="@+id/otp1" style="@style/OtpBoxStyle"/>
@@ -43,6 +43,7 @@
         <EditText android:id="@+id/otp6" style="@style/OtpBoxStyle"/>
 
     </LinearLayout>
+
 
     <!-- Error message -->
     <TextView

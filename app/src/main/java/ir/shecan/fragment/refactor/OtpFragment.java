@@ -6,12 +6,14 @@ import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.TransitionInflater;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Button;
 
@@ -70,6 +72,26 @@ public class OtpFragment extends Fragment {
                 .alpha(1f)
                 .setDuration(1000)
                 .start();
+
+
+        // Dynamic height (shared logic)
+        binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+
+            int screenHeight = binding.getRoot().getHeight();
+            int fiftyDp = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    170,
+                    getResources().getDisplayMetrics()
+            );
+
+            int finalHeight = screenHeight - fiftyDp;
+
+            RelativeLayout.LayoutParams params =
+                    (RelativeLayout.LayoutParams) binding.bottomFrameLayout.getLayoutParams();
+
+            params.height = finalHeight;
+            binding.bottomFrameLayout.setLayoutParams(params);
+        });
 
 
         return binding.getRoot();
