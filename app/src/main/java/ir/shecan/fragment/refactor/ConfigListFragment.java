@@ -2,14 +2,12 @@ package ir.shecan.fragment.refactor;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
@@ -18,8 +16,6 @@ import java.util.List;
 import ir.shecan.R;
 import ir.shecan.ServiceItem;
 import ir.shecan.adapter.ServiceAdapter;
-import ir.shecan.api.CoreApiResponseListener;
-import ir.shecan.api.CoreRepository;
 import ir.shecan.bottomSheet.SubscriptionBottomSheet;
 import ir.shecan.databinding.FragmentConfigListBinding;
 import ir.shecan.fragment.ToolbarFragment;
@@ -63,44 +59,5 @@ public class ConfigListFragment extends ToolbarFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        CoreRepository.getInstance().fetchCoreAPI(
-                getContext(),
-                new CoreApiResponseListener() {
-
-                    @Override
-                    public void onLoading() {
-//                        binding.progressBar.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onSuccess(String result) {
-//                        binding.progressBar.setVisibility(View.GONE);
-//                        binding.textViewResult.setText("Core Result: " + result);
-                    }
-
-                    @Override
-                    public void onInvalid() {
-//                        binding.progressBar.setVisibility(View.GONE);
-//                        binding.textViewResult.setText("Invalid!");
-                    }
-
-                    @Override
-                    public void onInTheRange() {
-//                        binding.progressBar.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onOutOfRange() {
-//                        binding.progressBar.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-//                        binding.progressBar.setVisibility(View.GONE);
-//                        binding.textViewResult.setText("Error: " + error);
-                    }
-                }
-        );
     }
 }

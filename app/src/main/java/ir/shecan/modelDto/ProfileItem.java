@@ -1,4 +1,4 @@
-package ir.shecan.model;
+package ir.shecan.modelDto;
 
 public class ProfileItem {
     private final int iconRes;

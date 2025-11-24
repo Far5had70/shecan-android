@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import ir.shecan.R;
-import ir.shecan.model.ThemeItem;
+import ir.shecan.modelDto.ThemeItem;
 
 public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> {
 

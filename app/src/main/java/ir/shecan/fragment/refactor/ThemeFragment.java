@@ -19,7 +19,7 @@ import ir.shecan.R;
 import ir.shecan.adapter.ThemeAdapter;
 import ir.shecan.databinding.FragmentThemeBinding;
 import ir.shecan.fragment.ToolbarFragment;
-import ir.shecan.model.ThemeItem;
+import ir.shecan.modelDto.ThemeItem;
 
 public class ThemeFragment extends ToolbarFragment {
 

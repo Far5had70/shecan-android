@@ -1,7 +1,6 @@
 package ir.shecan.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -10,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import ir.shecan.databinding.ItemProfileBinding;
-import ir.shecan.model.ProfileItem;
+import ir.shecan.modelDto.ProfileItem;
 
 public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHolder> {
 

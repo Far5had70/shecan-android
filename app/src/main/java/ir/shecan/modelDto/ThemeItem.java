@@ -1,4 +1,4 @@
-package ir.shecan.model;
+package ir.shecan.modelDto;
 
 import androidx.annotation.IntDef;
 import androidx.appcompat.app.AppCompatDelegate;

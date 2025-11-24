@@ -1,7 +1,5 @@
 package ir.shecan.fragment.refactor;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ import ir.shecan.activity.MainActivityNew;
 import ir.shecan.adapter.ProfileAdapter;
 import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.fragment.ToolbarFragment;
-import ir.shecan.model.ProfileItem;
+import ir.shecan.modelDto.ProfileItem;
 
 public class ProfileFragment extends ToolbarFragment {
 
