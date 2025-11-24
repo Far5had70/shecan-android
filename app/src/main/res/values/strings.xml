@@ -136,4 +136,15 @@
     <string name="confirm">تأیید</string>
     <string name="loginWithOtp">ورود با رمز یکبار مصرف</string>
     <string name="inputOtpCode">لطفا رمز پیامک شده را وارد کنید</string>
+    <string name="codeIsWrong">کد اشتباه است</string>
+    <string name="codeIsUnCompleted">کد ناقص است</string>
+    <string name="login">ورود</string>
+    <string name="setPassword">تعریف رمز عبور</string>
+    <string name="persianName">نام (فارسی)</string>
+    <string name="persianFamilyName">نام خانوادگی (فارسی)</string>
+    <string name="isLegal">سازمانی هستم</string>
+    <string name="email">ایمیل</string>
+    <string name="password">رمز عبور</string>
+    <string name="repeatPassword">تکرار رمز عبور</string>
+    <string name="continuee">ادامه</string>
 </resources>

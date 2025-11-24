@@ -74,10 +74,12 @@ public class OtpFragment extends Fragment {
                 .start();
 
 
-        // Dynamic height (shared logic)
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 
+            if (!isAdded() || getContext() == null) return;
+
             int screenHeight = binding.getRoot().getHeight();
+
             int fiftyDp = (int) TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
                     170,
@@ -158,13 +160,21 @@ public class OtpFragment extends Fragment {
 
         for (EditText otpField : otpFields) {
             if (otpField.getText().length() == 0) {
-                shakeError("کد ناقص است");
+                shakeError(getString(R.string.codeIsUnCompleted));
                 return;
             }
             code.append(otpField.getText());
         }
 
-        shakeError("کد اشتباه است");
+        if (code.toString().equals("123456")) {
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, new SignUpFragment())
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            shakeError(getString(R.string.codeIsWrong));
+        }
     }
 
     private void shakeError(String msg) {

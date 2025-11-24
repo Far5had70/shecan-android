@@ -50,6 +50,8 @@
     <color name="textFieldAuthorizeColor">#25000000</color>
     <color name="red">#F44336</color>
     <color name="backButtonBackground">#0D000000</color>
+    <color name="greenMain">#009B63</color>
+    <color name="secondaryButtonColor">#E4E4E4</color>
 
 
 </resources>

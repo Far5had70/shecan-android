@@ -1,27 +1,22 @@
 package ir.shecan.fragment.refactor;
 
-import android.app.ActivityOptions;
-import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import android.transition.TransitionInflater;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import ir.shecan.R;
-import ir.shecan.activity.AuthorizeActivity;
-import ir.shecan.databinding.FragmentLoginBinding;
+import ir.shecan.databinding.FragmentSignUpBinding;
 
-public class LoginFragment extends Fragment {
+public class SignUpFragment extends Fragment {
 
-    private FragmentLoginBinding binding;
+    private FragmentSignUpBinding binding;
 
     @Nullable
     @Override
@@ -29,33 +24,19 @@ public class LoginFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentLoginBinding.inflate(inflater, container, false);
+        binding = FragmentSignUpBinding.inflate(inflater, container, false);
 
-        binding.agreementView.setupText("https://shecan.ir/");
+        binding.iconBackImg.setOnClickListener(view -> {
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        });
 
-        binding.btnContinue.setOnClickListener(v -> {
-
-            OtpFragment otpFragment = new OtpFragment();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                otpFragment.setSharedElementEnterTransition(
-                        TransitionInflater.from(getContext())
-                                .inflateTransition(R.transition.change_bounds)
-                );
-                otpFragment.setSharedElementReturnTransition(
-                        TransitionInflater.from(getContext())
-                                .inflateTransition(R.transition.change_bounds)
-                );
-            }
-
+        binding.btnPassword.setOnClickListener(view -> {
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .addSharedElement(binding.iconToolbar, "toolbar_logo")
-                    .replace(R.id.fragmentContainer, otpFragment)
+                    .replace(R.id.fragmentContainer, new PasswordFragment())
                     .addToBackStack(null)
                     .commit();
         });
-
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 
@@ -77,6 +58,8 @@ public class LoginFragment extends Fragment {
             params.height = finalHeight;
             binding.bottomFrameLayout.setLayoutParams(params);
         });
+
+
 
         return binding.getRoot();
     }
