@@ -11,7 +11,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,7 +28,6 @@ public class APIManager {
     private static APIManager instance;
     private final RequestQueue requestQueue;
     private final Map<String, Object> cache = new HashMap<>();
-    private final Gson gson = new Gson();
 
     private APIManager(Context context) {
         requestQueue = Volley.newRequestQueue(context.getApplicationContext());
@@ -54,6 +55,10 @@ public class APIManager {
             if (useCache && cache.containsKey(cacheKey)) {
                 listener.onReceived((T) cache.get(cacheKey), true);
             }
+            GsonBuilder builder = new GsonBuilder();
+            Gson gson = builder
+                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                    .create();
 
             JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
 
@@ -113,6 +118,11 @@ public class APIManager {
             if (useCache && cache.containsKey(cacheKey)) {
                 listener.onReceived((List<T>) cache.get(cacheKey), true);
             }
+
+            GsonBuilder builder = new GsonBuilder();
+            Gson gson = builder
+                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                    .create();
 
             JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
 

@@ -58,10 +58,12 @@ public class LoginFragment extends Fragment {
                     HttpMethod.POST,
                     false,
                     (response, fromCache) -> {
-                        if (response != null && response.getExists()) {
-                            goToLoginWithPasswordFragment();
-                        } else {
-                            goToLoginWithOtpFragment();
+                        if (response != null) {
+                            if (response.getExists()) {
+                                goToLoginWithPasswordFragment();
+                            } else {
+                                goToLoginWithOtpFragment();
+                            }
                         }
                     },
                     ExistApiViewModel.class

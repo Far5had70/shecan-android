@@ -18,12 +18,10 @@ import ir.shecan.R;
 import ir.shecan.api.ApiEndpoint;
 import ir.shecan.api.ApiRepository;
 import ir.shecan.api.HttpMethod;
-import ir.shecan.databinding.FragmentChangePasswordBinding;
 import ir.shecan.databinding.FragmentPasswordBinding;
-import ir.shecan.modelDio.ExistApiInput;
-import ir.shecan.modelDio.VerifyApiInput;
-import ir.shecan.modelDto.ExistApiViewModel;
+import ir.shecan.modelDio.LoginApiInput;
 import ir.shecan.modelDto.VerifyApiViewModel;
+import ir.shecan.storage.AppStorage;
 
 public class PasswordFragment extends Fragment {
 
@@ -81,15 +79,20 @@ public class PasswordFragment extends Fragment {
 
         binding.btnContinue.setOnClickListener(view -> {
             ApiRepository repo = new ApiRepository(requireContext());
-            VerifyApiInput input = new VerifyApiInput(binding.edtPassword.getText().toString(), identifier);
-            repo.<VerifyApiViewModel, VerifyApiInput>request(
-                    "verify_" + input.getIdentifier(),
+            LoginApiInput input = new LoginApiInput(identifier, binding.edtPassword.getText().toString());
+            repo.<VerifyApiViewModel, LoginApiInput>request(
+                    "login_" + input.getIdentifier(),
                     input,
-                    ApiEndpoint.VERIFY.getPath(),
+                    ApiEndpoint.LOGIN.getPath(),
                     HttpMethod.POST,
                     false,
                     (response, fromCache) -> {
-                        Log.e("TAG", "onCreateView: " + response.getApiKey() );
+                        if (response != null){
+                            AppStorage storage = new AppStorage(getContext());
+                            storage.saveToken(response);
+//                            VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+                            getActivity().finish();
+                        }
                     },
                     VerifyApiViewModel.class
             );
