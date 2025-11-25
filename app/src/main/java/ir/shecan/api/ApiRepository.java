@@ -29,6 +29,21 @@ public class ApiRepository {
         apiManager.requestObject(cacheKey, payload, url, method, useCache, listener, clazz);
     }
 
+    ///
+    /// repository.requestList(
+    ///     "users",
+    ///     null,
+    ///     url,
+    ///     HttpMethod.GET,
+    ///     true,
+    ///     listener,
+    ///     jsonArray -> {
+    ///         List<User> list = new ArrayList<>();
+    ///         // Convert JSON here...
+    ///         return list;
+    ///     }
+    /// );
+    ///
     public <T, P> void requestList(
             String cacheKey,
             P payload,
@@ -36,7 +51,7 @@ public class ApiRepository {
             HttpMethod method,
             boolean useCache,
             Listeners.ApiListener<List<T>> listener,
-            Function<JSONArray, List<T>> mapper
+            Mapper<JSONArray, List<T>> mapper
     ) {
         apiManager.requestList(cacheKey, payload, url, method, useCache, listener, mapper);
     }

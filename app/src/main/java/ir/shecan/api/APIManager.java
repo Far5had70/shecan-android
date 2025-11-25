@@ -107,7 +107,7 @@ public class APIManager {
             HttpMethod method,
             boolean useCache,
             Listeners.ApiListener<List<T>> listener,
-            Function<JSONArray, List<T>> mapper
+            Mapper<JSONArray, List<T>> mapper
     ) {
         try {
             if (useCache && cache.containsKey(cacheKey)) {
@@ -124,21 +124,20 @@ public class APIManager {
                         JSONArray dataArray = response.optJSONArray("data");
                         if (dataArray == null) dataArray = new JSONArray();
 
-                        List<T> model = mapper.apply(dataArray);
+                        List<T> model = mapper.map(dataArray);
                         cache.put(cacheKey, model);
                         listener.onReceived(model, false);
                     },
                     error -> listener.onReceived(null, false)
             );
 
-            request.setRetryPolicy(new DefaultRetryPolicy(8000, 1, 1f));
-
             requestQueue.add(request);
 
-        } catch (Exception ex) {
+        } catch (Exception e) {
             listener.onReceived(null, false);
         }
     }
+
 
     private int convertMethod(HttpMethod method) {
         switch (method) {
