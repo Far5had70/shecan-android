@@ -1,5 +1,8 @@
 package ir.shecan.activity;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -23,7 +26,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
@@ -42,6 +44,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.fragment.AboutFragment;
 import ir.shecan.fragment.DNSTestFragment;
 import ir.shecan.fragment.refactor.ConfigListFragment;
@@ -56,18 +59,8 @@ import ir.shecan.util.server.DNSServerHelper;
 import ir.shecan.util.server.LocaleHelper;
 import ir.shecan.widget.CustomBottomBar;
 
-/**
- * Shecan Project
- *
- * @author iTX Technologies
- * @link https://itxtech.org
- * <p>
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- */
 public class MainActivityNew extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
     private static final String TAG = "DMainActivityNew";
 
     public static final String LAUNCH_ACTION = "ir.shecan.activity.MainActivityNew.LAUNCH_ACTION";
@@ -93,6 +86,12 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
 
     private ActivityResultLauncher<Intent> vpnPermissionLauncher;
 
+    // -------------------------
+    //         VIEW BINDING
+    // -------------------------
+    private ActivityMainNewBinding binding;
+
+
     public static MainActivityNew getInstance() {
         return instance;
     }
@@ -104,7 +103,9 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
 
         instance = this;
-        setContentView(R.layout.activity_main_new);
+
+        binding = ActivityMainNewBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         vpnPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -115,22 +116,13 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 }
         );
 
-        AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
-        appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
-
-//        Toolbar toolbar = findViewById(R.id.toolbar);
-//        DrawerLayout drawer = findViewById(R.id.main_drawer_layout);
-
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.addDrawerListener(toggle);
-//        toggle.syncState();
-
-//        NavigationView navigationView = findViewById(R.id.nav_view);
-//        navigationView.setNavigationItemSelectedListener(this);
+        binding.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
 
@@ -140,33 +132,42 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                         Log.w("FCM", "Fetching FCM registration token failed", task.getException());
                         return;
                     }
-
                     String token = task.getResult();
                     Log.d("FCM", "Token: " + token);
 
                     FirebaseMessaging.getInstance().subscribeToTopic("afterPushPoleScenarioTopic")
                             .addOnCompleteListener(subscribeTask -> {
                                 if (!subscribeTask.isSuccessful()) {
-                                    Log.w("FCM", "Subscription to topic failed", subscribeTask.getException());
+                                    Log.w("FCM", "Subscription failed", subscribeTask.getException());
                                 } else {
-                                    Log.d("FCM", "Successfully subscribed to topic: afterPushPoleScenarioTopic");
+                                    Log.d("FCM", "Subscribed to topic");
                                 }
                             });
                 });
 
-        CustomBottomBar bar = findViewById(R.id.customBar);
+        // Custom Bottom Bar
+        CustomBottomBar bar = binding.customBar;
         bar.addItem(getString(R.string.connections), R.drawable.ic_connection_inactive, R.drawable.ic_config_active);
         bar.addItem(getString(R.string.connect), R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_active);
         bar.addItem(getString(R.string.setting), R.drawable.ic_setting_inactive, R.drawable.ic_profile_active);
+
         bar.setOnItemSelected(index -> {
             switch (index) {
                 case 0:
+                    binding.toolbarLogo.setVisibility(GONE);
+                    binding.toolbarTitle.setVisibility(VISIBLE);
+                    binding.toolbarTitle.setText("تراکنش ها");
                     switchFragment(ConfigListFragment.class, true, false);
                     break;
                 case 1:
+                    binding.toolbarLogo.setVisibility(VISIBLE);
+                    binding.toolbarTitle.setVisibility(GONE);
                     switchFragment(HomeFragment.class, true, false);
                     break;
                 case 2:
+                    binding.toolbarLogo.setVisibility(GONE);
+                    binding.toolbarTitle.setVisibility(VISIBLE);
+                    binding.toolbarTitle.setText("تنظیمات");
                     switchFragment(ProfileFragment.class, true, false);
                     break;
             }
@@ -174,34 +175,13 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
 
         bar.select(1);
 
-//        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-//        bottomNav.setItemIconTintList(null);
-//        bottomNav.setItemTextColor(null);
-//        bottomNav.setOnNavigationItemSelectedListener(item -> {
-//            ToolbarFragment selected = null;
-//            switch (item.getItemId()) {
-//                case R.id.nav_settings:
-//                    selected = new SettingsFragment();
-//                    break;
-//                case R.id.nav_connect:
-//                    selected = new SettingsFragment();
-//                    break;
-//                case R.id.nav_connections:
-//                    selected = new SettingsFragment();
-//                    break;
-//            }
-//            if (selected != null) {
-////                getSupportFragmentManager().beginTransaction()
-////                        .replace(R.id.nav_host_fragment, selected)
-////                        .addToBackStack(null)
-////                        .commit();
-//            }
-//            return true;
-//        });
-
         handleIntent(getIntent());
     }
 
+
+    // -------------------------
+    //     باقی کد بدون تغییر
+    // -------------------------
 
     public void switchFragment(Class fragmentClass, boolean isHome, boolean isAdd) {
 
@@ -212,13 +192,11 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
             ToolbarFragment fragment = (ToolbarFragment) fragmentClass.newInstance();
 
             if (isAdd) {
-                // حالت ADD
                 if (currentFragment != null) {
-                    ft.hide(currentFragment); // فرگمنت قبلی مخفی می‌شود
+                    ft.hide(currentFragment);
                 }
-                ft.add(R.id.id_content, fragment); // add به جای replace
+                ft.add(R.id.id_content, fragment);
             } else {
-                // حالت REPLACE قبلی
                 ft.replace(R.id.id_content, fragment);
             }
 
@@ -229,12 +207,13 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
             Logger.logException(e);
         }
 
-        // --- ادامه تنظیمات UI مثل قبل ---
         Window window = getWindow();
-        CoordinatorLayout coordinatorLayout = findViewById(R.id.id_content);
+
+        CoordinatorLayout coordinatorLayout = binding.idContent;
         CoordinatorLayout.LayoutParams params =
                 (CoordinatorLayout.LayoutParams) coordinatorLayout.getLayoutParams();
-        AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
+
+        AppBarLayout appBarLayout = binding.appBarLayout;
 
         if (isHome) {
             window.getDecorView().setSystemUiVisibility(
@@ -249,6 +228,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
             params.setBehavior(null);
 
         } else {
+
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
@@ -282,7 +262,6 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     public void onBackPressed() {
         if (!(currentFragment instanceof HomeFragment)) {
             switchFragment(HomeFragment.class, true, false);
-//            recreate();
         } else {
             super.onBackPressed();
         }
@@ -293,6 +272,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         super.onDestroy();
         instance = null;
         currentFragment = null;
+        binding = null; // جلوگیری از memory leak
     }
 
     @Override
@@ -306,6 +286,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     public void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
         if (result == Activity.RESULT_OK) {
+
             if (ShecanVpnService.isProMode()) {
                 ShecanVpnService.primaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getProPrimary());
                 ShecanVpnService.secondaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getProSecondary());
@@ -314,25 +295,18 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 ShecanVpnService.secondaryServer = DNSServerHelper.getDNSById(DNSServerHelper.getSecondary());
             }
 
-            Shecan.getInstance().startService(Shecan.getServiceIntent(getApplicationContext()).setAction(ShecanVpnService.ACTION_ACTIVATE));
+            Shecan.getInstance().startService(
+                    Shecan.getServiceIntent(getApplicationContext()).setAction(ShecanVpnService.ACTION_ACTIVATE)
+            );
             Shecan.updateShortcut(getApplicationContext());
         }
     }
 
-    @Override
-    public void setContentView(@LayoutRes int layoutResID) {
-        super.setContentView(layoutResID);
-    }
-
-    @Override
-    public void setContentView(View view) {
-        super.setContentView(view);
-    }
-
 
     private void handleIntent(Intent intent) {
+
         int launchAction = intent.getIntExtra(LAUNCH_ACTION, LAUNCH_ACTION_NONE);
-        Log.d(TAG, "Updating user interface with Launch Action " + String.valueOf(launchAction));
+
         if (launchAction == LAUNCH_ACTION_ACTIVATE) {
             this.activateService();
         } else if (launchAction == LAUNCH_ACTION_DEACTIVATE) {
@@ -341,7 +315,6 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
             Shecan.updateShortcut(getApplicationContext());
             applyTheme();
             this.recreate();
-
         }
 
         int fragment = intent.getIntExtra(LAUNCH_FRAGMENT, FRAGMENT_NONE);
@@ -370,14 +343,16 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 switchFragment(LogFragment.class, false, false);
                 break;
         }
+
         if (currentFragment == null) {
             switchFragment(HomeFragment.class, true, false);
         }
     }
 
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
+
         int id = item.getItemId();
 
         switch (id) {
@@ -397,10 +372,15 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 switchFragment(LogFragment.class, false, false);
                 break;
         }
-        InputMethodManager imm = (InputMethodManager) Shecan.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(findViewById(R.id.id_content).getWindowToken(), 0);
+
+        InputMethodManager imm =
+                (InputMethodManager) Shecan.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        imm.hideSoftInputFromWindow(binding.idContent.getWindowToken(), 0);
+
         return true;
     }
+
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -409,28 +389,21 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     }
 
 
+    @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
-//    private void applyTheme() {
-//        int themeId = ShecanVpnService.isActivated() ? R.style.AppTheme : R.style.AppTheme_Dark;
-//        setTheme(themeId);
-//        getApplicationContext().setTheme(themeId);
-//    }
 
     public void activateService() {
         Intent intent = VpnService.prepare(Shecan.getInstance());
         if (intent != null) {
-            // بررسی وجود Activity مقصد
             if (intent.resolveActivity(getPackageManager()) != null) {
                 vpnPermissionLauncher.launch(intent);
             } else {
-                Log.e(TAG, "VPN permission activity not found! Device may not support VPN dialogs.");
-                // نمایش پیغام کاربرپسند به جای کرش
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "دستگاه شما از VPN داخلی پشتیبانی نمی‌کند.", Toast.LENGTH_LONG).show();
-                });
+                runOnUiThread(() ->
+                        Toast.makeText(this, "دستگاه شما از VPN داخلی پشتیبانی نمی‌کند.", Toast.LENGTH_LONG).show()
+                );
             }
         } else {
             onVpnPermissionGranted();
@@ -458,7 +431,15 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     }
 
     private void applyTheme() {
-        int mode = getSharedPreferences("settings", MODE_PRIVATE).getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        int mode = getSharedPreferences("settings", MODE_PRIVATE)
+                .getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+
         AppCompatDelegate.setDefaultNightMode(mode);
     }
+
+    public void refreshToolbarTheme() {
+        binding.toolbarTitle.setTextColor(getColor(R.color.black));
+    }
+
+
 }

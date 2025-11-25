@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/profileBackground"
@@ -23,28 +24,28 @@
             android:id="@+id/tvFullName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="کیمیا رضایی"
-            android:textColor="@color/white"
+            android:textColor="@color/greenDark"
             android:textSize="20dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="کیمیا رضایی" />
 
         <TextView
             android:id="@+id/tvEmail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="kimiarezaei@live.com"
-            android:textColor="#7B968C"
+            android:textColor="@color/greenSecondaryTextColor"
             android:textSize="12dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="kimiarezaei@live.com" />
 
         <TextView
             android:id="@+id/tvPhoneNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="۰۹۱۲۰۷۴۶۴۰۷"
-            android:textColor="#7B968C"
+            android:textColor="@color/greenSecondaryTextColor"
             android:textSize="12dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="۰۹۱۲۰۷۴۶۴۰۷" />
 
         <FrameLayout
             android:layout_width="match_parent"

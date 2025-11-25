@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ir.shecan.R;
+import ir.shecan.activity.MainActivityNew;
 import ir.shecan.adapter.ThemeAdapter;
 import ir.shecan.databinding.FragmentThemeBinding;
 import ir.shecan.fragment.ToolbarFragment;
@@ -81,6 +82,9 @@ public class ThemeFragment extends ToolbarFragment {
 
             // دوباره مقداردهی لیست
             setupRecycler(getContext());
+
+            ((MainActivityNew) requireActivity()).refreshToolbarTheme();
+
         }
     }
 
