@@ -1,0 +1,90 @@
+package ir.shecan.activity;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import ir.shecan.R;
+import ir.shecan.adapter.ThemeAdapter;
+import ir.shecan.databinding.ActivityThemeBinding;
+import ir.shecan.modelDto.AppConfig;
+import ir.shecan.modelDto.ThemeItem;
+import ir.shecan.modelDto.VerifyApiViewModel;
+import ir.shecan.storage.AppStorage;
+
+public class ThemeActivity extends AppCompatActivity {
+
+    private ActivityThemeBinding binding;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        binding = ActivityThemeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        setupRecycler();
+    }
+
+    private void setupRecycler() {
+
+        List<ThemeItem> list = new ArrayList<>();
+        list.add(new ThemeItem(getString(R.string.lightMode), AppCompatDelegate.MODE_NIGHT_NO));
+        list.add(new ThemeItem(getString(R.string.darkMode), AppCompatDelegate.MODE_NIGHT_YES));
+        list.add(new ThemeItem(getString(R.string.systemSetting), AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM));
+
+        int mode = AppCompatDelegate.MODE_NIGHT_NO;
+        AppStorage appStorage = new AppStorage(getApplicationContext());
+        AppConfig appConfig = appStorage.getAppConfig(AppConfig.class);
+        if(appConfig != null){
+            mode = appConfig.getMode();
+        }
+
+        ThemeAdapter adapter = new ThemeAdapter(this, mode, list, item -> {
+            saveThemeMode(item.getMode());
+            AppCompatDelegate.setDefaultNightMode(item.getMode());
+            updateThemeWithoutRecreate();
+        });
+
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setAdapter(adapter);
+    }
+
+    private void updateThemeWithoutRecreate() {
+        ViewGroup root = (ViewGroup) binding.getRoot().getParent();
+
+        if (root != null) {
+            root.removeAllViews();
+
+            LayoutInflater inflater = LayoutInflater.from(this);
+            binding = ActivityThemeBinding.inflate(inflater, root, false);
+
+            root.addView(binding.getRoot());
+
+            setupRecycler();
+
+            recreate();
+
+            // اگر Toolbar داخل MainActivity بود:
+            // ((MainActivityNew) this).refreshToolbarTheme();
+        }
+    }
+
+    private void saveThemeMode(int mode) {
+        AppStorage appStorage = new AppStorage(getApplicationContext());
+        appStorage.saveAppConfig(new AppConfig(mode));
+
+//        getSharedPreferences("settings", MODE_PRIVATE)
+//                .edit()
+//                .putInt("theme_mode", mode)
+//                .apply();
+    }
+}

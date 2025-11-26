@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 public class AppStorage {
 
     private static final String Token_KEY = "TOKEN_MODEL";
+    private static final String App_Config_KEY = "APP_CONFIG_MODEL";
 
     private final GenericPreferenceManager pref;
 
@@ -26,6 +27,21 @@ public class AppStorage {
     public void removeToken() {
         pref.remove(Token_KEY);
     }
+
+    // ---------------- App Config ----------------
+    public <T> void saveAppConfig(T appConfig) {
+        pref.saveModel(App_Config_KEY, appConfig);
+    }
+
+    public <T> T getAppConfig(Class<T> clazz) {
+        return pref.getModel(App_Config_KEY, clazz);
+    }
+
+    public void removeAppConfig() {
+        pref.remove(App_Config_KEY);
+    }
+    // -----------------------------------------------
+
 
     // پاک کردن همه چیز
     public void clearAll() {

@@ -15,6 +15,7 @@ import java.util.List;
 import ir.shecan.R;
 import ir.shecan.activity.AuthorizeActivity;
 import ir.shecan.activity.MainActivityNew;
+import ir.shecan.activity.ThemeActivity;
 import ir.shecan.adapter.ProfileAdapter;
 import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.fragment.ToolbarFragment;
@@ -73,7 +74,7 @@ public class ProfileFragment extends ToolbarFragment {
 //                    openFragment(AccountFragment.class);
                     break;
                 case 1:
-                    openFragment(ThemeFragment.class);
+                    getActivity().startActivity(new Intent(getActivity(), ThemeActivity.class));
                     break;
                 case 2:
 //                    openFragment(TransactionFragment.class);

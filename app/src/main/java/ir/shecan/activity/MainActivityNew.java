@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -53,7 +54,9 @@ import ir.shecan.fragment.LogFragment;
 import ir.shecan.fragment.SettingsFragment;
 import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.fragment.refactor.ProfileFragment;
+import ir.shecan.modelDto.AppConfig;
 import ir.shecan.service.ShecanVpnService;
+import ir.shecan.storage.AppStorage;
 import ir.shecan.util.Logger;
 import ir.shecan.util.server.DNSServerHelper;
 import ir.shecan.util.server.LocaleHelper;
@@ -75,10 +78,11 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     public static final int FRAGMENT_DNS_TEST = 1;
     public static final int FRAGMENT_SETTINGS = 2;
     public static final int FRAGMENT_ABOUT = 3;
-
     public static final int FRAGMENT_LOG = 6;
 
     public static final String LAUNCH_NEED_RECREATE = "ir.shecan.activity.MainActivityNew.LAUNCH_NEED_RECREATE";
+    public static final String LAST_TAB = "LAST_TAB_KEY";
+    private int currentTab = 1;
 
     private static MainActivityNew instance = null;
 
@@ -86,9 +90,6 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
 
     private ActivityResultLauncher<Intent> vpnPermissionLauncher;
 
-    // -------------------------
-    //         VIEW BINDING
-    // -------------------------
     private ActivityMainNewBinding binding;
 
 
@@ -97,13 +98,23 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(LAST_TAB, currentTab);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         Shecan.getInstance().updateLocale();
         applyTheme();
         super.onCreate(savedInstanceState);
 
-        instance = this;
+        int selectedTab = 1; // default
+        if (savedInstanceState != null) {
+            selectedTab = savedInstanceState.getInt(LAST_TAB, 1);
+        }
 
+        instance = this;
         binding = ActivityMainNewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -116,7 +127,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
                 }
         );
 
-        binding.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
+        binding.toolbar.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -152,36 +163,16 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         bar.addItem(getString(R.string.setting), R.drawable.ic_setting_inactive, R.drawable.ic_profile_active);
 
         bar.setOnItemSelected(index -> {
-            switch (index) {
-                case 0:
-                    binding.toolbarLogo.setVisibility(GONE);
-                    binding.toolbarTitle.setVisibility(VISIBLE);
-                    binding.toolbarTitle.setText("تراکنش ها");
-                    switchFragment(ConfigListFragment.class, true, false);
-                    break;
-                case 1:
-                    binding.toolbarLogo.setVisibility(VISIBLE);
-                    binding.toolbarTitle.setVisibility(GONE);
-                    switchFragment(HomeFragment.class, true, false);
-                    break;
-                case 2:
-                    binding.toolbarLogo.setVisibility(GONE);
-                    binding.toolbarTitle.setVisibility(VISIBLE);
-                    binding.toolbarTitle.setText("تنظیمات");
-                    switchFragment(ProfileFragment.class, true, false);
-                    break;
-            }
+            currentTab = index;
+            updateFragment(index);
         });
 
-        bar.select(1);
+        currentTab = selectedTab;
+        bar.select(selectedTab);
+        updateFragment(selectedTab);
 
         handleIntent(getIntent());
     }
-
-
-    // -------------------------
-    //     باقی کد بدون تغییر
-    // -------------------------
 
     public void switchFragment(Class fragmentClass, boolean isHome, boolean isAdd) {
 
@@ -213,7 +204,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         CoordinatorLayout.LayoutParams params =
                 (CoordinatorLayout.LayoutParams) coordinatorLayout.getLayoutParams();
 
-        AppBarLayout appBarLayout = binding.appBarLayout;
+        AppBarLayout appBarLayout = binding.toolbar.appBarLayout;
 
         if (isHome) {
             window.getDecorView().setSystemUiVisibility(
@@ -272,7 +263,7 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         super.onDestroy();
         instance = null;
         currentFragment = null;
-        binding = null; // جلوگیری از memory leak
+        binding = null;
     }
 
     @Override
@@ -430,16 +421,54 @@ public class MainActivityNew extends AppCompatActivity implements NavigationView
         Shecan.updateShortcut(getApplicationContext());
     }
 
+    private AppStorage appStorage;
+    private int currentMode = 0;
+
+    @SuppressLint("WrongConstant")
     private void applyTheme() {
-        int mode = getSharedPreferences("settings", MODE_PRIVATE)
-                .getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        appStorage = new AppStorage(getApplicationContext());
+        AppConfig appConfig = appStorage.getAppConfig(AppConfig.class);
+        if(appConfig != null){
+            int mode = appConfig.getMode();
+            currentMode = mode;
+            AppCompatDelegate.setDefaultNightMode(mode);
+        }
 
-        AppCompatDelegate.setDefaultNightMode(mode);
     }
 
-    public void refreshToolbarTheme() {
-        binding.toolbarTitle.setTextColor(getColor(R.color.black));
+    @Override
+    protected void onResume() {
+        super.onResume();
+        appStorage = new AppStorage(getApplicationContext());
+        AppConfig appConfig = appStorage.getAppConfig(AppConfig.class);
+        if(appConfig != null){
+            int mode = appConfig.getMode();
+            if (currentMode != mode) {
+                recreate();
+            }
+            currentMode = mode;
+        }
     }
 
-
+    private void updateFragment(int index) {
+        switch (index) {
+            case 0:
+                binding.toolbar.toolbarLogo.setVisibility(GONE);
+                binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
+                binding.toolbar.toolbarTitle.setText("تراکنش ها");
+                switchFragment(ConfigListFragment.class, true, false);
+                break;
+            case 1:
+                binding.toolbar.toolbarLogo.setVisibility(VISIBLE);
+                binding.toolbar.toolbarTitle.setVisibility(GONE);
+                switchFragment(HomeFragment.class, true, false);
+                break;
+            case 2:
+                binding.toolbar.toolbarLogo.setVisibility(GONE);
+                binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
+                binding.toolbar.toolbarTitle.setText("تنظیمات");
+                switchFragment(ProfileFragment.class, true, false);
+                break;
+        }
+    }
 }
