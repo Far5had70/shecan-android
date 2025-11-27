@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ApiRepository {
 
-    private final APIManager apiManager;
+    public final APIManager apiManager;
 
     public ApiRepository(Context context) {
         apiManager = APIManager.getInstance(context);
@@ -31,8 +31,8 @@ public class ApiRepository {
             HttpMethod method,
             boolean useCache,
             Listeners.ApiListener<List<T>> listener,
-            Mapper<JSONArray, List<T>> mapper
+            Class<T> clazz
     ) {
-        apiManager.requestList(cacheKey, payload, url, method, useCache, listener, mapper);
+        apiManager.requestList(cacheKey, payload, url, method, useCache, listener, clazz);
     }
 }

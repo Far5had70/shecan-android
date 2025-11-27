@@ -36,9 +36,11 @@ import ir.shecan.storage.AppStorage;
 public class OtpFragment extends Fragment {
 
     private String identifier;
+    private boolean isExist;
 
-    public OtpFragment(String identifier) {
+    public OtpFragment(String identifier, boolean isExist) {
         this.identifier = identifier;
+        this.isExist = isExist;
     }
 
     private FragmentOtpBinding binding;
@@ -154,6 +156,11 @@ public class OtpFragment extends Fragment {
 
     private void startTimer() {
 
+        AuthApi auth = new AuthApi(requireContext());
+        auth.sendOtp(identifier, (response, fromCache1) -> {
+
+        });
+
         binding.otpLayout.tvResend.setVisibility(TextView.GONE);
         binding.otpLayout.tvTimer.setVisibility(TextView.VISIBLE);
 
@@ -181,30 +188,33 @@ public class OtpFragment extends Fragment {
             code.append(otpField.getText());
         }
 
+        showLoading(true);
+
         AuthApi auth = new AuthApi(requireContext());
         auth.verifyOtp(
                 identifier,
                 code.toString(),
                 (res, fromCache) -> {
+
+                    showLoading(false);
+
                     if (res != null) {
                         AppStorage storage = new AppStorage(getContext());
                         storage.saveToken(res);
-                        getActivity().finish();
+                        if (isExist) {
+                            getActivity().finish();
+                        } else {
+                            getActivity().getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragmentContainer, new SignUpFragment())
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
                     } else {
                         shakeError(getString(R.string.codeIsWrong));
                     }
                 }
         );
-
-//        if (code.toString().equals("123456")) {
-//            getActivity().getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .replace(R.id.fragmentContainer, new SignUpFragment())
-//                    .addToBackStack(null)
-//                    .commit();
-//        } else {
-//            shakeError(getString(R.string.codeIsWrong));
-//        }
     }
 
     private void shakeError(String msg) {
@@ -213,5 +223,19 @@ public class OtpFragment extends Fragment {
 
         binding.otpLayout.tvErrorOtp.setText(msg);
         binding.otpLayout.tvErrorOtp.setVisibility(View.VISIBLE);
+    }
+
+    private void showLoading(boolean loading) {
+        if (loading) {
+            binding.otpLayout.btnVerify.setEnabled(false);
+            binding.otpLayout.btnVerify.setAlpha(0.5f);
+            binding.progressVerify.setVisibility(View.VISIBLE);
+            binding.otpLayout.btnVerify.setText("");
+        } else {
+            binding.otpLayout.btnVerify.setEnabled(true);
+            binding.otpLayout.btnVerify.setAlpha(1f);
+            binding.progressVerify.setVisibility(View.GONE);
+            binding.otpLayout.btnVerify.setText("تایید");
+        }
     }
 }

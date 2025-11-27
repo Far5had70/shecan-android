@@ -8,13 +8,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.FragmentChangePasswordBinding;
+import ir.shecan.modelDto.VerifyApiViewModel;
+import ir.shecan.storage.AppStorage;
 
 public class ChangePasswordFragment extends Fragment {
 
@@ -36,6 +41,26 @@ public class ChangePasswordFragment extends Fragment {
         });
 
         setupTypingAnimation();
+
+        AppStorage storage = new AppStorage(getContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+
+        binding.btnContinue.setOnClickListener(view -> {
+            if(!binding.edtPassword.getText().toString().equals(binding.edtRepeatPassword.getText().toString())){
+                Toast.makeText(getActivity(), R.string.passworsNotSame, Toast.LENGTH_LONG).show();
+                return;
+            }
+            showLoading(true);
+            AuthApi auth = new AuthApi(requireContext());
+            auth.updatePassword(
+                    token.getApiKey(),
+                    binding.edtPassword.getText().toString(),
+                    (response, fromCache) -> {
+                        showLoading(false);
+                        getActivity().finish();
+                    }
+            );
+        });
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 
@@ -86,5 +111,19 @@ public class ChangePasswordFragment extends Fragment {
 
         binding.edtPassword.setOnFocusChangeListener(focusListener);
         binding.edtRepeatPassword.setOnFocusChangeListener(focusListener);
+    }
+
+    private void showLoading(boolean loading) {
+        if (loading) {
+            binding.btnContinue.setEnabled(false);
+            binding.btnContinue.setAlpha(0.5f);
+            binding.progress.setVisibility(View.VISIBLE);
+            binding.btnContinue.setText("");
+        } else {
+            binding.btnContinue.setEnabled(true);
+            binding.btnContinue.setAlpha(1f);
+            binding.progress.setVisibility(View.GONE);
+            binding.btnContinue.setText(ContextCompat.getString(getContext(),R.string.login));
+        }
     }
 }

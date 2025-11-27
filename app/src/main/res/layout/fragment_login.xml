@@ -146,4 +146,13 @@
         android:layout_gravity="bottom"
         android:layout_margin="16dp"/>
 
+    <ProgressBar
+        android:id="@+id/progress"
+        android:indeterminateTint="@color/greenMain"
+        android:indeterminateTintMode="src_in"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_width="36dp"
+        android:layout_height="36dp" />
+
 </FrameLayout>

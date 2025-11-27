@@ -31,9 +31,12 @@ import ir.shecan.activity.mainActivityUtils.LaunchHandler;
 import ir.shecan.activity.mainActivityUtils.TabItem;
 import ir.shecan.activity.mainActivityUtils.ThemeManager;
 import ir.shecan.activity.mainActivityUtils.VpnManager;
+import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.fragment.refactor.HomeFragment;
+import ir.shecan.modelDto.VerifyApiViewModel;
+import ir.shecan.storage.AppStorage;
 import ir.shecan.widget.CustomBottomBar;
 
 public class MainActivityNew extends AppCompatActivity {
@@ -110,12 +113,32 @@ public class MainActivityNew extends AppCompatActivity {
                     .subscribeToTopic("afterPushPoleScenarioTopic");
         });
 
+        updateLoginInformation();
+
         setupCustomBottomBar();
 
         currentTab = selectedTab;
         updateFragment(selectedTab);
 
         LaunchHandler.handle(this, getIntent());
+    }
+
+    public void updateLoginInformation() {
+        AppStorage storage = new AppStorage(getApplicationContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+        if (token != null && token.getApiKey() != null){
+            AuthApi auth = new AuthApi(getApplicationContext());
+            auth.me(
+                    token.getApiKey(),
+                    (res, fromCache) -> {
+                        token.setFirstname(res.getUser().getFirstname());
+                        token.setMail(res.getUser().getMail());
+                        token.setLastname(res.getUser().getLastname());
+                        storage.saveToken(token);
+                        recreate();
+                    }
+            );
+        }
     }
 
     private void requestNotificationPermission() {

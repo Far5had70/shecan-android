@@ -9,10 +9,14 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.FragmentSignUpBinding;
+import ir.shecan.modelDto.VerifyApiViewModel;
+import ir.shecan.storage.AppStorage;
 
 public class SignUpFragment extends Fragment {
 
@@ -26,16 +30,49 @@ public class SignUpFragment extends Fragment {
 
         binding = FragmentSignUpBinding.inflate(inflater, container, false);
 
+        AppStorage storage = new AppStorage(getContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+
+        binding.edtPersianName.setText(token.getFirstname());
+        binding.edtPersianFamilyName.setText(token.getLastname());
+        binding.edtEmail.setText(token.getMail());
+
         binding.iconBackImg.setOnClickListener(view -> {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
 
         binding.btnPassword.setOnClickListener(view -> {
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainer, new ChangePasswordFragment())
-                    .addToBackStack(null)
-                    .commit();
+            showLoading(true);
+            AuthApi auth = new AuthApi(requireContext());
+            auth.updateProfile(
+                    token.getApiKey(),
+                    binding.edtPersianName.getText().toString(),
+                    binding.edtPersianFamilyName.getText().toString(),
+                    binding.edtEmail.getText().toString(),
+                    (response, fromCache) -> {
+                        showLoading(false);
+                        getActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragmentContainer, new ChangePasswordFragment())
+                                .addToBackStack(null)
+                                .commit();
+                    }
+            );
+        });
+
+        binding.btnLogin.setOnClickListener(view -> {
+            showLoading(true);
+            AuthApi auth = new AuthApi(requireContext());
+            auth.updateProfile(
+                    token.getApiKey(),
+                    binding.edtPersianName.getText().toString(),
+                    binding.edtPersianFamilyName.getText().toString(),
+                    binding.edtEmail.getText().toString(),
+                    (response, fromCache) -> {
+                        showLoading(false);
+                        getActivity().finish();
+                    }
+            );
         });
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
@@ -59,8 +96,20 @@ public class SignUpFragment extends Fragment {
             binding.bottomFrameLayout.setLayoutParams(params);
         });
 
-
-
         return binding.getRoot();
+    }
+
+    private void showLoading(boolean loading) {
+        if (loading) {
+            binding.btnLogin.setEnabled(false);
+            binding.btnLogin.setAlpha(0.5f);
+            binding.progress.setVisibility(View.VISIBLE);
+            binding.btnLogin.setText("");
+        } else {
+            binding.btnLogin.setEnabled(true);
+            binding.btnLogin.setAlpha(1f);
+            binding.progress.setVisibility(View.GONE);
+            binding.btnLogin.setText(ContextCompat.getString(getContext(),R.string.login));
+        }
     }
 }

@@ -117,18 +117,7 @@ public class AuthApi {
                         listener.onReceived(model, false);
                     }
                 },
-                jsonArray -> {
-                    List<VerifyApiViewModel> list = new ArrayList<>();
-                    Gson gson = new Gson();
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject obj = jsonArray.optJSONObject(i);
-                        if (obj != null) {
-                            list.add(gson.fromJson(obj.toString(), VerifyApiViewModel.class));
-                        }
-                    }
-                    return list;
-                }
+                VerifyApiViewModel.class
         );
 
     }
@@ -170,6 +159,9 @@ public class AuthApi {
         payload.put("api_key", apiKey);
         payload.put("firstname", firstname);
         payload.put("lastname", lastname);
+
+        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+
         payload.put("mail", mail);
 
         repo.request(
@@ -190,6 +182,9 @@ public class AuthApi {
             String apiKey,
             Listeners.ApiListener<AccountViewModel> listener
     ) {
+
+        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+
         repo.request(
                 "my_account",
                 null,
@@ -210,6 +205,8 @@ public class AuthApi {
             int limit,
             Listeners.ApiListener<IssuesViewModel> listener
     ) {
+        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+
         String url = "https://my.shecan.ir/issues.json?offset=" + offset +
                 "&limit=" + limit +
                 "&key=" + apiKey;

@@ -17,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,7 +142,7 @@ public class APIManager {
             HttpMethod method,
             boolean useCache,
             Listeners.ApiListener<List<T>> listener,
-            Mapper<JSONArray, List<T>> mapper
+            Class<T> clazz
     ) {
         try {
             if (useCache && cache.containsKey(cacheKey)) {
@@ -149,7 +150,6 @@ public class APIManager {
                 return;
             }
 
-            // اگر POST یا PUT باید بدنه بفرستی
             Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
@@ -164,7 +164,15 @@ public class APIManager {
                     payload,
                     buildHeaders(),
                     responseArray -> {
-                        List<T> list = mapper.map(responseArray);
+
+                        List<T> list = new ArrayList<>();
+
+                        for (int i = 0; i < responseArray.length(); i++) {
+                            JSONObject item = responseArray.optJSONObject(i);
+                            T model = gson.fromJson(item.toString(), clazz);  // ← تبدیل خودکار
+                            list.add(model);
+                        }
+
                         cache.put(cacheKey, list);
                         listener.onReceived(list, false);
                     },
@@ -177,6 +185,8 @@ public class APIManager {
             listener.onReceived(null, false);
         }
     }
+
+
 
     private int convertMethod(HttpMethod method) {
         switch (method) {

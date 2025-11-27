@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import org.json.JSONException;
@@ -44,29 +45,23 @@ public class LoginFragment extends Fragment {
 
         binding.btnContinue.setOnClickListener(v -> {
 
-            JSONObject payload = new JSONObject();
-            try {
-                payload.put("phone", binding.edtPhoneNumber.getText().toString());
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+            showLoading(true);
 
             String identifier = binding.edtPhoneNumber.getText().toString();
             AuthApi auth = new AuthApi(requireContext());
             auth.exists(
                     identifier,
                     (res, fromCache) -> {
+
                         if (res != null) {
 
-                            if (res.getExists()) goToLoginWithPasswordFragment();
+                            if (res.getExists()) {
+                                showLoading(false);
+                                goToLoginWithPasswordFragment();
+                            }
                             else {
-                                auth.sendOtp(identifier, (response, fromCache1) -> {
-                                    if (response != null) {
-                                        goToLoginWithOtpFragment();
-                                    } else {
-                                        Toast.makeText(getContext(), "خطا در ارسال otp", Toast.LENGTH_LONG).show();
-                                    }
-                                });
+                                showLoading(false);
+                                goToLoginWithOtpFragment();
                             }
                         }
                     }
@@ -99,7 +94,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void goToLoginWithOtpFragment() {
-        OtpFragment otpFragment = new OtpFragment(binding.edtPhoneNumber.getText().toString());
+        OtpFragment otpFragment = new OtpFragment(binding.edtPhoneNumber.getText().toString(), false);
         route(otpFragment);
     }
 
@@ -126,5 +121,21 @@ public class LoginFragment extends Fragment {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit();
+    }
+
+
+
+    private void showLoading(boolean loading) {
+        if (loading) {
+            binding.btnContinue.setEnabled(false);
+            binding.btnContinue.setAlpha(0.5f);
+            binding.progress.setVisibility(View.VISIBLE);
+            binding.btnContinue.setText("");
+        } else {
+            binding.btnContinue.setEnabled(true);
+            binding.btnContinue.setAlpha(1f);
+            binding.progress.setVisibility(View.GONE);
+            binding.btnContinue.setText(ContextCompat.getString(getContext(),R.string.continuee));
+        }
     }
 }

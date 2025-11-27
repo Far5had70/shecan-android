@@ -45,6 +45,7 @@ public class ProfileFragment extends ToolbarFragment {
         if (storage != null) {
             updateUi();
         }
+        ((MainActivityNew) getActivity()).updateLoginInformation();
     }
 
     private void updateUi() {

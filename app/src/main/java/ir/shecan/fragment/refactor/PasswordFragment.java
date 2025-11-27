@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
@@ -81,11 +82,16 @@ public class PasswordFragment extends Fragment {
 
         binding.btnContinue.setOnClickListener(view -> {
 
+            showLoading(true);
+
             AuthApi auth = new AuthApi(requireContext());
             auth.login(
                     identifier,
                     binding.edtPassword.getText().toString(),
                     (res, fromCache) -> {
+
+                        showLoading(false);
+
                         if (res != null){
                             AppStorage storage = new AppStorage(getContext());
                             storage.saveToken(res);
@@ -103,7 +109,7 @@ public class PasswordFragment extends Fragment {
 
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragmentContainer, new OtpFragment(identifier))
+                    .replace(R.id.fragmentContainer, new OtpFragment(identifier, false))
                     .addToBackStack(null)
                     .commit();
         });
@@ -133,5 +139,19 @@ public class PasswordFragment extends Fragment {
 
         binding.edtPassword.setOnKeyListener(typingListener);
         binding.edtPassword.setOnFocusChangeListener(focusListener);
+    }
+
+    private void showLoading(boolean loading) {
+        if (loading) {
+            binding.btnContinue.setEnabled(false);
+            binding.btnContinue.setAlpha(0.5f);
+            binding.progressVerify.setVisibility(View.VISIBLE);
+            binding.btnContinue.setText("");
+        } else {
+            binding.btnContinue.setEnabled(true);
+            binding.btnContinue.setAlpha(1f);
+            binding.progressVerify.setVisibility(View.GONE);
+            binding.btnContinue.setText(ContextCompat.getString(getContext(),R.string.login));
+        }
     }
 }
