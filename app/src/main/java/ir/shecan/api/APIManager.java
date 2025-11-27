@@ -1,6 +1,3 @@
-// نسخه‌ی بهینه‌شده APIManager و ApiRepository
-// شامل مدیریت کش، مدیریت صحیح JSON، پشتیبانی از Single و List، مدیریت خطا، و Mapper انعطاف‌پذیر
-
 package ir.shecan.api;
 
 import android.content.Context;
@@ -18,16 +15,18 @@ import com.google.gson.GsonBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class APIManager {
 
     private static APIManager instance;
     private final RequestQueue requestQueue;
+
     private final Map<String, Object> cache = new HashMap<>();
+    private final Map<String, String> optionalHeaders = new HashMap<>();
 
     private APIManager(Context context) {
         requestQueue = Volley.newRequestQueue(context.getApplicationContext());
@@ -38,9 +37,36 @@ public class APIManager {
         return instance;
     }
 
-    // ------------------------------
-    //   Single Object API Request
-    // ------------------------------
+    // -------------------------------------
+    //     مدیریت هدرهای اختیاری
+    // -------------------------------------
+
+    public void setOptionalHeader(String key, String value) {
+        optionalHeaders.put(key, value);
+    }
+
+    public void setOptionalHeaders(Map<String, String> headers) {
+        optionalHeaders.putAll(headers);
+    }
+
+    private Map<String, String> buildHeaders() {
+        Map<String, String> headers = new HashMap<>();
+
+        // هدر اختصاصی شما
+        headers.put("x-redmine-api-key", optionalHeaders.getOrDefault("x-redmine-api-key", ""));
+
+        // سایر هدرهای دلخواه
+        for (String key : optionalHeaders.keySet()) {
+            if (!key.equals("x-redmine-api-key")) {
+                headers.put(key, optionalHeaders.get(key));
+            }
+        }
+        return headers;
+    }
+
+    // -------------------------------------
+    //      Single Object Request
+    // -------------------------------------
 
     public <T, P> void requestObject(
             String cacheKey,
@@ -55,44 +81,46 @@ public class APIManager {
             if (useCache && cache.containsKey(cacheKey)) {
                 listener.onReceived((T) cache.get(cacheKey), true);
             }
-            GsonBuilder builder = new GsonBuilder();
-            Gson gson = builder
+
+            Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
 
-            JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
+            JSONObject payload = payloadModel != null ?
+                    new JSONObject(gson.toJson(payloadModel)) : null;
 
             JsonObjectRequest request = new JsonObjectRequest(
                     convertMethod(method),
                     url,
                     payload,
                     response -> {
-
-                        // اگر API خروجی را در "data" بدهد → آن را بخوان
                         JSONObject dataObject = response.optJSONObject("data");
                         if (dataObject == null) dataObject = response;
 
-                        // خودکار تبدیل به مدل
                         T model = gson.fromJson(dataObject.toString(), clazz);
-
                         cache.put(cacheKey, model);
+
                         listener.onReceived(model, false);
                     },
                     error -> {
-                        if (error.networkResponse != null && error.networkResponse.data != null) {
-                            try {
-                                String body = new String(error.networkResponse.data, "UTF-8");
+                        try {
+                            if (error.networkResponse != null) {
+                                String body = new String(
+                                        error.networkResponse.data,
+                                        StandardCharsets.UTF_8
+                                );
                                 JSONObject obj = new JSONObject(body);
-                                String errorMessage = obj.optString("error", "خطای ناشناخته");
-                                Log.e("API_ERROR", "Message: " + errorMessage);
-//                                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                Log.e("API_ERROR", obj.optString("error"));
                             }
-                        }
+                        } catch (Exception ignored) {}
                         listener.onReceived(null, false);
                     }
-            );
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    return buildHeaders();
+                }
+            };
 
             requestQueue.add(request);
 
@@ -101,9 +129,9 @@ public class APIManager {
         }
     }
 
-    // ------------------------------
-    //   List API Request
-    // ------------------------------
+    // -------------------------------------
+    //      List Request
+    // -------------------------------------
 
     public <T, P> void requestList(
             String cacheKey,
@@ -119,12 +147,12 @@ public class APIManager {
                 listener.onReceived((List<T>) cache.get(cacheKey), true);
             }
 
-            GsonBuilder builder = new GsonBuilder();
-            Gson gson = builder
+            Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
 
-            JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
+            JSONObject payload = payloadModel != null ?
+                    new JSONObject(gson.toJson(payloadModel)) : null;
 
             JsonObjectRequest request = new JsonObjectRequest(
                     convertMethod(method),
@@ -134,12 +162,18 @@ public class APIManager {
                         JSONArray dataArray = response.optJSONArray("data");
                         if (dataArray == null) dataArray = new JSONArray();
 
-                        List<T> model = mapper.map(dataArray);
-                        cache.put(cacheKey, model);
-                        listener.onReceived(model, false);
+                        List<T> list = mapper.map(dataArray);
+                        cache.put(cacheKey, list);
+
+                        listener.onReceived(list, false);
                     },
                     error -> listener.onReceived(null, false)
-            );
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    return buildHeaders();
+                }
+            };
 
             requestQueue.add(request);
 
@@ -148,17 +182,12 @@ public class APIManager {
         }
     }
 
-
     private int convertMethod(HttpMethod method) {
         switch (method) {
-            case POST:
-                return Request.Method.POST;
-            case PUT:
-                return Request.Method.PUT;
-            case DELETE:
-                return Request.Method.DELETE;
-            default:
-                return Request.Method.GET;
+            case POST: return Request.Method.POST;
+            case PUT: return Request.Method.PUT;
+            case DELETE: return Request.Method.DELETE;
+            default: return Request.Method.GET;
         }
     }
 }

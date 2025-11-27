@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import ir.shecan.R;
 import ir.shecan.api.ApiEndpoint;
 import ir.shecan.api.ApiRepository;
+import ir.shecan.api.AuthApi;
 import ir.shecan.api.HttpMethod;
 import ir.shecan.databinding.FragmentPasswordBinding;
 import ir.shecan.modelDio.LoginApiInput;
@@ -78,23 +79,18 @@ public class PasswordFragment extends Fragment {
         });
 
         binding.btnContinue.setOnClickListener(view -> {
-            ApiRepository repo = new ApiRepository(requireContext());
-            LoginApiInput input = new LoginApiInput(identifier, binding.edtPassword.getText().toString());
-            repo.<VerifyApiViewModel, LoginApiInput>request(
-                    "login_" + input.getIdentifier(),
-                    input,
-                    ApiEndpoint.LOGIN.getPath(),
-                    HttpMethod.POST,
-                    false,
-                    (response, fromCache) -> {
-                        if (response != null){
+
+            AuthApi auth = new AuthApi(requireContext());
+            auth.login(
+                    identifier,
+                    binding.edtPassword.getText().toString(),
+                    (res, fromCache) -> {
+                        if (res != null){
                             AppStorage storage = new AppStorage(getContext());
-                            storage.saveToken(response);
-//                            VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+                            storage.saveToken(res);
                             getActivity().finish();
                         }
-                    },
-                    VerifyApiViewModel.class
+                    }
             );
         });
 

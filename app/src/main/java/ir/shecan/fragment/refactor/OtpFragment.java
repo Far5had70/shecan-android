@@ -22,9 +22,24 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiEndpoint;
+import ir.shecan.api.ApiRepository;
+import ir.shecan.api.AuthApi;
+import ir.shecan.api.HttpMethod;
 import ir.shecan.databinding.FragmentOtpBinding;
+import ir.shecan.modelDio.LoginApiInput;
+import ir.shecan.modelDio.SendOtpApiInput;
+import ir.shecan.modelDio.VerifyApiInput;
+import ir.shecan.modelDto.VerifyApiViewModel;
+import ir.shecan.storage.AppStorage;
 
 public class OtpFragment extends Fragment {
+
+    private String identifier;
+
+    public OtpFragment(String identifier) {
+        this.identifier = identifier;
+    }
 
     private FragmentOtpBinding binding;
     EditText[] otpFields = new EditText[6];
@@ -159,22 +174,37 @@ public class OtpFragment extends Fragment {
         StringBuilder code = new StringBuilder();
 
         for (EditText otpField : otpFields) {
-            if (otpField.getText().length() == 0) {
+            if (otpField.getText().length() <= 5) {
                 shakeError(getString(R.string.codeIsUnCompleted));
                 return;
             }
             code.append(otpField.getText());
         }
 
-        if (code.toString().equals("123456")) {
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainer, new SignUpFragment())
-                    .addToBackStack(null)
-                    .commit();
-        } else {
-            shakeError(getString(R.string.codeIsWrong));
-        }
+        AuthApi auth = new AuthApi(requireContext());
+        auth.verifyOtp(
+                identifier,
+                code.toString(),
+                (res, fromCache) -> {
+                    if (res != null) {
+                        AppStorage storage = new AppStorage(getContext());
+                        storage.saveToken(res);
+                        getActivity().finish();
+                    } else {
+                        shakeError(getString(R.string.codeIsWrong));
+                    }
+                }
+        );
+
+//        if (code.toString().equals("123456")) {
+//            getActivity().getSupportFragmentManager()
+//                    .beginTransaction()
+//                    .replace(R.id.fragmentContainer, new SignUpFragment())
+//                    .addToBackStack(null)
+//                    .commit();
+//        } else {
+//            shakeError(getString(R.string.codeIsWrong));
+//        }
     }
 
     private void shakeError(String msg) {

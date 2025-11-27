@@ -20,10 +20,13 @@ import org.json.JSONObject;
 import ir.shecan.R;
 import ir.shecan.api.ApiEndpoint;
 import ir.shecan.api.ApiRepository;
+import ir.shecan.api.AuthApi;
 import ir.shecan.api.HttpMethod;
+import ir.shecan.api.Listeners;
 import ir.shecan.databinding.FragmentLoginBinding;
 import ir.shecan.modelDio.ExistApiInput;
 import ir.shecan.modelDto.ExistApiViewModel;
+import ir.shecan.modelDto.SendOtpApiViewModel;
 
 public class LoginFragment extends Fragment {
 
@@ -48,25 +51,25 @@ public class LoginFragment extends Fragment {
                 throw new RuntimeException(e);
             }
 
-            ApiRepository repo = new ApiRepository(requireContext());
+            String identifier = binding.edtPhoneNumber.getText().toString();
+            AuthApi auth = new AuthApi(requireContext());
+            auth.exists(
+                    identifier,
+                    (res, fromCache) -> {
+                        if (res != null) {
 
-            ExistApiInput input = new ExistApiInput(binding.edtPhoneNumber.getText().toString());
-            repo.<ExistApiViewModel, ExistApiInput>request(
-                    "otp_" + input.getIdentifier(),
-                    input,
-                    ApiEndpoint.OTP_EXISTS.getPath(),
-                    HttpMethod.POST,
-                    false,
-                    (response, fromCache) -> {
-                        if (response != null) {
-                            if (response.getExists()) {
-                                goToLoginWithPasswordFragment();
-                            } else {
-                                goToLoginWithOtpFragment();
+                            if (res.getExists()) goToLoginWithPasswordFragment();
+                            else {
+                                auth.sendOtp(identifier, (response, fromCache1) -> {
+                                    if (response != null) {
+                                        goToLoginWithOtpFragment();
+                                    } else {
+                                        Toast.makeText(getContext(), "خطا در ارسال otp", Toast.LENGTH_LONG).show();
+                                    }
+                                });
                             }
                         }
-                    },
-                    ExistApiViewModel.class
+                    }
             );
         });
 
@@ -96,7 +99,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void goToLoginWithOtpFragment() {
-        OtpFragment otpFragment = new OtpFragment();
+        OtpFragment otpFragment = new OtpFragment(binding.edtPhoneNumber.getText().toString());
         route(otpFragment);
     }
 

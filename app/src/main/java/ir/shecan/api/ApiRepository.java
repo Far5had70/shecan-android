@@ -1,13 +1,8 @@
-
 package ir.shecan.api;
 
 import android.content.Context;
-
 import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.List;
-import java.util.function.Function;
 
 public class ApiRepository {
 
@@ -29,21 +24,6 @@ public class ApiRepository {
         apiManager.requestObject(cacheKey, payload, url, method, useCache, listener, clazz);
     }
 
-    ///
-    /// repository.requestList(
-    ///     "users",
-    ///     null,
-    ///     url,
-    ///     HttpMethod.GET,
-    ///     true,
-    ///     listener,
-    ///     jsonArray -> {
-    ///         List<User> list = new ArrayList<>();
-    ///         // Convert JSON here...
-    ///         return list;
-    ///     }
-    /// );
-    ///
     public <T, P> void requestList(
             String cacheKey,
             P payload,
