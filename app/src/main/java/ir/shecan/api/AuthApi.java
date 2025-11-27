@@ -2,7 +2,13 @@ package ir.shecan.api;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ir.shecan.api.ApiRepository;
@@ -95,17 +101,36 @@ public class AuthApi {
             String code,
             Listeners.ApiListener<VerifyApiViewModel> listener
     ) {
-        VerifyApiInput input = new VerifyApiInput(identifier, code);
+        VerifyApiInput input = new VerifyApiInput(code, identifier);
 
-        repo.request(
+        repo.requestList(
                 "otp_verify_" + identifier,
                 input,
                 "https://my.shecan.ir/api/auth/verify",
                 HttpMethod.POST,
                 false,
-                listener,
-                VerifyApiViewModel.class
+                (response, fromCache) -> {
+                    if (response == null || response.isEmpty()) {
+                        listener.onReceived(null, false);
+                    } else {
+                        VerifyApiViewModel model = response.get(0);
+                        listener.onReceived(model, false);
+                    }
+                },
+                jsonArray -> {
+                    List<VerifyApiViewModel> list = new ArrayList<>();
+                    Gson gson = new Gson();
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject obj = jsonArray.optJSONObject(i);
+                        if (obj != null) {
+                            list.add(gson.fromJson(obj.toString(), VerifyApiViewModel.class));
+                        }
+                    }
+                    return list;
+                }
         );
+
     }
 
     // ------------------------

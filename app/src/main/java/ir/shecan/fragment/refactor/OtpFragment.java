@@ -174,7 +174,7 @@ public class OtpFragment extends Fragment {
         StringBuilder code = new StringBuilder();
 
         for (EditText otpField : otpFields) {
-            if (otpField.getText().length() <= 5) {
+            if (otpField.getText().length() == 0) {
                 shakeError(getString(R.string.codeIsUnCompleted));
                 return;
             }

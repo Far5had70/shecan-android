@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -92,6 +93,19 @@ public class PasswordFragment extends Fragment {
                         }
                     }
             );
+        });
+
+        binding.btnContinueWithOtpCode.setOnClickListener(view -> {
+            AuthApi auth = new AuthApi(requireContext());
+            auth.sendOtp(identifier, (response, fromCache1) -> {
+
+            });
+
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, new OtpFragment(identifier))
+                    .addToBackStack(null)
+                    .commit();
         });
 
         return binding.getRoot();

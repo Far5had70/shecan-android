@@ -6,6 +6,7 @@ import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.FieldNamingPolicy;
@@ -145,35 +146,30 @@ public class APIManager {
         try {
             if (useCache && cache.containsKey(cacheKey)) {
                 listener.onReceived((List<T>) cache.get(cacheKey), true);
+                return;
             }
 
+            // اگر POST یا PUT باید بدنه بفرستی
             Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
 
-            JSONObject payload = payloadModel != null ?
-                    new JSONObject(gson.toJson(payloadModel)) : null;
+            JSONObject payload = payloadModel != null
+                    ? new JSONObject(gson.toJson(payloadModel))
+                    : null;
 
-            JsonObjectRequest request = new JsonObjectRequest(
+            CustomJsonArrayRequest request = new CustomJsonArrayRequest(
                     convertMethod(method),
                     url,
                     payload,
-                    response -> {
-                        JSONArray dataArray = response.optJSONArray("data");
-                        if (dataArray == null) dataArray = new JSONArray();
-
-                        List<T> list = mapper.map(dataArray);
+                    buildHeaders(),
+                    responseArray -> {
+                        List<T> list = mapper.map(responseArray);
                         cache.put(cacheKey, list);
-
                         listener.onReceived(list, false);
                     },
                     error -> listener.onReceived(null, false)
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    return buildHeaders();
-                }
-            };
+            );
 
             requestQueue.add(request);
 
