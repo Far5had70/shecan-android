@@ -55,6 +55,12 @@
     <color name="greenDark">#061F16</color>
     <color name="connectionButtonProgressBar">#477F6A</color>
     <color name="connectionButtonConnectedBar">#16C385</color>
+    <color name="graySelectedFillColor">#EAECEC</color>
+    <color name="graySelectedFillStrokeColor">#D8DDDD</color>
+    <color name="notSelectedFillStrokeColor">#EAECEC</color>
+    <color name="black2">#05000000</color>
+    <color name="black7">#12000000</color>
+    <color name="profileRadiusColor">#26000000</color>
 
 
 </resources>

@@ -46,7 +46,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
     public void onBindViewHolder(@NonNull ProfileAdapter.ViewHolder holder, int position) {
         ProfileItem item = items.get(position);
 
-        holder.binding.imgIcon.setImageResource(item.getIconRes());
+//        holder.binding.imgIcon.setImageResource(item.getIconRes());
         holder.binding.tvTitle.setText(item.getTitle());
 
         holder.itemView.setOnClickListener(v -> listener.onClick(position, item));

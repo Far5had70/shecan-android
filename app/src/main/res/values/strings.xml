@@ -145,8 +145,11 @@
     <string name="isLegal">سازمانی هستم</string>
     <string name="email">ایمیل</string>
     <string name="password">رمز عبور</string>
+    <string name="passwordNew">رمز عبور جدید</string>
+    <string name="passwordNewRepeat">تکرار رمز عبور جدید</string>
     <string name="repeatPassword">تکرار رمز عبور</string>
     <string name="continuee">ادامه</string>
     <string name="passworsNotSame">رمزهای عبور وارد شده یکسان نمی باشند</string>
     <string name="companyName">نام شرکت</string>
+    <string name="saveChange">ذخیره تغییرات</string>
 </resources>

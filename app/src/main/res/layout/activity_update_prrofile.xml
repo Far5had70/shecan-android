@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/homeBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ir.shecan.widget.ProfileTabBar
+            android:id="@+id/profileTabBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/profileTab"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@drawable/profile_rounded_box">
+
+                    <include
+                        android:id="@+id/profileView"
+                        layout="@layout/layout_profile_header"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:layout_gravity="center_horizontal" />
+
+                    <EditText
+                        android:id="@+id/edtPersianName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@drawable/edittext_profile_rounded_box"
+                        android:gravity="start"
+                        android:padding="14dp"
+                        android:hint="@string/persianName"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:textColor="@color/greenPrimaryTextColor"
+                        android:textColorHint="@color/greenPrimaryTextColor"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edtPersianFamilyName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@drawable/edittext_profile_rounded_box"
+                        android:gravity="start"
+                        android:padding="14dp"
+                        android:hint="@string/persianFamilyName"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:textColor="@color/greenPrimaryTextColor"
+                        android:textColorHint="@color/greenPrimaryTextColor"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edtEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@drawable/edittext_profile_rounded_box"
+                        android:gravity="start"
+                        android:padding="14dp"
+                        android:hint="@string/email"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:textColor="@color/greenPrimaryTextColor"
+                        android:textColorHint="@color/greenPrimaryTextColor"
+                        android:textSize="14sp" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/passwordTab"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:orientation="vertical"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@drawable/profile_rounded_box">
+
+                    <EditText
+                        android:id="@+id/oldPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@drawable/edittext_rounded_box"
+                        android:gravity="end"
+                        android:padding="14dp"
+                        android:hint="@string/password"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:textColor="@color/greenPrimaryTextColor"
+                        android:textColorHint="@color/greenPrimaryTextColor"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edtPasswordNew"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@drawable/edittext_rounded_box"
+                        android:gravity="end"
+                        android:padding="14dp"
+                        android:hint="@string/passwordNew"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:textColor="@color/greenPrimaryTextColor"
+                        android:textColorHint="@color/greenPrimaryTextColor"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edtPasswordNewRepeat"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="@drawable/edittext_rounded_box"
+                        android:gravity="end"
+                        android:padding="14dp"
+                        android:hint="@string/passwordNewRepeat"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:textColor="@color/greenPrimaryTextColor"
+                        android:textColorHint="@color/greenPrimaryTextColor"
+                        android:textSize="14sp" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="bottom"
+        android:background="@color/homeBackground"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:backgroundTint="@color/greenMain"
+            android:text="@string/saveChange"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:backgroundTint="@color/homeBackground"
+            android:text="@string/cancel2"
+            android:textColor="@color/greenSecondaryTextColor"/>
+
+    </LinearLayout>
+
+</FrameLayout>

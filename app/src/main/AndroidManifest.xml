@@ -66,6 +66,7 @@
         <activity android:name="ir.shecan.activity.OtpActivity" />
         <activity android:name="ir.shecan.activity.AuthorizeActivity" />
         <activity android:name="ir.shecan.activity.ThemeActivity" />
+        <activity android:name="ir.shecan.activity.UpdateProfileActivity" />
 
         <!-- Receivers -->
         <receiver

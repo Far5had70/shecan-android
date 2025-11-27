@@ -87,6 +87,10 @@ public class MainActivityNew extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Shecan.getInstance().updateLocale();
+
+        themeManager = new ThemeManager(this);
+        themeManager.applyTheme();
+
         super.onCreate(savedInstanceState);
 
         int selectedTab = 1;
@@ -99,8 +103,6 @@ public class MainActivityNew extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         vpnManager = new VpnManager(this);
-        themeManager = new ThemeManager(this);
-        themeManager.applyTheme();
 
         binding.toolbar.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
 
@@ -114,6 +116,8 @@ public class MainActivityNew extends AppCompatActivity {
         });
 
         updateLoginInformation();
+
+        updateConfigsIfSignedIn();
 
         setupCustomBottomBar();
 
@@ -131,11 +135,29 @@ public class MainActivityNew extends AppCompatActivity {
             auth.me(
                     token.getApiKey(),
                     (res, fromCache) -> {
-                        token.setFirstname(res.getUser().getFirstname());
-                        token.setMail(res.getUser().getMail());
-                        token.setLastname(res.getUser().getLastname());
-                        storage.saveToken(token);
-                        recreate();
+                        if (res != null && res.getUser() != null){
+                            token.setFirstname(res.getUser().getFirstname());
+                            token.setMail(res.getUser().getMail());
+                            token.setLastname(res.getUser().getLastname());
+                            storage.saveToken(token);
+                        }
+//                        recreate();
+                    }
+            );
+        }
+    }
+
+    public void updateConfigsIfSignedIn() {
+        AppStorage storage = new AppStorage(getApplicationContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+        if (token != null && token.getApiKey() != null){
+            AuthApi auth = new AuthApi(getApplicationContext());
+            auth.issues(
+                    token.getApiKey(),
+                    0,1000,
+                    (res, fromCache) -> {
+                        storage.saveIssues(res);
+//                        recreate();
                     }
             );
         }

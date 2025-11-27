@@ -8,6 +8,7 @@ public class AppStorage {
 
     private static final String Token_KEY = "TOKEN_MODEL";
     private static final String App_Config_KEY = "APP_CONFIG_MODEL";
+    private static final String Issue_KEY = "Issue_MODEL";
 
     private final GenericPreferenceManager pref;
 
@@ -39,6 +40,20 @@ public class AppStorage {
 
     public void removeAppConfig() {
         pref.remove(App_Config_KEY);
+    }
+    // -----------------------------------------------
+
+    // ---------------- Configs ----------------
+    public <T> void saveIssues(T issue) {
+        pref.saveModel(Issue_KEY, issue);
+    }
+
+    public <T> T getIssue(Class<T> clazz) {
+        return pref.getModel(Issue_KEY, clazz);
+    }
+
+    public void removeIssue() {
+        pref.remove(Issue_KEY);
     }
     // -----------------------------------------------
 
