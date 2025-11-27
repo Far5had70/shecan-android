@@ -18,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -60,7 +62,7 @@ public class MainActivityNew extends AppCompatActivity {
 
     private ToolbarFragment currentFragment;
 
-    private ActivityMainNewBinding binding;
+    public ActivityMainNewBinding binding;
 
     private VpnManager vpnManager;
     private ThemeManager themeManager;
@@ -257,7 +259,7 @@ public class MainActivityNew extends AppCompatActivity {
         super.attachBaseContext(ir.shecan.util.server.LocaleHelper.onAttach(base));
     }
 
-    private void updateFragment(int index) {
+    public void updateFragment(int index) {
         TabItem tab = TabItem.fromIndex(index);
 
         if (tab.getTitle() != null) {

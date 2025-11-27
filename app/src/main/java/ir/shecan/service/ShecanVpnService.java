@@ -323,6 +323,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
         }
 
         if (shouldRefresh) {
+            ((Shecan) getApplicationContext()).getVpnState().postValue(0);
             Logger.info("shecan service has stopped");
             // Launch UI update on main thread (UI-safe)
             try {
@@ -451,6 +452,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
             }
 
             Logger.info("shecan service is started");
+            ((Shecan) getApplicationContext()).getVpnState().postValue(2);
 
             if (Shecan.getPrefs().getBoolean("settings_dns_over_tcp", false)) {
                 provider = new TcpProvider(descriptor, this);

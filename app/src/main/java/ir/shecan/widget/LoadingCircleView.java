@@ -13,11 +13,15 @@ public class LoadingCircleView extends View {
 
     private Paint paint;
     private RectF rectF;
-    private float sweepAngle = 90f; // طول پروگرس
-    private float startAngle = 225f; // شروع از 225 درجه
-    private float rotation = 0f; // زاویه چرخش
-    private int strokeWidth = 8; // ضخامت خط
-    private float circleSizePercent = 1.0f; // 1.0 یعنی کل سایز ویو، 0.8 یعنی 80% از ویو
+
+    private float sweepAngle = 90f;       // مقدار پیشفرض
+    private float startAngle = 225f;
+    private float rotation = 0f;
+    private int strokeWidth = 8;
+
+    private float circleSizePercent = 1.0f;
+
+    private boolean isSpinning = true;   // حالت چرخش فعال
 
     public LoadingCircleView(Context context) {
         super(context);
@@ -30,15 +34,16 @@ public class LoadingCircleView extends View {
     }
 
     private void init() {
+
         paint = new Paint();
-        paint.setColor(0xFFFFFFFF); // سفید
+        paint.setColor(0xFFFFFFFF);   // سفید
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(strokeWidth);
         paint.setAntiAlias(true);
 
         rectF = new RectF();
 
-        // انیمیشن چرخش
+        // شروع پیش‌فرض چرخش
         post(rotationRunnable);
     }
 
@@ -52,27 +57,64 @@ public class LoadingCircleView extends View {
 
         float left = (getWidth() - width) / 2f + padding;
         float top = (getHeight() - height) / 2f + padding;
-        float right = left + width - padding*2;
-        float bottom = top + height - padding*2;
+        float right = left + width - padding * 2;
+        float bottom = top + height - padding * 2;
 
         rectF.set(left, top, right, bottom);
 
         canvas.drawArc(rectF, startAngle + rotation, sweepAngle, false, paint);
     }
 
-
-    private Runnable rotationRunnable = new Runnable() {
+    // انیمیشن چرخش
+    private final Runnable rotationRunnable = new Runnable() {
         @Override
         public void run() {
-            rotation += 5; // سرعت چرخش
-            if (rotation >= 360) rotation -= 360;
-            invalidate();
-            postDelayed(this, 16); // تقریبا 60fps
+
+            if (isSpinning) {
+                rotation += 5;
+                if (rotation >= 360) rotation -= 360;
+                invalidate();
+            }
+
+            postDelayed(this, 16); // 60fps
         }
     };
 
+    // ----------- کنترل‌ها -----------
+
+    // شروع چرخش
+    public void start() {
+        isSpinning = true;
+    }
+
+    // توقف چرخش
+    public void stop() {
+        isSpinning = false;
+        rotation = 0f;
+        invalidate();
+    }
+
+    // تغییر رنگ
+    public void setColor(int color) {
+        paint.setColor(color);
+        invalidate();
+    }
+
+    // تنظیم درصد پیشرفت (0 تا 100)
+    public void setProgress(int percent) {
+        sweepAngle = (360f * percent) / 100f;
+        invalidate();
+    }
+
+    // مخصوص حالت Connected
+    public void setConnectedState() {
+        stop();
+        setProgress(100);
+        setColor(0x16C385); // سبز
+    }
+
     public void setCircleSizePercent(float percent) {
-        circleSizePercent = percent; // مقدار بین 0.0 و 1.0
+        circleSizePercent = percent;
         invalidate();
     }
 }

@@ -28,7 +28,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +36,6 @@ import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.activity.MainActivityNew;
 import ir.shecan.databinding.FragmentMainNewBinding;
-import ir.shecan.databinding.SelectedConfigViewBinding;
 import ir.shecan.dialog.ContactSupportDialog;
 import ir.shecan.dialog.RenewalDialog;
 import ir.shecan.dialog.UpdateDialog;
@@ -76,25 +74,93 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private int countdownValue = 80; // default for dynamic mode
 
     private AnimationDrawable loadingAnimation;
+    MainActivityNew activity;
+    //    private MainSharedViewModel sharedViewModel;
+    private static final String TAG = "HomeFragment";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentMainNewBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        activity = (MainActivityNew) getActivity();
 
         // initialize views using binding
         setupLinkUpdater();
         setupModeButtons();
         setupDonatePadding();
         setupMainButton();
+//        sharedViewModel = new ViewModelProvider(requireActivity()).get(MainSharedViewModel.class);
 
         binding.vpnButton.setOnClickListener(view -> {
-            binding.vpnButton.showLoading(!binding.vpnButton.isLoading());
+
+            if (ShecanVpnService.isActivated()) {
+                Shecan app = (Shecan) requireContext().getApplicationContext();
+                app.getVpnState().setValue(0);
+                ShecanVpnService.cancelConnectionStatusAPI(requireContext());
+                ShecanVpnService.cancelCoreAPI(requireContext());
+                Shecan.deactivateService(requireContext());
+                return;
+            }
+
+            if (ShecanVpnService.isProMode()) {
+                if (ShecanVpnService.isDynamicIPMode()) {
+                    binding.linkUpdaterInputLayout.setError(null);
+                    binding.linkUpdaterInputLayout.setErrorEnabled(false);
+                    String updaterUrl = binding.linkUpdaterEditText.getText().toString().trim();
+                    if (updaterUrl.isEmpty()) {
+                        binding.linkUpdaterInputLayout.setError(getString(R.string.empty_link_updater_error));
+                        binding.linkUpdaterInputLayout.setErrorEnabled(true);
+                        return;
+                    }
+                    if (updaterUrl.contains("https://ddns.shecan.ir/update?password=")) {
+                        Shecan.setUpdaterLink(updaterUrl);
+                        ShecanVpnService.callCoreAPI(requireContext(), HomeFragment.this);
+                    } else {
+                        binding.linkUpdaterInputLayout.setError(getString(R.string.false_link_updater_error));
+                        binding.linkUpdaterInputLayout.setErrorEnabled(true);
+                    }
+                } else {
+                    isConnectBtnEnabled = false;
+                    startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                            .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+                }
+            } else {
+                Shecan app = (Shecan) requireContext().getApplicationContext();
+                app.getVpnState().setValue(1);
+
+                startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                        .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+            }
         });
 
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.getVpnState().observe(getViewLifecycleOwner(), state -> {
+            if (state != null && binding != null) {
+                switch (state){
+                    case 0:
+                        binding.vpnButton.showLoading(false);
+                        break;
+                    case 1:
+                        binding.vpnButton.showLoading(true);
+                        break;
+                    case 2:
+                        binding.vpnButton.setConnected(true);
+                        break;
+                }
+            }
+        });
+
+
+//        sharedViewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {
+//            if (isLoading != null) {
+//                binding.vpnButton.showLoading(isLoading);
+//            }
+//        });
+
         binding.chooseConfig.setOnClickListener(v -> {
-            Log.d("test","test");
+            activity.updateFragment(0);
+            activity.binding.customBar.select(0);
         });
 
         binding.servicePanel.setStatus(
@@ -375,7 +441,15 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         }
     }
 
+//shecan service is started
+//Starting advanced DNS proxy.
+
+//stopThread
+//shecan service has stopped
+//Told to stop VPN
+
     private void setUiForConnected(boolean isDynamicMode) {
+        Log.e(TAG, "setUiForConnected: ");
         if (!isAdded()) return;
         final Context ctx = requireContext();
 //        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_on));
@@ -392,6 +466,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void setUiForDisconnected() {
+        Log.e(TAG, "setUiForDisconnected: ");
         if (!isAdded()) return;
         final Context ctx = requireContext();
 //        binding.getRoot().setBackground(ContextCompat.getDrawable(ctx, R.drawable.background_off));
@@ -407,6 +482,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void setViewIsConnecting() {
+        Log.e(TAG, "setViewIsConnecting: ");
         if (!isAdded()) return;
         isApiSuccess = false;
         shouldShowSupportDialog = false;

@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -104,6 +105,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     private final Handler handler = new Handler();
 
     private ScheduledExecutorService scheduler;
+
+    private MutableLiveData<Integer> vpnState = new MutableLiveData<>();
 
     @Override
     public void onCreate() {
@@ -453,6 +456,10 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                     ShecanVpnService.callConnectionStatusAPI(Shecan.this, Shecan.this, null);
             }
         }, 20, TimeUnit.SECONDS);
+    }
+
+    public MutableLiveData<Integer> getVpnState() {
+        return vpnState;
     }
 
     public static class ShecanInfo {
