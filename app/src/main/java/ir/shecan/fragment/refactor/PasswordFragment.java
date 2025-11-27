@@ -109,7 +109,7 @@ public class PasswordFragment extends Fragment {
 
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragmentContainer, new OtpFragment(identifier, false))
+                    .replace(R.id.fragmentContainer, new OtpFragment(identifier, true))
                     .addToBackStack(null)
                     .commit();
         });

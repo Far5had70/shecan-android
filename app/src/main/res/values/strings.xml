@@ -148,4 +148,5 @@
     <string name="repeatPassword">تکرار رمز عبور</string>
     <string name="continuee">ادامه</string>
     <string name="passworsNotSame">رمزهای عبور وارد شده یکسان نمی باشند</string>
+    <string name="companyName">نام شرکت</string>
 </resources>

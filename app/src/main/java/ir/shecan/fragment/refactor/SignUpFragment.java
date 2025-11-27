@@ -1,10 +1,14 @@
 package ir.shecan.fragment.refactor;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -41,6 +45,10 @@ public class SignUpFragment extends Fragment {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
 
+        binding.isCompanyCB.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            binding.edtCompanyName.setVisibility(isChecked ? VISIBLE : GONE);
+        });
+
         binding.btnPassword.setOnClickListener(view -> {
             showLoading(true);
             AuthApi auth = new AuthApi(requireContext());
@@ -48,6 +56,7 @@ public class SignUpFragment extends Fragment {
                     token.getApiKey(),
                     binding.edtPersianName.getText().toString(),
                     binding.edtPersianFamilyName.getText().toString(),
+                    binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
                     (response, fromCache) -> {
                         showLoading(false);
@@ -67,6 +76,7 @@ public class SignUpFragment extends Fragment {
                     token.getApiKey(),
                     binding.edtPersianName.getText().toString(),
                     binding.edtPersianFamilyName.getText().toString(),
+                    binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
                     (response, fromCache) -> {
                         showLoading(false);
@@ -103,12 +113,12 @@ public class SignUpFragment extends Fragment {
         if (loading) {
             binding.btnLogin.setEnabled(false);
             binding.btnLogin.setAlpha(0.5f);
-            binding.progress.setVisibility(View.VISIBLE);
+            binding.progress.setVisibility(VISIBLE);
             binding.btnLogin.setText("");
         } else {
             binding.btnLogin.setEnabled(true);
             binding.btnLogin.setAlpha(1f);
-            binding.progress.setVisibility(View.GONE);
+            binding.progress.setVisibility(GONE);
             binding.btnLogin.setText(ContextCompat.getString(getContext(),R.string.login));
         }
     }

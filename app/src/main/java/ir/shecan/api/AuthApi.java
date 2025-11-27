@@ -152,6 +152,7 @@ public class AuthApi {
             String apiKey,
             String firstname,
             String lastname,
+            String companyName,
             String mail,
             Listeners.ApiListener<Void> listener
     ) {
@@ -159,6 +160,11 @@ public class AuthApi {
         payload.put("api_key", apiKey);
         payload.put("firstname", firstname);
         payload.put("lastname", lastname);
+
+        if (companyName != null){
+            payload.put("company_name", companyName);
+        }
+
 
         repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
 
