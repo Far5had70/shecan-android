@@ -71,11 +71,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private CountDownTimer countDownTimer;
     private ObjectAnimator blinkAnimator;
 
-    private int countdownValue = 80; // default for dynamic mode
+    private int countdownValue = 80;
 
     private AnimationDrawable loadingAnimation;
     MainActivityNew activity;
-    //    private MainSharedViewModel sharedViewModel;
     private static final String TAG = "HomeFragment";
 
     @Nullable
@@ -90,7 +89,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         setupModeButtons();
         setupDonatePadding();
         setupMainButton();
-//        sharedViewModel = new ViewModelProvider(requireActivity()).get(MainSharedViewModel.class);
 
         binding.vpnButton.setOnClickListener(view -> {
 
@@ -151,12 +149,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             }
         });
 
-
-//        sharedViewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {
-//            if (isLoading != null) {
-//                binding.vpnButton.showLoading(isLoading);
-//            }
-//        });
 
         binding.chooseConfig.setOnClickListener(v -> {
             activity.updateFragment(0);
@@ -440,13 +432,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             }
         }
     }
-
-//shecan service is started
-//Starting advanced DNS proxy.
-
-//stopThread
-//shecan service has stopped
-//Told to stop VPN
 
     private void setUiForConnected(boolean isDynamicMode) {
         Log.e(TAG, "setUiForConnected: ");

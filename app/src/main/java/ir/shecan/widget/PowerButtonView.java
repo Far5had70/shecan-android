@@ -9,7 +9,9 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
+import ir.shecan.R;
 import ir.shecan.databinding.ButtonLayoutBinding;
 
 public class PowerButtonView extends ConstraintLayout {
@@ -128,7 +130,7 @@ public class PowerButtonView extends ConstraintLayout {
                 scaleUp();
 
                 binding.loadingCircle.setVisibility(View.VISIBLE);
-                binding.loadingCircle.setColor(0xFFFFFFFF);
+                binding.loadingCircle.setColor(ContextCompat.getColor(getContext(), R.color.connectionButtonProgressBar));
                 binding.loadingCircle.start();
                 break;
 
@@ -141,7 +143,7 @@ public class PowerButtonView extends ConstraintLayout {
                 binding.loadingCircle.setVisibility(View.VISIBLE);
                 binding.loadingCircle.stop();
                 binding.loadingCircle.setProgress(100);
-                binding.loadingCircle.setColor(0xFF16C385);
+                binding.loadingCircle.setColor(ContextCompat.getColor(getContext(), R.color.connectionButtonConnectedBar));
                 break;
         }
     }
