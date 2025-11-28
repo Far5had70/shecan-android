@@ -1,5 +1,4 @@
 package ir.shecan.fragment.refactor;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,18 +6,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import ir.shecan.R;
-import ir.shecan.ServiceItem;
 import ir.shecan.adapter.ServiceAdapter;
 import ir.shecan.bottomSheet.SubscriptionBottomSheet;
 import ir.shecan.databinding.FragmentConfigListBinding;
 import ir.shecan.fragment.ToolbarFragment;
+import ir.shecan.modelDto.IssuesViewModel;
+import ir.shecan.modelDto.ServiceItem;
+import ir.shecan.modelDto.ServiceItemMapper;
+import ir.shecan.storage.AppStorage;
 
 public class ConfigListFragment extends ToolbarFragment {
 
@@ -29,21 +28,50 @@ public class ConfigListFragment extends ToolbarFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentConfigListBinding.inflate(inflater, container, false);
 
-        List<ServiceItem> serviceItems = new ArrayList<>();
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.newConnection), R.drawable.ic_new, ContextCompat.getColor(getContext(), R.color.primaryTextColor)));
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.expiring), R.drawable.ic_alert, ContextCompat.getColor(getContext(), R.color.colorAccent)));
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.waitingForActivate), R.drawable.ic_watch, ContextCompat.getColor(getContext(), R.color.primaryTextColor)));
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.active), R.drawable.ic_connect, ContextCompat.getColor(getContext(), R.color.connectionIsActiveColor)));
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.gold), getString(R.string.readyToConnect), R.drawable.ic_done, ContextCompat.getColor(getContext(), R.color.connectionIsReadyColor)));
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.free), getString(R.string.readyToConnect), R.drawable.ic_done, ContextCompat.getColor(getContext(), R.color.connectionIsReadyColor)));
+        AppStorage appStorage = new AppStorage(getContext());
+        List<ServiceItem> serviceItems = buildServiceItems(appStorage);
 
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(new ServiceAdapter(getContext(),serviceItems, item -> {
-            SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
-            bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
-        }));
+        setupRecyclerView(serviceItems, appStorage);
 
         return binding.getRoot();
+    }
+
+    private List<ServiceItem> buildServiceItems(AppStorage appStorage) {
+        IssuesViewModel viewModel = appStorage.getIssue(IssuesViewModel.class);
+
+        List<IssuesViewModel.IssuesDTO> issues = (viewModel != null && viewModel.getIssues() != null)
+                ? new ArrayList<>(viewModel.getIssues())
+                : new ArrayList<>();
+
+        // آیتم پیش‌فرض free
+        issues.add(IssuesViewModel.IssuesDTO.createDefault());
+
+        List<ServiceItem> items = new ArrayList<>();
+        for (IssuesViewModel.IssuesDTO issue : issues) {
+            items.add(ServiceItemMapper.map(getContext(), issue));
+        }
+
+        return items;
+    }
+
+    private void setupRecyclerView(List<ServiceItem> items, AppStorage appStorage) {
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(new ServiceAdapter(
+                getContext(),
+                items,
+                new ServiceAdapter.OnMoreClickListener() {
+                    @Override
+                    public void onBackgroundClicked(ServiceItem item) {
+                        appStorage.saveServiceStatus(item);
+                    }
+
+                    @Override
+                    public void onOptionClicked(ServiceItem item) {
+                        SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
+                        bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
+                    }
+                }
+        ));
     }
 
     @Override
@@ -53,8 +81,7 @@ public class ConfigListFragment extends ToolbarFragment {
     }
 
     @Override
-    public void checkStatus() {
-    }
+    public void checkStatus() {}
 
     @Override
     public void onResume() {

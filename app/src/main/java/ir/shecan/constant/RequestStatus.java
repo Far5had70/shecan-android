@@ -2,6 +2,8 @@ package ir.shecan.constant;
 
 public enum RequestStatus {
 
+    READY_TO_CONNECT(0),
+
     /** جدید */
     NEW(1),
 

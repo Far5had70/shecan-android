@@ -59,6 +59,25 @@ public class IssuesViewModel {
         private Object closedOn;
         private List<CustomFieldsDTO> customFields;
 
+        public IssuesDTO(int id, ProjectDTO project, TrackerDTO tracker, StatusDTO status, PriorityDTO priority, AuthorDTO author, String subject, String description, String startDate, String dueDate, int doneRatio, boolean isPrivate, String createdOn, String updatedOn, Object closedOn, List<CustomFieldsDTO> customFields) {
+            this.id = id;
+            this.project = project;
+            this.tracker = tracker;
+            this.status = status;
+            this.priority = priority;
+            this.author = author;
+            this.subject = subject;
+            this.description = description;
+            this.startDate = startDate;
+            this.dueDate = dueDate;
+            this.doneRatio = doneRatio;
+            this.isPrivate = isPrivate;
+            this.createdOn = createdOn;
+            this.updatedOn = updatedOn;
+            this.closedOn = closedOn;
+            this.customFields = customFields;
+        }
+
         public int getId() {
             return id;
         }
@@ -321,5 +340,27 @@ public class IssuesViewModel {
                 this.value = value;
             }
         }
+
+        public static IssuesDTO createDefault() {
+            return new IssuesDTO(
+                    0,
+                    new ProjectDTO(),
+                    new TrackerDTO(),
+                    new StatusDTO(),
+                    new PriorityDTO(),
+                    new AuthorDTO(),
+                    "",
+                    "",
+                    "",
+                    "",
+                    0,
+                    false,
+                    "",
+                    "",
+                    null,
+                    new java.util.ArrayList<>()
+            );
+        }
+
     }
 }

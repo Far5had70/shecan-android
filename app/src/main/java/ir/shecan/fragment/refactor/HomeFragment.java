@@ -29,6 +29,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,10 +43,13 @@ import ir.shecan.dialog.ContactSupportDialog;
 import ir.shecan.dialog.RenewalDialog;
 import ir.shecan.dialog.UpdateDialog;
 import ir.shecan.fragment.ToolbarFragment;
+import ir.shecan.modelDto.IssuesViewModel;
+import ir.shecan.modelDto.ServiceItem;
 import ir.shecan.service.BaseApiResponseListener;
 import ir.shecan.service.ConnectionStatusApiListener;
 import ir.shecan.service.CoreApiResponseListener;
 import ir.shecan.service.ShecanVpnService;
+import ir.shecan.storage.AppStorage;
 import ir.shecan.util.AnimationUtils;
 import ir.shecan.util.AppUtils;
 import ir.shecan.util.PersianTools;
@@ -156,20 +161,30 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             activity.binding.customBar.select(0);
         });
 
-        binding.servicePanel.setStatus(
-                new ServiceStatusView.ServiceStatus("طلایی", "982341", "1404/06/28")
-        );
+
+        AppStorage appStorage = new AppStorage(getContext());
+        ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
+        if (serviceItem == null){
+            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free) , ""  , 0 , 0 , IssuesViewModel.IssuesDTO.createDefault());
+        }
+        try {
+            binding.servicePanel.setStatus(serviceItem);
+        } catch (ParseException e) {
+
+        }
 
         binding.servicePanel.setOnClickListener(view -> {
-            if (binding.servicePanel.isPurchased()) {
-                binding.servicePanel.setStatus(
-                        new ServiceStatusView.ServiceStatus("رایگان")
-                );
-            } else {
-                binding.servicePanel.setStatus(
-                        new ServiceStatusView.ServiceStatus("طلایی", "982341", "1404/06/28")
-                );
-            }
+//            if (binding.servicePanel.isPurchased()) {
+//                binding.servicePanel.setStatus(
+//                        new ServiceStatusView.ServiceStatus("رایگان")
+//                );
+//            } else {
+//                binding.servicePanel.setStatus(
+//                        new ServiceStatusView.ServiceStatus("طلایی", "982341", "1404/06/28", "")
+//                );
+//            }
+            activity.updateFragment(0);
+            activity.binding.customBar.select(0);
         });
 
 //        binding.loadingImage.setBackgroundResource(R.drawable.animation_button_loading_dark);

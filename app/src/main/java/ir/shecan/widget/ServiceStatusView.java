@@ -8,7 +8,15 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import ir.shecan.databinding.SelectedConfigViewBinding;
+import ir.shecan.modelDto.ServiceItem;
+import saman.zamani.persiandate.PersianDate;
+import saman.zamani.persiandate.PersianDateFormat;
 
 public class ServiceStatusView extends ConstraintLayout {
 
@@ -33,43 +41,53 @@ public class ServiceStatusView extends ConstraintLayout {
         binding = SelectedConfigViewBinding.inflate(LayoutInflater.from(context), this, true);
     }
 
-    // -------------------------------------------
-    // Data Model
-    // -------------------------------------------
-    public static class ServiceStatus {
-        public String serviceType;
-        public boolean isPurchased;
-        public String orderCode;
-        public String expireDate;
-
-        // Purchased
-        public ServiceStatus(String serviceType, String orderCode, String expireDate) {
-            this.serviceType = serviceType;
-            this.orderCode = orderCode;
-            this.expireDate = expireDate;
-            this.isPurchased = true;
-        }
-
-        // Free
-        public ServiceStatus(String serviceType) {
-            this.serviceType = serviceType;
-            this.isPurchased = false;
-        }
-    }
+//    // -------------------------------------------
+//    // Data Model
+//    // -------------------------------------------
+//    public static class ServiceStatus {
+//        public String serviceType;
+//        public boolean isPurchased;
+//        public String orderCode;
+//        public String expireDate;
+//        public String updateLink;
+//
+//        // Purchased
+//        public ServiceStatus(String serviceType, String orderCode, String expireDate, String updateLink) {
+//            this.serviceType = serviceType;
+//            this.orderCode = orderCode;
+//            this.expireDate = expireDate;
+//            this.updateLink = updateLink;
+//            this.isPurchased = true;
+//        }
+//
+//        // Free
+//        public ServiceStatus(String serviceType) {
+//            this.serviceType = serviceType;
+//            this.isPurchased = false;
+//        }
+//    }
 
     // -------------------------------------------
     // Set status
     // -------------------------------------------
-    public void setStatus(ServiceStatus status) {
+    public void setStatus(ServiceItem status) throws ParseException {
 
-        binding.valueService.setText(status.serviceType);
+        binding.valueService.setText(status.getServiceType());
 
-        if (status.isPurchased) {
+        if (status.getModel().getId() > 0) {
             binding.colOrder.setVisibility(View.VISIBLE);
             binding.colExpire.setVisibility(View.VISIBLE);
 
-            binding.valueOrder.setText(status.orderCode != null ? status.orderCode : "-");
-            binding.valueExpire.setText(status.expireDate != null ? status.expireDate : "-");
+            binding.valueOrder.setText(status.getOrderCode() != null ? status.getOrderCode() : "-");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(status.getModel().getDueDate());
+
+            PersianDate pDate = new PersianDate(date);
+            PersianDateFormat pdFormat = new PersianDateFormat("Y/m/d");
+
+            String shamsi = pdFormat.format(pDate);
+            binding.valueExpire.setText(shamsi != null ? shamsi : "-");
 
         } else {
             binding.colOrder.setVisibility(View.GONE);

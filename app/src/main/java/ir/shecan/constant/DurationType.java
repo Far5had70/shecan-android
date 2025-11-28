@@ -1,12 +1,12 @@
 package ir.shecan.constant;
 
 public enum DurationType {
-    SAL_E2(21, "ساله 2"),
-    MAHE_6(19, "ماهه 6"),
-    MAHE_9(51, "ماهه 9"),
-    MAHE_3(52, "ماهه 3"),
-    MAHIANE(50, "ماهیانه"),
-    SALANE(17, "سالانه"),
+    SAL_E2(19, "ساله 2"),
+    MAHE_6(51, "ماهه 6"),
+    MAHE_9(52, "ماهه 9"),
+    MAHE_3(50, "ماهه 3"),
+    MAHIANE(17, "ماهیانه"),
+    SALANE(18, "سالانه"),
     UNKNOWN(0, "نامشخص");
 
     private final int id;

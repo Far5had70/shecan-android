@@ -1,7 +1,6 @@
 package ir.shecan.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import ir.shecan.R;
-import ir.shecan.ServiceItem;
+import ir.shecan.modelDto.ServiceItem;
 import ir.shecan.databinding.LayoutItemServiceBinding;
 
 public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
@@ -25,7 +24,8 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
     private int selectedPosition = -1;
 
     public interface OnMoreClickListener {
-        void onMoreClicked(ServiceItem item);
+        void onBackgroundClicked(ServiceItem item);
+        void onOptionClicked(ServiceItem item);
     }
 
     public ServiceAdapter(Context context, List<ServiceItem> items, OnMoreClickListener listener) {
@@ -45,7 +45,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
 
         public void bind(Context context, ServiceItem item, boolean isSelected, OnMoreClickListener listener) {
 
-            binding.txtOrderCode.setText(item.getOrderCode());
+            binding.txtOrderCode.setText(item.getOrderCode().equals("0") ? "-" : item.getOrderCode());
             binding.txtServiceType.setText(item.getServiceType());
             binding.txtStatus.setText(item.getStatusText());
             binding.txtStatus.setTextColor(item.getStatusColor());
@@ -59,10 +59,13 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
                 binding.root.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
             }
 
-            binding.btnOptions.setOnClickListener(v -> listener.onMoreClicked(item));
+            binding.btnOptions.setOnClickListener(v -> listener.onBackgroundClicked(item));
 
             binding.root.setOnClickListener(v -> {
-                listener.onMoreClicked(item);
+                listener.onBackgroundClicked(item);
+            });
+            binding.btnOptions.setOnClickListener(v -> {
+                listener.onOptionClicked(item);
             });
         }
     }
@@ -81,11 +84,20 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
 
         boolean isSelected = position == selectedPosition;
 
-        holder.bind(context, items.get(position), isSelected, item -> {
-            selectedPosition = holder.getAdapterPosition();
-            notifyDataSetChanged();
+        holder.bind(context, items.get(position), isSelected, new OnMoreClickListener() {
+            @Override
+            public void onBackgroundClicked(ServiceItem item) {
+                selectedPosition = holder.getAdapterPosition();
+                notifyDataSetChanged();
+                listener.onBackgroundClicked(item);
+            }
 
-            listener.onMoreClicked(item);
+            @Override
+            public void onOptionClicked(ServiceItem item) {
+                selectedPosition = holder.getAdapterPosition();
+                notifyDataSetChanged();
+                listener.onOptionClicked(item);
+            }
         });
     }
 
