@@ -63,18 +63,32 @@ public class CustomBottomBar extends LinearLayout {
 
     public void select(int index) {
         selectedIndex = index;
+
         for (int i = 0; i < items.size(); i++) {
             Item it = items.get(i);
 
             if (i == index) {
                 it.binding.icon.setImageResource(it.activeRes);
-                it.binding.label.setTextColor(ContextCompat.getColor(getContext(), R.color.bottomNavigationActiveTextColor));
+
+                // Scale 3X
+                it.binding.icon.animate().scaleX(3f).scaleY(3f).setDuration(0).start();
+
+                it.binding.label.setTextColor(
+                        ContextCompat.getColor(getContext(), R.color.bottomNavigationActiveTextColor)
+                );
             } else {
                 it.binding.icon.setImageResource(it.inactiveRes);
-                it.binding.label.setTextColor(ContextCompat.getColor(getContext(), R.color.bottomNavigationInactiveTextColor));
+
+                // Scale back to normal
+                it.binding.icon.animate().scaleX(1f).scaleY(1f).setDuration(0).start();
+
+                it.binding.label.setTextColor(
+                        ContextCompat.getColor(getContext(), R.color.bottomNavigationInactiveTextColor)
+                );
             }
         }
     }
+
 
     private static class Item {
         BottomItemBinding binding;

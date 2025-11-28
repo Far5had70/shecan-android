@@ -14,6 +14,7 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -31,10 +32,13 @@ import ir.shecan.activity.mainActivityUtils.LaunchHandler;
 import ir.shecan.activity.mainActivityUtils.TabItem;
 import ir.shecan.activity.mainActivityUtils.ThemeManager;
 import ir.shecan.activity.mainActivityUtils.VpnManager;
+import ir.shecan.api.ApiCallback;
 import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.fragment.refactor.HomeFragment;
+import ir.shecan.modelDto.AccountViewModel;
+import ir.shecan.modelDto.IssuesViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 import ir.shecan.widget.CustomBottomBar;
@@ -86,10 +90,11 @@ public class MainActivityNew extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Shecan.getInstance().updateLocale();
 
         themeManager = new ThemeManager(this);
         themeManager.applyTheme();
+
+        Shecan.getInstance().updateLocale();
 
         super.onCreate(savedInstanceState);
 
@@ -125,6 +130,24 @@ public class MainActivityNew extends AppCompatActivity {
         updateFragment(selectedTab);
 
         LaunchHandler.handle(this, getIntent());
+
+        onBackPressedHandler();
+    }
+
+    private void onBackPressedHandler() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (!(currentFragment instanceof HomeFragment)) {
+                    switchFragment(HomeFragment.class, true, false);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     public void updateLoginInformation() {
@@ -134,14 +157,21 @@ public class MainActivityNew extends AppCompatActivity {
             AuthApi auth = new AuthApi(getApplicationContext());
             auth.me(
                     token.getApiKey(),
-                    (res, fromCache) -> {
-                        if (res != null && res.getUser() != null){
-                            token.setFirstname(res.getUser().getFirstname());
-                            token.setMail(res.getUser().getMail());
-                            token.setLastname(res.getUser().getLastname());
-                            storage.saveToken(token);
+                    new ApiCallback<AccountViewModel>() {
+                        @Override
+                        public void onSuccess(AccountViewModel res, boolean fromCache) {
+                            if (res != null && res.getUser() != null){
+                                token.setFirstname(res.getUser().getFirstname());
+                                token.setMail(res.getUser().getMail());
+                                token.setLastname(res.getUser().getLastname());
+                                storage.saveToken(token);
+                            }
                         }
-//                        recreate();
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+
+                        }
                     }
             );
         }
@@ -154,10 +184,17 @@ public class MainActivityNew extends AppCompatActivity {
             AuthApi auth = new AuthApi(getApplicationContext());
             auth.issues(
                     token.getApiKey(),
-                    0,1000,
-                    (res, fromCache) -> {
-                        storage.saveIssues(res);
-//                        recreate();
+                    0, 1000,
+                    new ApiCallback<IssuesViewModel>() {
+                        @Override
+                        public void onSuccess(IssuesViewModel res, boolean fromCache) {
+                            storage.saveIssues(res);
+                        }
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+
+                        }
                     }
             );
         }
@@ -181,6 +218,9 @@ public class MainActivityNew extends AppCompatActivity {
             currentTab = index;
             updateFragment(index);
         });
+
+        updateFragment(1);
+        binding.customBar.select(1);
     }
 
     public void switchFragment(Class fragmentClass, boolean isHome, boolean isAdd) {
@@ -274,15 +314,6 @@ public class MainActivityNew extends AppCompatActivity {
     public void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
         if (vpnManager != null) vpnManager.handleActivityResult(result);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (!(currentFragment instanceof HomeFragment)) {
-            switchFragment(HomeFragment.class, true, false);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @Override

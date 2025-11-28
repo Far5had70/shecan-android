@@ -16,8 +16,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiCallback;
 import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.FragmentChangePasswordBinding;
+import ir.shecan.modelDto.EmptyResponse;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
@@ -55,9 +57,18 @@ public class ChangePasswordFragment extends Fragment {
             auth.updatePassword(
                     token.getApiKey(),
                     binding.edtPassword.getText().toString(),
-                    (response, fromCache) -> {
-                        showLoading(false);
-                        getActivity().finish();
+                    new ApiCallback<EmptyResponse>() {
+                        @Override
+                        public void onSuccess(EmptyResponse data, boolean fromCache) {
+                            showLoading(false);
+                            getActivity().finish();
+                        }
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            showLoading(false);
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                        }
                     }
             );
         });

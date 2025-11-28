@@ -128,9 +128,9 @@
     <string name="free">رایگان</string>
     <string name="gold">طلایی</string>
     <string name="bronze">برنزی</string>
-    <string name="lightMode">حالت روشن</string>
-    <string name="darkMode">حالت تاریک</string>
-    <string name="systemSetting">طبق تنظیمات سیستم</string>
+    <string name="lightMode">روشن</string>
+    <string name="darkMode">تاریک</string>
+    <string name="systemSetting">خودکار</string>
     <string name="phoneOrEmail">شماره همراه یا ایمیل</string>
     <string name="sendAgain">ارسال مجدد</string>
     <string name="confirm">تأیید</string>

@@ -31,7 +31,7 @@
         <ir.shecan.widget.CustomBottomBar
             android:id="@+id/customBar"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="200dp"
             android:layout_gravity="bottom"
             android:background="@null" />
 

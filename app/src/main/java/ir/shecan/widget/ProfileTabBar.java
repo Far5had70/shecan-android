@@ -2,6 +2,7 @@ package ir.shecan.widget;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
@@ -77,6 +78,9 @@ public class ProfileTabBar extends LinearLayout {
             circle2.setBackgroundResource(R.drawable.circle_unselected);
             text1.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
 
+            profile.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+            password.setColorFilter(ContextCompat.getColor(getContext(), R.color.black));
+
         } else {
             tab2.setBackgroundResource(R.drawable.tab_selected);
             circle2.setBackgroundResource(R.drawable.circle_selected);
@@ -85,6 +89,9 @@ public class ProfileTabBar extends LinearLayout {
             tab1.setBackgroundResource(R.drawable.tab_unselected);
             circle1.setBackgroundResource(R.drawable.circle_unselected);
             text1.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
+
+            password.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+            profile.setColorFilter(ContextCompat.getColor(getContext(), R.color.black));
         }
     }
 

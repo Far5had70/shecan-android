@@ -18,10 +18,10 @@ public class ApiRepository {
             String url,
             HttpMethod method,
             boolean useCache,
-            Listeners.ApiListener<T> listener,
+            ApiCallback<T> callback,
             Class<T> clazz
     ) {
-        apiManager.requestObject(cacheKey, payload, url, method, useCache, listener, clazz);
+        apiManager.requestObject(cacheKey, payload, url, method, useCache, callback, clazz);
     }
 
     public <T, P> void requestList(
@@ -30,9 +30,10 @@ public class ApiRepository {
             String url,
             HttpMethod method,
             boolean useCache,
-            Listeners.ApiListener<List<T>> listener,
+            ApiCallback<List<T>> callback,
             Class<T> clazz
     ) {
-        apiManager.requestList(cacheKey, payload, url, method, useCache, listener, clazz);
+        apiManager.requestList(cacheKey, payload, url, method, useCache, callback, clazz);
     }
+
 }

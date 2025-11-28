@@ -17,12 +17,14 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiCallback;
 import ir.shecan.api.ApiEndpoint;
 import ir.shecan.api.ApiRepository;
 import ir.shecan.api.AuthApi;
 import ir.shecan.api.HttpMethod;
 import ir.shecan.databinding.FragmentPasswordBinding;
 import ir.shecan.modelDio.LoginApiInput;
+import ir.shecan.modelDto.SendOtpApiViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
@@ -88,14 +90,21 @@ public class PasswordFragment extends Fragment {
             auth.login(
                     identifier,
                     binding.edtPassword.getText().toString(),
-                    (res, fromCache) -> {
+                    new ApiCallback<VerifyApiViewModel>() {
+                        @Override
+                        public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+                            showLoading(false);
+                            if (res != null) {
+                                AppStorage storage = new AppStorage(getContext());
+                                storage.saveToken(res);
+                                getActivity().finish();
+                            }
+                        }
 
-                        showLoading(false);
-
-                        if (res != null){
-                            AppStorage storage = new AppStorage(getContext());
-                            storage.saveToken(res);
-                            getActivity().finish();
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            showLoading(false);
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                         }
                     }
             );
@@ -103,8 +112,16 @@ public class PasswordFragment extends Fragment {
 
         binding.btnContinueWithOtpCode.setOnClickListener(view -> {
             AuthApi auth = new AuthApi(requireContext());
-            auth.sendOtp(identifier, (response, fromCache1) -> {
+            auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
+                @Override
+                public void onSuccess(SendOtpApiViewModel data, boolean fromCache) {
 
+                }
+
+                @Override
+                public void onError(int statusCode, String message) {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                }
             });
 
             getActivity().getSupportFragmentManager()
@@ -151,7 +168,7 @@ public class PasswordFragment extends Fragment {
             binding.btnContinue.setEnabled(true);
             binding.btnContinue.setAlpha(1f);
             binding.progressVerify.setVisibility(View.GONE);
-            binding.btnContinue.setText(ContextCompat.getString(getContext(),R.string.login));
+            binding.btnContinue.setText(ContextCompat.getString(getContext(), R.string.login));
         }
     }
 }

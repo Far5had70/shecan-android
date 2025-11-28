@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiCallback;
 import ir.shecan.api.ApiEndpoint;
 import ir.shecan.api.ApiRepository;
 import ir.shecan.api.AuthApi;
@@ -51,18 +52,25 @@ public class LoginFragment extends Fragment {
             AuthApi auth = new AuthApi(requireContext());
             auth.exists(
                     identifier,
-                    (res, fromCache) -> {
+                    new ApiCallback<ExistApiViewModel>() {
+                        @Override
+                        public void onSuccess(ExistApiViewModel res, boolean fromCache) {
+                            if (res != null) {
 
-                        if (res != null) {
+                                if (res.getExists()) {
+                                    showLoading(false);
+                                    goToLoginWithPasswordFragment();
+                                } else {
+                                    showLoading(false);
+                                    goToLoginWithOtpFragment();
+                                }
+                            }
+                        }
 
-                            if (res.getExists()) {
-                                showLoading(false);
-                                goToLoginWithPasswordFragment();
-                            }
-                            else {
-                                showLoading(false);
-                                goToLoginWithOtpFragment();
-                            }
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            showLoading(false);
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                         }
                     }
             );
@@ -124,7 +132,6 @@ public class LoginFragment extends Fragment {
     }
 
 
-
     private void showLoading(boolean loading) {
         if (loading) {
             binding.btnContinue.setEnabled(false);
@@ -135,7 +142,7 @@ public class LoginFragment extends Fragment {
             binding.btnContinue.setEnabled(true);
             binding.btnContinue.setAlpha(1f);
             binding.progress.setVisibility(View.GONE);
-            binding.btnContinue.setText(ContextCompat.getString(getContext(),R.string.continuee));
+            binding.btnContinue.setText(ContextCompat.getString(getContext(), R.string.continuee));
         }
     }
 }

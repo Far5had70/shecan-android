@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,8 +18,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiCallback;
 import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.FragmentSignUpBinding;
+import ir.shecan.modelDto.EmptyResponse;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
@@ -58,13 +61,22 @@ public class SignUpFragment extends Fragment {
                     binding.edtPersianFamilyName.getText().toString(),
                     binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
-                    (response, fromCache) -> {
-                        showLoading(false);
-                        getActivity().getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragmentContainer, new ChangePasswordFragment())
-                                .addToBackStack(null)
-                                .commit();
+                    new ApiCallback<EmptyResponse>() {
+                        @Override
+                        public void onSuccess(EmptyResponse data, boolean fromCache) {
+                            showLoading(false);
+                            getActivity().getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragmentContainer, new ChangePasswordFragment())
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            showLoading(false);
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                        }
                     }
             );
         });
@@ -78,9 +90,18 @@ public class SignUpFragment extends Fragment {
                     binding.edtPersianFamilyName.getText().toString(),
                     binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
-                    (response, fromCache) -> {
-                        showLoading(false);
-                        getActivity().finish();
+                    new ApiCallback<EmptyResponse>() {
+                        @Override
+                        public void onSuccess(EmptyResponse data, boolean fromCache) {
+                            showLoading(false);
+                            getActivity().finish();
+                        }
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            showLoading(false);
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                        }
                     }
             );
         });

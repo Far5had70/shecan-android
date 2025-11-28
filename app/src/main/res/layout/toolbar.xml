@@ -41,6 +41,7 @@
             android:layout_height="40dp"
             android:visibility="gone"
             android:padding="12dp"
+            android:background="?selectableItemBackgroundBorderless"
             android:layout_gravity="center_vertical|start"
             android:layout_marginStart="8dp"
             android:src="@drawable/ic_back" />

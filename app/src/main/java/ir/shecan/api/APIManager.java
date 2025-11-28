@@ -4,8 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -21,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import ir.shecan.modelDto.EmptyResponse;
 
 public class APIManager {
 
@@ -55,7 +61,11 @@ public class APIManager {
         Map<String, String> headers = new HashMap<>();
 
         // هدر اختصاصی شما
-        headers.put("x-redmine-api-key", optionalHeaders.getOrDefault("x-redmine-api-key", ""));
+        String apiKey = optionalHeaders.containsKey("x-redmine-api-key")
+                ? optionalHeaders.get("x-redmine-api-key")
+                : "";
+
+        headers.put("x-redmine-api-key", apiKey);
 
         // سایر هدرهای دلخواه
         for (String key : optionalHeaders.keySet()) {
@@ -76,77 +86,14 @@ public class APIManager {
             String url,
             HttpMethod method,
             boolean useCache,
-            Listeners.ApiListener<T> listener,
+            ApiCallback<T> callback,
             Class<T> clazz
     ) {
         try {
+
+            // === Cache Check ===
             if (useCache && cache.containsKey(cacheKey)) {
-                listener.onReceived((T) cache.get(cacheKey), true);
-            }
-
-            Gson gson = new GsonBuilder()
-                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                    .create();
-
-            JSONObject payload = payloadModel != null ?
-                    new JSONObject(gson.toJson(payloadModel)) : null;
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    convertMethod(method),
-                    url,
-                    payload,
-                    response -> {
-                        JSONObject dataObject = response.optJSONObject("data");
-                        if (dataObject == null) dataObject = response;
-
-                        T model = gson.fromJson(dataObject.toString(), clazz);
-                        cache.put(cacheKey, model);
-
-                        listener.onReceived(model, false);
-                    },
-                    error -> {
-                        try {
-                            if (error.networkResponse != null) {
-                                String body = new String(
-                                        error.networkResponse.data,
-                                        StandardCharsets.UTF_8
-                                );
-                                JSONObject obj = new JSONObject(body);
-                                Log.e("API_ERROR", obj.optString("error"));
-                            }
-                        } catch (Exception ignored) {}
-                        listener.onReceived(null, false);
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    return buildHeaders();
-                }
-            };
-
-            requestQueue.add(request);
-
-        } catch (Exception e) {
-            listener.onReceived(null, false);
-        }
-    }
-
-    // -------------------------------------
-    //      List Request
-    // -------------------------------------
-
-    public <T, P> void requestList(
-            String cacheKey,
-            P payloadModel,
-            String url,
-            HttpMethod method,
-            boolean useCache,
-            Listeners.ApiListener<List<T>> listener,
-            Class<T> clazz
-    ) {
-        try {
-            if (useCache && cache.containsKey(cacheKey)) {
-                listener.onReceived((List<T>) cache.get(cacheKey), true);
+                callback.onSuccess((T) cache.get(cacheKey), true);
                 return;
             }
 
@@ -158,42 +105,181 @@ public class APIManager {
                     ? new JSONObject(gson.toJson(payloadModel))
                     : null;
 
+            JsonObjectRequest request = new JsonObjectRequest(
+                    convertMethod(method),
+                    url,
+                    payload,
+                    response -> {
+                        try {
+
+                            // --------------- Handling null responses safely ----------------------
+
+                            if (response == null || response.toString().equals("null")) {
+
+                                // اگر مدل EmptyResponse بود → بدون JSON استفاده شود
+                                if (clazz.equals(EmptyResponse.class)) {
+                                    T model = clazz.getDeclaredConstructor().newInstance();
+                                    callback.onSuccess(model, false);
+                                    return;
+                                }
+
+                                // در غیر اینصورت یک JSONObject خالی
+                                response = new JSONObject();
+                            }
+
+                            // ---------------- Parse "data" or fallback to root ------------------
+
+                            JSONObject data = response.optJSONObject("data");
+                            if (data == null) data = response;
+
+                            T model = gson.fromJson(data.toString(), clazz);
+
+                            cache.put(cacheKey, model);
+                            callback.onSuccess(model, false);
+
+                        } catch (Exception ex) {
+                            callback.onError(-2, ex.getMessage());
+                        }
+                    },
+                    error -> {
+                        int code = 0;
+                        String message = "Unknown error";
+
+                        try {
+                            if (error.networkResponse != null) {
+                                code = error.networkResponse.statusCode;
+
+                                String body = new String(
+                                        error.networkResponse.data,
+                                        StandardCharsets.UTF_8
+                                ).trim();
+
+                                message = (body.isEmpty()) ? "Empty error response" : body;
+                            }
+                        } catch (Exception e2) {
+                            message = e2.getMessage();
+                        }
+
+                        callback.onError(code, message);
+                    }
+            ) {
+
+                // ---------------- Force accept empty/null server responses ------------------
+                @Override
+                protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                    try {
+                        String jsonString = new String(
+                                response.data,
+                                HttpHeaderParser.parseCharset(response.headers, "utf-8")
+                        ).trim();
+
+                        // Handle null / empty / 204
+                        if (jsonString.isEmpty() ||
+                                jsonString.equals("null") ||
+                                response.statusCode == 204) {
+
+                            return Response.success(
+                                    new JSONObject(), // return empty object
+                                    HttpHeaderParser.parseCacheHeaders(response)
+                            );
+                        }
+
+                        return super.parseNetworkResponse(response);
+
+                    } catch (Exception e) {
+                        return Response.error(new ParseError(e));
+                    }
+                }
+
+                @Override
+                public Map<String, String> getHeaders() {
+                    return buildHeaders();
+                }
+            };
+
+            requestQueue.add(request);
+
+        } catch (Exception e) {
+            callback.onError(-1, e.getMessage());
+        }
+    }
+
+
+    // -------------------------------------
+    //      List Request
+    // -------------------------------------
+
+    public <T, P> void requestList(
+            String cacheKey,
+            P payloadModel,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            ApiCallback<List<T>> callback,
+            Class<T> clazz
+    ) {
+        try {
+
+            if (useCache && cache.containsKey(cacheKey)) {
+                callback.onSuccess((List<T>) cache.get(cacheKey), true);
+                return;
+            }
+
+            Gson gson = new GsonBuilder()
+                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                    .create();
+
+            JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
+
             CustomJsonArrayRequest request = new CustomJsonArrayRequest(
                     convertMethod(method),
                     url,
                     payload,
                     buildHeaders(),
-                    responseArray -> {
+                    jsonArray -> {
 
                         List<T> list = new ArrayList<>();
 
-                        for (int i = 0; i < responseArray.length(); i++) {
-                            JSONObject item = responseArray.optJSONObject(i);
-                            T model = gson.fromJson(item.toString(), clazz);  // ← تبدیل خودکار
-                            list.add(model);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject item = jsonArray.optJSONObject(i);
+                            list.add(gson.fromJson(item.toString(), clazz));
                         }
 
                         cache.put(cacheKey, list);
-                        listener.onReceived(list, false);
+                        callback.onSuccess(list, false);
                     },
-                    error -> listener.onReceived(null, false)
+                    error -> {
+
+                        int code = 0;
+                        String msg = "Unknown error";
+
+                        if (error.networkResponse != null) {
+                            code = error.networkResponse.statusCode;
+                            msg = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+                        }
+
+                        callback.onError(code, msg);
+                    }
             );
 
             requestQueue.add(request);
 
         } catch (Exception e) {
-            listener.onReceived(null, false);
+            callback.onError(-1, e.getMessage());
         }
     }
 
 
-
     private int convertMethod(HttpMethod method) {
         switch (method) {
-            case POST: return Request.Method.POST;
-            case PUT: return Request.Method.PUT;
-            case DELETE: return Request.Method.DELETE;
-            default: return Request.Method.GET;
+            case POST:
+                return Request.Method.POST;
+            case PUT:
+                return Request.Method.PUT;
+            case DELETE:
+                return Request.Method.DELETE;
+            default:
+                return Request.Method.GET;
         }
     }
 }

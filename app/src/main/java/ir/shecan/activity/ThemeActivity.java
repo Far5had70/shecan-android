@@ -1,5 +1,7 @@
 package ir.shecan.activity;
 
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -31,15 +33,20 @@ public class ThemeActivity extends AppCompatActivity {
         binding = ActivityThemeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.toolbar.back.setVisibility(VISIBLE);
+        binding.toolbar.back.setOnClickListener(v ->
+                getOnBackPressedDispatcher().onBackPressed()
+        );
+
         setupRecycler();
     }
 
     private void setupRecycler() {
 
         List<ThemeItem> list = new ArrayList<>();
+        list.add(new ThemeItem(getString(R.string.systemSetting), AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM));
         list.add(new ThemeItem(getString(R.string.lightMode), AppCompatDelegate.MODE_NIGHT_NO));
         list.add(new ThemeItem(getString(R.string.darkMode), AppCompatDelegate.MODE_NIGHT_YES));
-        list.add(new ThemeItem(getString(R.string.systemSetting), AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM));
 
         int mode = AppCompatDelegate.MODE_NIGHT_NO;
         AppStorage appStorage = new AppStorage(getApplicationContext());

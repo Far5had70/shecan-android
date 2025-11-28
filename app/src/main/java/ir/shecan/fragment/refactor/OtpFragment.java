@@ -16,12 +16,14 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.api.ApiCallback;
 import ir.shecan.api.ApiEndpoint;
 import ir.shecan.api.ApiRepository;
 import ir.shecan.api.AuthApi;
@@ -30,6 +32,7 @@ import ir.shecan.databinding.FragmentOtpBinding;
 import ir.shecan.modelDio.LoginApiInput;
 import ir.shecan.modelDio.SendOtpApiInput;
 import ir.shecan.modelDio.VerifyApiInput;
+import ir.shecan.modelDto.SendOtpApiViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
@@ -157,8 +160,16 @@ public class OtpFragment extends Fragment {
     private void startTimer() {
 
         AuthApi auth = new AuthApi(requireContext());
-        auth.sendOtp(identifier, (response, fromCache1) -> {
+        auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
+            @Override
+            public void onSuccess(SendOtpApiViewModel data, boolean fromCache) {
 
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
         });
 
         binding.otpLayout.tvResend.setVisibility(TextView.GONE);
@@ -194,24 +205,31 @@ public class OtpFragment extends Fragment {
         auth.verifyOtp(
                 identifier,
                 code.toString(),
-                (res, fromCache) -> {
+                new ApiCallback<VerifyApiViewModel>() {
+                    @Override
+                    public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+                        showLoading(false);
 
-                    showLoading(false);
-
-                    if (res != null) {
-                        AppStorage storage = new AppStorage(getContext());
-                        storage.saveToken(res);
-                        if (isExist) {
-                            getActivity().finish();
+                        if (res != null) {
+                            AppStorage storage = new AppStorage(getContext());
+                            storage.saveToken(res);
+                            if (isExist) {
+                                getActivity().finish();
+                            } else {
+                                getActivity().getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.fragmentContainer, new SignUpFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            }
                         } else {
-                            getActivity().getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .replace(R.id.fragmentContainer, new SignUpFragment())
-                                    .addToBackStack(null)
-                                    .commit();
+                            shakeError(getString(R.string.codeIsWrong));
                         }
-                    } else {
-                        shakeError(getString(R.string.codeIsWrong));
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                     }
                 }
         );

@@ -2,23 +2,16 @@ package ir.shecan.api;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ir.shecan.api.ApiRepository;
-import ir.shecan.api.HttpMethod;
-import ir.shecan.api.Listeners;
 import ir.shecan.modelDio.ExistApiInput;
 import ir.shecan.modelDio.LoginApiInput;
 import ir.shecan.modelDio.SendOtpApiInput;
 import ir.shecan.modelDio.VerifyApiInput;
 import ir.shecan.modelDto.AccountViewModel;
+import ir.shecan.modelDto.EmptyResponse;
 import ir.shecan.modelDto.ExistApiViewModel;
 import ir.shecan.modelDto.IssuesViewModel;
 import ir.shecan.modelDto.SendOtpApiViewModel;
@@ -32,13 +25,11 @@ public class AuthApi {
         repo = new ApiRepository(context);
     }
 
-    // ------------------------
+    // ---------------------------------------------------
     // 1) exists
-    // ------------------------
-    public void exists(
-            String identifier,
-            Listeners.ApiListener<ExistApiViewModel> listener
-    ) {
+    // ---------------------------------------------------
+    public void exists(String identifier, ApiCallback<ExistApiViewModel> callback) {
+
         ExistApiInput input = new ExistApiInput(identifier);
 
         repo.request(
@@ -47,19 +38,16 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/exists",
                 HttpMethod.POST,
                 false,
-                listener,
+                callback,
                 ExistApiViewModel.class
         );
     }
 
-    // ------------------------
+    // ---------------------------------------------------
     // 2) login
-    // ------------------------
-    public void login(
-            String identifier,
-            String password,
-            Listeners.ApiListener<VerifyApiViewModel> listener
-    ) {
+    // ---------------------------------------------------
+    public void login(String identifier, String password, ApiCallback<VerifyApiViewModel> callback) {
+
         LoginApiInput input = new LoginApiInput(identifier, password);
 
         repo.request(
@@ -68,18 +56,16 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/login",
                 HttpMethod.POST,
                 false,
-                listener,
+                callback,
                 VerifyApiViewModel.class
         );
     }
 
-    // ------------------------
-    // 3) send otp
-    // ------------------------
-    public void sendOtp(
-            String identifier,
-            Listeners.ApiListener<SendOtpApiViewModel> listener
-    ) {
+    // ---------------------------------------------------
+    // 3) send OTP
+    // ---------------------------------------------------
+    public void sendOtp(String identifier, ApiCallback<SendOtpApiViewModel> callback) {
+
         SendOtpApiInput input = new SendOtpApiInput(identifier);
 
         repo.request(
@@ -88,19 +74,16 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/send-otp",
                 HttpMethod.POST,
                 false,
-                listener,
+                callback,
                 SendOtpApiViewModel.class
         );
     }
 
-    // ------------------------
-    // 4) verify otp
-    // ------------------------
-    public void verifyOtp(
-            String identifier,
-            String code,
-            Listeners.ApiListener<VerifyApiViewModel> listener
-    ) {
+    // ---------------------------------------------------
+    // 4) verify OTP
+    // ---------------------------------------------------
+    public void verifyOtp(String identifier, String code, ApiCallback<VerifyApiViewModel> callback) {
+
         VerifyApiInput input = new VerifyApiInput(code, identifier);
 
         repo.requestList(
@@ -109,27 +92,32 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/verify",
                 HttpMethod.POST,
                 false,
-                (response, fromCache) -> {
-                    if (response == null || response.isEmpty()) {
-                        listener.onReceived(null, false);
-                    } else {
-                        VerifyApiViewModel model = response.get(0);
-                        listener.onReceived(model, false);
+                new ApiCallback<List<VerifyApiViewModel>>() {
+                    @Override
+                    public void onSuccess(List<VerifyApiViewModel> list, boolean fromCache) {
+
+                        if (list == null || list.isEmpty()) {
+                            callback.onSuccess(null, false);
+                            return;
+                        }
+
+                        callback.onSuccess(list.get(0), false);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        callback.onError(statusCode, message);
                     }
                 },
                 VerifyApiViewModel.class
         );
-
     }
 
-    // ------------------------
+    // ---------------------------------------------------
     // 5) update password
-    // ------------------------
-    public void updatePassword(
-            String apiKey,
-            String password,
-            Listeners.ApiListener<Void> listener
-    ) {
+    // ---------------------------------------------------
+    public void updatePassword(String apiKey, String password, ApiCallback<EmptyResponse> callback) {
+
         Map<String, String> payload = new HashMap<>();
         payload.put("api_key", apiKey);
         payload.put("password", password);
@@ -140,35 +128,33 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/update",
                 HttpMethod.PUT,
                 false,
-                listener,
-                Void.class
+                callback,
+                EmptyResponse.class
         );
     }
 
-    // ------------------------
+    // ---------------------------------------------------
     // 6) update profile
-    // ------------------------
+    // ---------------------------------------------------
     public void updateProfile(
             String apiKey,
             String firstname,
             String lastname,
             String companyName,
             String mail,
-            Listeners.ApiListener<Void> listener
+            ApiCallback<EmptyResponse> callback
     ) {
+
         Map<String, String> payload = new HashMap<>();
         payload.put("api_key", apiKey);
         payload.put("firstname", firstname);
         payload.put("lastname", lastname);
 
-        if (companyName != null){
-            payload.put("company_name", companyName);
-        }
-
-
-        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+        if (companyName != null) payload.put("company_name", companyName);
 
         payload.put("mail", mail);
+
+        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
 
         repo.request(
                 "update_profile",
@@ -176,18 +162,15 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/update",
                 HttpMethod.PUT,
                 false,
-                listener,
-                Void.class
+                callback,
+                EmptyResponse.class
         );
     }
 
-    // ------------------------
-    // 7) get account info
-    // ------------------------
-    public void me(
-            String apiKey,
-            Listeners.ApiListener<AccountViewModel> listener
-    ) {
+    // ---------------------------------------------------
+    // 7) me (account info)
+    // ---------------------------------------------------
+    public void me(String apiKey, ApiCallback<AccountViewModel> callback) {
 
         repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
 
@@ -197,25 +180,22 @@ public class AuthApi {
                 "https://my.shecan.ir/my/account.json?key=" + apiKey,
                 HttpMethod.GET,
                 false,
-                listener,
+                callback,
                 AccountViewModel.class
         );
     }
 
-    // ------------------------
-    // 8) get issues
-    // ------------------------
-    public void issues(
-            String apiKey,
-            int offset,
-            int limit,
-            Listeners.ApiListener<IssuesViewModel> listener
-    ) {
+    // ---------------------------------------------------
+    // 8) issues
+    // ---------------------------------------------------
+    public void issues(String apiKey, int offset, int limit, ApiCallback<IssuesViewModel> callback) {
+
         repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
 
-        String url = "https://my.shecan.ir/issues.json?offset=" + offset +
-                "&limit=" + limit +
-                "&key=" + apiKey;
+        String url =
+                "https://my.shecan.ir/issues.json?offset=" + offset +
+                        "&limit=" + limit +
+                        "&key=" + apiKey;
 
         repo.request(
                 "issues",
@@ -223,7 +203,7 @@ public class AuthApi {
                 url,
                 HttpMethod.GET,
                 false,
-                listener,
+                callback,
                 IssuesViewModel.class
         );
     }
