@@ -30,15 +30,15 @@ public class ConfigListFragment extends ToolbarFragment {
         binding = FragmentConfigListBinding.inflate(inflater, container, false);
 
         List<ServiceItem> serviceItems = new ArrayList<>();
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.newConnection), R.drawable.ic_new, ContextCompat.getColor(getContext(), R.color.serviceRowBodyColor)));
+        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.newConnection), R.drawable.ic_new, ContextCompat.getColor(getContext(), R.color.primaryTextColor)));
         serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.expiring), R.drawable.ic_alert, ContextCompat.getColor(getContext(), R.color.colorAccent)));
-        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.waitingForActivate), R.drawable.ic_watch, ContextCompat.getColor(getContext(), R.color.serviceRowBodyColor)));
+        serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.waitingForActivate), R.drawable.ic_watch, ContextCompat.getColor(getContext(), R.color.primaryTextColor)));
         serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.bronze), getString(R.string.active), R.drawable.ic_connect, ContextCompat.getColor(getContext(), R.color.connectionIsActiveColor)));
         serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.gold), getString(R.string.readyToConnect), R.drawable.ic_done, ContextCompat.getColor(getContext(), R.color.connectionIsReadyColor)));
         serviceItems.add(new ServiceItem("۲۹۳۲۸۶۴", getString(R.string.free), getString(R.string.readyToConnect), R.drawable.ic_done, ContextCompat.getColor(getContext(), R.color.connectionIsReadyColor)));
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(new ServiceAdapter(serviceItems, item -> {
+        binding.recyclerView.setAdapter(new ServiceAdapter(getContext(),serviceItems, item -> {
             SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
             bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
         }));

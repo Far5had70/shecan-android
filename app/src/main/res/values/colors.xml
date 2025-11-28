@@ -59,8 +59,14 @@
     <color name="graySelectedFillStrokeColor">#D8DDDD</color>
     <color name="notSelectedFillStrokeColor">#EAECEC</color>
     <color name="black2">#05000000</color>
+    <color name="black4">#0A000000</color>
     <color name="black7">#12000000</color>
+    <color name="black10">#1A000000</color>
+    <color name="white4">#0AFFFFFF</color>
+    <color name="white7">#12FFFFFF</color>
     <color name="profileRadiusColor">#26000000</color>
+    <color name="lightBack">#F5FAF9</color>
+    <color name="mainBack">#FFFFFF</color>
 
 
 </resources>
