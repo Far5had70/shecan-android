@@ -13,7 +13,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.Request;
@@ -27,9 +26,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
-//import com.pushpole.sdk.NotificationButtonData;
-//import com.pushpole.sdk.NotificationData;
-//import com.pushpole.sdk.PushPole;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,7 +102,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
     private ScheduledExecutorService scheduler;
 
-    private MutableLiveData<Integer> vpnState = new MutableLiveData<>();
+    private final MutableLiveData<Integer> vpnState = new MutableLiveData<>();
 
     @Override
     public void onCreate() {
@@ -178,10 +174,10 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     private void initDirectory(String dir) {
         File directory = new File(dir);
         if (!directory.isDirectory()) {
-            Logger.warning(dir + " is not a directory. Delete result: " + String.valueOf(directory.delete()));
+            Logger.warning(dir + " is not a directory. Delete result: " + directory.delete());
         }
         if (!directory.exists()) {
-            Logger.debug(dir + " does not exist. Create result: " + String.valueOf(directory.mkdirs()));
+            Logger.debug(dir + " does not exist. Create result: " + directory.mkdirs());
         }
     }
 

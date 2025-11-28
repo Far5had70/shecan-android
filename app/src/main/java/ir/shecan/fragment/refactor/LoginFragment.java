@@ -15,20 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import ir.shecan.R;
 import ir.shecan.api.ApiCallback;
-import ir.shecan.api.ApiEndpoint;
-import ir.shecan.api.ApiRepository;
 import ir.shecan.api.AuthApi;
-import ir.shecan.api.HttpMethod;
-import ir.shecan.api.Listeners;
 import ir.shecan.databinding.FragmentLoginBinding;
-import ir.shecan.modelDio.ExistApiInput;
 import ir.shecan.modelDto.ExistApiViewModel;
-import ir.shecan.modelDto.SendOtpApiViewModel;
 
 public class LoginFragment extends Fragment {
 

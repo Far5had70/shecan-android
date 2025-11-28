@@ -1,11 +1,8 @@
 package ir.shecan.activity;
 
-import android.app.ActivityOptions;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.Window;
-import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;

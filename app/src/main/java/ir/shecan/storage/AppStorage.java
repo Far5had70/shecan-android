@@ -2,8 +2,6 @@ package ir.shecan.storage;
 
 import android.content.Context;
 
-import com.google.gson.reflect.TypeToken;
-
 public class AppStorage {
 
     private static final String Token_KEY = "TOKEN_MODEL";

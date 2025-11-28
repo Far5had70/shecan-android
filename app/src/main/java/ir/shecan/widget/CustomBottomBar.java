@@ -1,7 +1,6 @@
 package ir.shecan.widget;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
@@ -17,7 +16,7 @@ import ir.shecan.databinding.CustomBottomBarBinding;
 
 public class CustomBottomBar extends LinearLayout {
 
-    private CustomBottomBarBinding binding;
+    private final CustomBottomBarBinding binding;
     private final List<Item> items = new ArrayList<>();
     private int selectedIndex = -1;
 

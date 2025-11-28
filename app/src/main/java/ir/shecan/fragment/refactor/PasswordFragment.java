@@ -3,7 +3,6 @@ package ir.shecan.fragment.refactor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,19 +17,15 @@ import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
 import ir.shecan.api.ApiCallback;
-import ir.shecan.api.ApiEndpoint;
-import ir.shecan.api.ApiRepository;
 import ir.shecan.api.AuthApi;
-import ir.shecan.api.HttpMethod;
 import ir.shecan.databinding.FragmentPasswordBinding;
-import ir.shecan.modelDio.LoginApiInput;
 import ir.shecan.modelDto.SendOtpApiViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
 public class PasswordFragment extends Fragment {
 
-    private String identifier;
+    private final String identifier;
 
     public PasswordFragment(String identifier) {
         this.identifier = identifier;

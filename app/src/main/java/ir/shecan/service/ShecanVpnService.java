@@ -482,7 +482,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
             if (notification != null && provider != null) {
                 try {
                     long queries = provider.getDnsQueryTimes();
-                    notification.setContentTitle(getResources().getString(R.string.notice_queries) + " " + String.valueOf(queries));
+                    notification.setContentTitle(getResources().getString(R.string.notice_queries) + " " + queries);
                     NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
                     if (manager != null)
                         manager.notify(NOTIFICATION_ACTIVATED, notification.build());

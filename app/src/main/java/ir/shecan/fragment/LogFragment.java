@@ -49,7 +49,7 @@ public class LogFragment extends ToolbarFragment implements Toolbar.OnMenuItemCl
         try {
             String file = Shecan.logPath +
                     "Shecan-" +
-                    String.valueOf(System.currentTimeMillis()) +
+                    System.currentTimeMillis() +
                     ".log";
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(Logger.getLog());

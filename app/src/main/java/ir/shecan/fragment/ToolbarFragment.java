@@ -1,15 +1,9 @@
 package ir.shecan.fragment;
 
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.View;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.navigation.NavigationView;
-
-import ir.shecan.R;
 
 /**
  * Shecan Project

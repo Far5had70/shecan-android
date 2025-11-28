@@ -1,7 +1,7 @@
 package ir.shecan.api;
 
 import android.content.Context;
-import org.json.JSONArray;
+
 import java.util.List;
 
 public class ApiRepository {

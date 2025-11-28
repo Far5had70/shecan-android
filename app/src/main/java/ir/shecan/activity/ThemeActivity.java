@@ -19,7 +19,6 @@ import ir.shecan.adapter.ThemeAdapter;
 import ir.shecan.databinding.ActivityThemeBinding;
 import ir.shecan.modelDto.AppConfig;
 import ir.shecan.modelDto.ThemeItem;
-import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
 public class ThemeActivity extends AppCompatActivity {

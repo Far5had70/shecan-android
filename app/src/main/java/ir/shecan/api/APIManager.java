@@ -1,23 +1,20 @@
 package ir.shecan.api;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -154,7 +151,24 @@ public class APIManager {
                                         StandardCharsets.UTF_8
                                 ).trim();
 
-                                message = (body.isEmpty()) ? "Empty error response" : body;
+                                if (body.isEmpty()) {
+                                    message = "Empty error response";
+                                } else {
+                                    try {
+                                        JSONObject obj = new JSONObject(body);
+
+                                        if (obj.has("error")) {
+                                            message = obj.getString("error");
+                                        } else if (obj.has("message")) {
+                                            message = obj.getString("message");
+                                        } else {
+                                            message = body;
+                                        }
+
+                                    } catch (JSONException je) {
+                                        message = body;
+                                    }
+                                }
                             }
                         } catch (Exception e2) {
                             message = e2.getMessage();

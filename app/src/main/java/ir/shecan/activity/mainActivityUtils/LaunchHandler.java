@@ -4,7 +4,10 @@ import android.content.Intent;
 
 import ir.shecan.Shecan;
 import ir.shecan.activity.MainActivityNew;
-import ir.shecan.fragment.*;
+import ir.shecan.fragment.AboutFragment;
+import ir.shecan.fragment.DNSTestFragment;
+import ir.shecan.fragment.LogFragment;
+import ir.shecan.fragment.SettingsFragment;
 import ir.shecan.fragment.refactor.HomeFragment;
 
 public final class LaunchHandler {

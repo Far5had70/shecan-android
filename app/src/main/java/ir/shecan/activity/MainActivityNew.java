@@ -19,8 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -227,7 +225,7 @@ public class MainActivityNew extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
 
         try {
-            ToolbarFragment fragment = (ToolbarFragment) FragmentNavigator.switchFragment(
+            ToolbarFragment fragment = FragmentNavigator.switchFragment(
                     fm,
                     R.id.id_content,
                     fragmentClass,

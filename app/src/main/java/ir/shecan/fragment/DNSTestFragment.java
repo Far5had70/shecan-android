@@ -195,7 +195,7 @@ public class DNSTestFragment extends ToolbarFragment {
                     if (response != null && !response.answerSection.isEmpty()) {
                         for (Record record : response.answerSection) {
                             if (record.getPayload().getType() == type) {
-                                testText.append("\n").append(getString(R.string.test_result_resolved)).append(" ").append(record.getPayload().toString());
+                                testText.append("\n").append(getString(R.string.test_result_resolved)).append(" ").append(record.getPayload());
                             }
                         }
                         testText.append("\n").append(getString(R.string.test_time_used)).append(" ").
@@ -218,7 +218,7 @@ public class DNSTestFragment extends ToolbarFragment {
             }
         };
 
-        final Button startTestBut = (Button) view.findViewById(R.id.button_start_test);
+        final Button startTestBut = view.findViewById(R.id.button_start_test);
         startTestBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

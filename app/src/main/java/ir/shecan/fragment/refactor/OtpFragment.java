@@ -15,7 +15,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,22 +23,16 @@ import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
 import ir.shecan.api.ApiCallback;
-import ir.shecan.api.ApiEndpoint;
-import ir.shecan.api.ApiRepository;
 import ir.shecan.api.AuthApi;
-import ir.shecan.api.HttpMethod;
 import ir.shecan.databinding.FragmentOtpBinding;
-import ir.shecan.modelDio.LoginApiInput;
-import ir.shecan.modelDio.SendOtpApiInput;
-import ir.shecan.modelDio.VerifyApiInput;
 import ir.shecan.modelDto.SendOtpApiViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
 
 public class OtpFragment extends Fragment {
 
-    private String identifier;
-    private boolean isExist;
+    private final String identifier;
+    private final boolean isExist;
 
     public OtpFragment(String identifier, boolean isExist) {
         this.identifier = identifier;

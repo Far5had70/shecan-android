@@ -15,9 +15,9 @@ public class LoadingCircleView extends View {
     private RectF rectF;
 
     private float sweepAngle = 90f;       // مقدار پیشفرض
-    private float startAngle = 225f;
+    private final float startAngle = 225f;
     private float rotation = 0f;
-    private int strokeWidth = 8;
+    private final int strokeWidth = 8;
 
     private float circleSizePercent = 1.0f;
 

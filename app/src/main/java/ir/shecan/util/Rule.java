@@ -123,7 +123,7 @@ public class Rule {
             Shecan.configurations.getDnsmasqRules().remove(this);
         }
         File file = new File(getFileName());
-        Logger.info("Delete rule " + getName() + " result: " + String.valueOf(file.delete()));
+        Logger.info("Delete rule " + getName() + " result: " + file.delete());
     }
 
 

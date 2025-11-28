@@ -3,8 +3,6 @@ package ir.shecan.activity;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-import static java.security.AccessController.getContext;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
