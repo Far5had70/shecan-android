@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="250dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    >
 
     <!-- ring = 86% سایز circle -->
     <ImageView
@@ -36,9 +37,9 @@
         android:id="@+id/circle"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintWidth_percent="1.0"
+        app:layout_constraintWidth_percent="1.4"
         app:layout_constraintDimensionRatio="1:1"
-        android:src="@drawable/button_circle"
+        android:src="@drawable/button_circle3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

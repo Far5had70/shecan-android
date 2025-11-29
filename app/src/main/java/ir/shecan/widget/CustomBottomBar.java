@@ -70,10 +70,10 @@ public class CustomBottomBar extends LinearLayout {
                 it.binding.icon.setImageResource(it.activeRes);
 
                 // Scale 3X
-                it.binding.icon.animate().scaleX(3f).scaleY(3f).setDuration(0).start();
+                it.binding.icon.animate().scaleX(3.5f).scaleY(3.5f).setDuration(0).start();
 
                 it.binding.label.setTextColor(
-                        ContextCompat.getColor(getContext(), R.color.bottomNavigationActiveTextColor)
+                        ContextCompat.getColor(getContext(), R.color.primaryTextColor)
                 );
             } else {
                 it.binding.icon.setImageResource(it.inactiveRes);
@@ -82,7 +82,7 @@ public class CustomBottomBar extends LinearLayout {
                 it.binding.icon.animate().scaleX(1f).scaleY(1f).setDuration(0).start();
 
                 it.binding.label.setTextColor(
-                        ContextCompat.getColor(getContext(), R.color.bottomNavigationInactiveTextColor)
+                        ContextCompat.getColor(getContext(), R.color.greenSecondaryTextColor)
                 );
             }
         }

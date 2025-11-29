@@ -42,6 +42,7 @@
     <color name="profileRadiusColor">#26FFFFFF</color>
     <color name="lightBack">#0E221B</color>
     <color name="mainBack">#071711</color>
+    <color name="bottomBarUnSelectedColor">#123029</color>
 
 
 
