@@ -68,6 +68,8 @@
     <color name="lightBack">#F5FAF9</color>
     <color name="mainBack">#FFFFFF</color>
     <color name="bottomBarUnSelectedColor">#DFE8E6</color>
+    <color name="inboxBoxColor">#FFFFFF</color>
+    <color name="progressHolderColor">#F0F0F0</color>
 
 
 </resources>

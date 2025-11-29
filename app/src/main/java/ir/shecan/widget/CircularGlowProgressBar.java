@@ -11,20 +11,25 @@ import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.core.content.ContextCompat;
+
+import ir.shecan.R;
+
 public class CircularGlowProgressBar extends View {
 
     private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint outerGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint backgroundRingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private RectF arcRect;
-    private int progress = 60;   // مقدار پیشفرض
+    private int progress = 60;
 
     private int[] gradientColors = {
             0xFFFF6A00, // نارنجی
             0xFF00C853, // سبز
             0xFF00E5FF, // آبی
-            0xFFFF6A00  // 🔥 تکرار رنگ اول برای حذف خط مرزی
+            0xFFFF6A00  // تکرار رنگ اول
     };
 
     public CircularGlowProgressBar(Context context) {
@@ -39,19 +44,26 @@ public class CircularGlowProgressBar extends View {
 
     private void init() {
 
-        setLayerType(LAYER_TYPE_SOFTWARE, null); // مهم برای Glow
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
 
-        // حلقه اصلی
+        // 🎨 حلقه پس‌زمینه خاکستری
+        backgroundRingPaint.setStyle(Paint.Style.STROKE);
+        backgroundRingPaint.setStrokeWidth(40f);   // ضخیم‌تر
+        backgroundRingPaint.setColor(ContextCompat.getColor(getContext(), R.color.progressHolderColor));
+        backgroundRingPaint.setStrokeCap(Paint.Cap.ROUND);
+        backgroundRingPaint.setAlpha(80);         // کمی محو
+
+        // 🎨 حلقه اصلی رنگی
         ringPaint.setStyle(Paint.Style.STROKE);
         ringPaint.setStrokeWidth(22f);
         ringPaint.setStrokeCap(Paint.Cap.ROUND);
 
-        // گلو داخلی دور رنگ
+        // 🎨 گلو داخلی
         glowPaint.setStyle(Paint.Style.STROKE);
         glowPaint.setStrokeWidth(15f);
         glowPaint.setMaskFilter(new BlurMaskFilter(20, BlurMaskFilter.Blur.NORMAL));
 
-        // هاله بیرونی خیلی محو
+        // 🎨 هاله بیرونی خیلی محو
         outerGlowPaint.setStyle(Paint.Style.STROKE);
         outerGlowPaint.setStrokeWidth(20f);
         outerGlowPaint.setMaskFilter(new BlurMaskFilter(40, BlurMaskFilter.Blur.NORMAL));
@@ -69,6 +81,7 @@ public class CircularGlowProgressBar extends View {
                 gradientColors,
                 null
         );
+
         ringPaint.setShader(shader);
         glowPaint.setShader(shader);
         outerGlowPaint.setShader(shader);
@@ -81,17 +94,20 @@ public class CircularGlowProgressBar extends View {
 
         float sweepAngle = (progress / 100f) * 360f;
 
-        // هاله‌ خیلی محو
+        // 1️⃣ حلقه پس‌زمینه خاکستری (ثابت)
+        canvas.drawArc(arcRect, 0, 360, false, backgroundRingPaint);
+
+        // 2️⃣ هاله خیلی محو
         canvas.drawArc(arcRect, -90, sweepAngle, false, outerGlowPaint);
 
-        // گلو ضخیم
+        // 3️⃣ گلو روشن
         canvas.drawArc(arcRect, -90, sweepAngle, false, glowPaint);
 
-        // حلقه اصلی
+        // 4️⃣ حلقه اصلی رنگی
         canvas.drawArc(arcRect, -90, sweepAngle, false, ringPaint);
     }
 
-    // -------------- Public API ------------------------
+    // ---------------- Public API ----------------
 
     public void setProgress(int value) {
         progress = Math.max(0, Math.min(100, value));

@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import java.util.ArrayList;
 import java.util.List;
 import ir.shecan.adapter.ServiceAdapter;
-import ir.shecan.bottomSheet.SubscriptionBottomSheet;
 import ir.shecan.databinding.FragmentConfigListBinding;
 import ir.shecan.fragment.ToolbarFragment;
+import ir.shecan.fragment.bottomSheet.SubscriptionBottomSheet;
 import ir.shecan.modelDto.IssuesViewModel;
 import ir.shecan.modelDto.ServiceItem;
 import ir.shecan.modelDto.ServiceItemMapper;
@@ -78,8 +78,8 @@ public class ConfigListFragment extends ToolbarFragment {
 
                     @Override
                     public void onOptionClicked(ServiceItem item) {
-//                        SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
-//                        bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
+                        SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance(item);
+                        bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
                     }
                 }
         );

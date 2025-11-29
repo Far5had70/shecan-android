@@ -1,9 +1,7 @@
 package ir.shecan.modelDto;
 
 import android.content.Context;
-
 import androidx.core.content.ContextCompat;
-
 import ir.shecan.R;
 import ir.shecan.constant.DurationType;
 import ir.shecan.constant.RequestStatus;
@@ -15,48 +13,79 @@ public class ServiceItemMapper {
 
         String orderCode = String.valueOf(dto.getId());
 
-        // استخراج نوع سرویس از Custom Fields → id = 58
         int serviceTypeId = getCustomFieldInt(dto, 58);
         ServiceType serviceType = ServiceType.fromId(serviceTypeId);
 
-        // استخراج مدت سرویس از Custom Fields → id = 21
         int durationId = getCustomFieldInt(dto, 21);
         DurationType durationType = DurationType.fromId(durationId);
 
-        // استخراج لینک بروزرسان از Custom Fields → id = 95
         String updateLink = getCustomFieldString(dto, 95);
 
-        // استخراج وضعیت
         RequestStatus status = RequestStatus.fromValue(dto.getStatus().getId());
-        if (status == null){
-            status = RequestStatus.READY_TO_CONNECT;
-        }
+        if (status == null) status = RequestStatus.READY_TO_CONNECT;
 
-        // تبدیل وضعیت به متن + آیکون + رنگ
         String statusText = getStatusTitle(context, status);
         int statusIcon = getStatusIcon(status);
         int statusColor = getStatusColor(context, status);
 
-        return new ServiceItem(
+        // ساخت ServiceItem
+        ServiceItem item = new ServiceItem(
                 orderCode,
-                serviceType.getTitle(),
+                serviceType != null ? serviceType.getTitle() : "",
                 statusText,
                 updateLink,
                 statusIcon,
                 statusColor,
                 dto
         );
+
+        // 🎉‌ ست کردن تمام فیلدهای جدید
+        item.id = dto.getId();
+
+        item.projectId = dto.getProject().getId();
+        item.projectName = dto.getProject().getName();
+
+        item.trackerId = dto.getTracker().getId();
+        item.trackerName = dto.getTracker().getName();
+
+        item.statusId = dto.getStatus().getId();
+        item.statusName = dto.getStatus().getName();
+
+        item.priorityId = dto.getPriority().getId();
+        item.priorityName = dto.getPriority().getName();
+
+        item.authorId = dto.getAuthor().getId();
+        item.authorName = dto.getAuthor().getName();
+
+        item.subject = dto.getSubject();
+        item.description = dto.getDescription();
+        item.startDate = dto.getStartDate();
+        item.dueDate = dto.getDueDate();
+        item.doneRatio = dto.getDoneRatio();
+        item.isPrivate = dto.isIsPrivate();
+        item.createdOn = dto.getCreatedOn();
+        item.updatedOn = dto.getUpdatedOn();
+        item.closedOn = dto.getClosedOn();
+
+        // custom fields
+        item.cfDuration = getCustomFieldInt(dto, 21);
+        item.cfNameFa = getCustomFieldString(dto, 5);
+        item.cfFamilyFa = getCustomFieldString(dto, 25);
+        item.cfMobile = getCustomFieldString(dto, 18);
+        item.cfEmail = getCustomFieldString(dto, 4);
+        item.cfWebsite = getCustomFieldString(dto, 36);
+        item.cfServiceType = getCustomFieldInt(dto, 58);
+        item.cfUpdateLink = getCustomFieldString(dto, 95);
+
+        return item;
     }
 
     private static int getCustomFieldInt(IssuesViewModel.IssuesDTO dto, int id) {
         if (dto.getCustomFields() == null) return 0;
         for (IssuesViewModel.IssuesDTO.CustomFieldsDTO c : dto.getCustomFields()) {
             if (c.getId() == id) {
-                try {
-                    return Integer.parseInt(c.getValue());
-                } catch (Exception e) {
-                    return 0;
-                }
+                try { return Integer.parseInt(c.getValue()); }
+                catch (Exception e) { return 0; }
             }
         }
         return 0;
@@ -66,16 +95,11 @@ public class ServiceItemMapper {
         if (dto.getCustomFields() == null) return "";
         for (IssuesViewModel.IssuesDTO.CustomFieldsDTO c : dto.getCustomFields()) {
             if (c.getId() == id) {
-                try {
-                    return c.getValue();
-                } catch (Exception e) {
-                    return "";
-                }
+                return c.getValue();
             }
         }
         return "";
     }
-
 
     private static String getStatusTitle(Context context, RequestStatus status) {
         switch (status) {
