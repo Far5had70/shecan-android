@@ -81,7 +81,7 @@ public class ProfileFragment extends ToolbarFragment {
                     break;
                 case 2:
 //                    openFragment(TransactionFragment.class);
-                    getActivity().startActivity(new Intent(getActivity(), AuthorizeActivity.class));
+//                    getActivity().startActivity(new Intent(getActivity(), AuthorizeActivity.class));
                     break;
                 case 3:
 //                    openFragment(DomainSupportFragment.class);

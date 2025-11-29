@@ -15,7 +15,7 @@ public class ThemeManager {
 
     private final Context context;
     private final AppStorage appStorage;
-    private int currentMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+    private int currentMode = AppCompatDelegate.MODE_NIGHT_NO;
 
     public ThemeManager(@NonNull Context context) {
         this.context = context.getApplicationContext();
@@ -28,6 +28,8 @@ public class ThemeManager {
         if (appConfig != null) {
             currentMode = appConfig.getMode();
             AppCompatDelegate.setDefaultNightMode(currentMode);
+        } else {
+            appStorage.saveAppConfig(new AppConfig(currentMode));
         }
     }
 
