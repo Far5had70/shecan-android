@@ -105,4 +105,9 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
     public int getItemCount() {
         return items.size();
     }
+
+    public void setSelectedPosition(int pos) {
+        this.selectedPosition = pos;
+        notifyDataSetChanged();
+    }
 }

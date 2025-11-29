@@ -8,7 +8,6 @@ import ir.shecan.R;
 import ir.shecan.constant.DurationType;
 import ir.shecan.constant.RequestStatus;
 import ir.shecan.constant.ServiceType;
-import ir.shecan.modelDto.IssuesViewModel;
 
 public class ServiceItemMapper {
 
@@ -23,6 +22,9 @@ public class ServiceItemMapper {
         // استخراج مدت سرویس از Custom Fields → id = 21
         int durationId = getCustomFieldInt(dto, 21);
         DurationType durationType = DurationType.fromId(durationId);
+
+        // استخراج لینک بروزرسان از Custom Fields → id = 95
+        String updateLink = getCustomFieldString(dto, 95);
 
         // استخراج وضعیت
         RequestStatus status = RequestStatus.fromValue(dto.getStatus().getId());
@@ -39,6 +41,7 @@ public class ServiceItemMapper {
                 orderCode,
                 serviceType.getTitle(),
                 statusText,
+                updateLink,
                 statusIcon,
                 statusColor,
                 dto
@@ -47,18 +50,32 @@ public class ServiceItemMapper {
 
     private static int getCustomFieldInt(IssuesViewModel.IssuesDTO dto, int id) {
         if (dto.getCustomFields() == null) return 0;
-        return dto.getCustomFields().stream()
-                .filter(c -> c.getId() == id)
-                .findFirst()
-                .map(c -> {
-                    try {
-                        return Integer.parseInt(c.getValue());
-                    } catch (Exception e) {
-                        return 0;
-                    }
-                })
-                .orElse(0);
+        for (IssuesViewModel.IssuesDTO.CustomFieldsDTO c : dto.getCustomFields()) {
+            if (c.getId() == id) {
+                try {
+                    return Integer.parseInt(c.getValue());
+                } catch (Exception e) {
+                    return 0;
+                }
+            }
+        }
+        return 0;
     }
+
+    private static String getCustomFieldString(IssuesViewModel.IssuesDTO dto, int id) {
+        if (dto.getCustomFields() == null) return "";
+        for (IssuesViewModel.IssuesDTO.CustomFieldsDTO c : dto.getCustomFields()) {
+            if (c.getId() == id) {
+                try {
+                    return c.getValue();
+                } catch (Exception e) {
+                    return "";
+                }
+            }
+        }
+        return "";
+    }
+
 
     private static String getStatusTitle(Context context, RequestStatus status) {
         switch (status) {

@@ -96,6 +96,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         setupDonatePadding();
         setupMainButton();
 
+        AppStorage appStorage = new AppStorage(getContext());
+        ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
+
+        ServiceItem finalServiceItem = serviceItem;
         binding.vpnButton.setOnClickListener(view -> {
 
             if (ShecanVpnService.isActivated()) {
@@ -107,32 +111,15 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 return;
             }
 
-            if (ShecanVpnService.isProMode()) {
-                if (ShecanVpnService.isDynamicIPMode()) {
-                    binding.linkUpdaterInputLayout.setError(null);
-                    binding.linkUpdaterInputLayout.setErrorEnabled(false);
-                    String updaterUrl = binding.linkUpdaterEditText.getText().toString().trim();
-                    if (updaterUrl.isEmpty()) {
-                        binding.linkUpdaterInputLayout.setError(getString(R.string.empty_link_updater_error));
-                        binding.linkUpdaterInputLayout.setErrorEnabled(true);
-                        return;
-                    }
-                    if (updaterUrl.contains("https://ddns.shecan.ir/update?password=")) {
-                        Shecan.setUpdaterLink(updaterUrl);
-                        ShecanVpnService.callCoreAPI(requireContext(), HomeFragment.this);
-                    } else {
-                        binding.linkUpdaterInputLayout.setError(getString(R.string.false_link_updater_error));
-                        binding.linkUpdaterInputLayout.setErrorEnabled(true);
-                    }
-                } else {
-                    isConnectBtnEnabled = false;
-                    startActivity(new Intent(requireActivity(), MainActivityNew.class)
-                            .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
-                }
-            } else {
-                Shecan app = (Shecan) requireContext().getApplicationContext();
-                app.getVpnState().setValue(1);
+            Shecan app = (Shecan) requireContext().getApplicationContext();
+            app.getVpnState().setValue(1);
 
+            if (isUpdateLinkMode(finalServiceItem)) {
+                String updaterUrl = "https://ddns.shecan.ir/update?password=" + finalServiceItem.getUpdateLink();
+                Shecan.setUpdaterLink(updaterUrl);
+                ShecanVpnService.callCoreAPI(requireContext(), HomeFragment.this);
+            } else {
+                isConnectBtnEnabled = false;
                 startActivity(new Intent(requireActivity(), MainActivityNew.class)
                         .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
             }
@@ -162,10 +149,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         });
 
 
-        AppStorage appStorage = new AppStorage(getContext());
-        ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
         if (serviceItem == null){
-            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free) , ""  , 0 , 0 , IssuesViewModel.IssuesDTO.createDefault());
+            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free) , "", ""  , 0 , 0 , IssuesViewModel.IssuesDTO.createDefault());
         }
         try {
             binding.servicePanel.setStatus(serviceItem);
@@ -174,15 +159,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         }
 
         binding.servicePanel.setOnClickListener(view -> {
-//            if (binding.servicePanel.isPurchased()) {
-//                binding.servicePanel.setStatus(
-//                        new ServiceStatusView.ServiceStatus("رایگان")
-//                );
-//            } else {
-//                binding.servicePanel.setStatus(
-//                        new ServiceStatusView.ServiceStatus("طلایی", "982341", "1404/06/28", "")
-//                );
-//            }
             activity.updateFragment(0);
             activity.binding.customBar.select(0);
         });
@@ -202,6 +178,20 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
 
         return root;
+    }
+
+    private boolean isUpdateLinkMode(ServiceItem serviceItem) {
+        if (serviceItem == null){
+            return false;
+        }
+        if (serviceItem.getUpdateLink() == null){
+            return false;
+        }
+        if (serviceItem.getUpdateLink().isEmpty()){
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -582,6 +572,9 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void onInvalid() {
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.getVpnState().setValue(0);
+
         stopBlinkAnimation();
         if (isAdded()) new RenewalDialog(requireActivity()).show();
     }

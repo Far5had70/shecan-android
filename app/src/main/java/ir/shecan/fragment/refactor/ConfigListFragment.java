@@ -55,8 +55,19 @@ public class ConfigListFragment extends ToolbarFragment {
     }
 
     private void setupRecyclerView(List<ServiceItem> items, AppStorage appStorage) {
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(new ServiceAdapter(
+        ServiceItem savedItem = appStorage.getServiceStatus(ServiceItem.class);
+
+        int defaultSelected = -1;
+        if (savedItem != null) {
+            for (int i = 0; i < items.size(); i++) {
+                if (items.get(i).getOrderCode().equals(savedItem.getOrderCode())) {
+                    defaultSelected = i;
+                    break;
+                }
+            }
+        }
+
+        ServiceAdapter adapter = new ServiceAdapter(
                 getContext(),
                 items,
                 new ServiceAdapter.OnMoreClickListener() {
@@ -71,7 +82,12 @@ public class ConfigListFragment extends ToolbarFragment {
                         bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
                     }
                 }
-        ));
+        );
+
+        adapter.setSelectedPosition(defaultSelected);
+
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
     }
 
     @Override

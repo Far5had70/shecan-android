@@ -4,17 +4,23 @@ public class ServiceItem {
     private final String orderCode;
     private final String serviceType;
     private final String statusText;
+    private final String updateLink;
     private final int statusIcon;
     private final int statusColor;
     private final IssuesViewModel.IssuesDTO model;
 
-    public ServiceItem(String orderCode, String serviceType, String statusText, int statusIcon, int statusColor, IssuesViewModel.IssuesDTO model) {
+    public ServiceItem(String orderCode, String serviceType, String statusText, String updateLink, int statusIcon, int statusColor, IssuesViewModel.IssuesDTO model) {
         this.orderCode = orderCode;
         this.serviceType = serviceType;
         this.statusText = statusText;
+        this.updateLink = updateLink;
         this.statusIcon = statusIcon;
         this.statusColor = statusColor;
         this.model = model;
+    }
+
+    public String getUpdateLink() {
+        return updateLink;
     }
 
     public String getOrderCode() {
