@@ -72,21 +72,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/sendAgain"
-        android:textColor="#009B63"
+        android:textColor="@color/greenMain"
         android:paddingTop="6dp"
         android:textSize="16sp"
         android:fontFamily="@font/iran_yekan_bold"
         android:visibility="gone"/>
 
     <!-- Verify button -->
-    <Button
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"/>
+
+    <ir.shecan.widget.CustomButton
         android:id="@+id/btnVerify"
+        style="@style/CustomButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:backgroundTint="#009B63"
-        android:text="@string/confirm"
-        android:textColor="#FFFFFF"
-        android:fontFamily="@font/iran_yekan_bold"/>
+        android:layout_margin="8dp"
+        android:text="@string/confirm" />
+
+
 
 </LinearLayout>

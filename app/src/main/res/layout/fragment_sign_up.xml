@@ -125,30 +125,27 @@
                                 android:layout_height="wrap_content"
                                 android:weightSum="2">
 
-                                <Button
+                                <ir.shecan.widget.CustomButton
                                     android:id="@+id/btnLogin"
+                                    style="@style/CustomButtonStyle"
                                     android:layout_width="0dp"
                                     android:layout_weight="1"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginHorizontal="16dp"
-                                    android:backgroundTint="@color/greenMain"
-                                    android:text="@string/login"
-                                    android:textColor="#FFFFFF"/>
+                                    android:layout_margin="8dp"
+                                    android:text="@string/login" />
 
-                                <Button
+                                <ir.shecan.widget.CustomButton
                                     android:id="@+id/btnPassword"
+                                    style="@style/CustomButtonStyle"
                                     android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginHorizontal="16dp"
                                     android:layout_weight="1"
-                                    android:backgroundTint="@color/greenMain"
-                                    android:text="@string/setPassword"
-                                    android:textColor="#FFFFFF" />
+                                    android:layout_height="wrap_content"
+                                    android:layout_margin="8dp"
+                                    android:text="@string/setPassword" />
 
                             </LinearLayout>
 
                         </LinearLayout>
-
 
                     </FrameLayout>
 

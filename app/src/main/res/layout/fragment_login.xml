@@ -88,6 +88,7 @@
                                 android:background="@drawable/edittext_rounded_box"
                                 android:gravity="start"
                                 android:padding="14dp"
+                                android:maxLines="1"
                                 android:hint="شماره همراه یا ایمیل"
                                 android:fontFamily="@font/iran_yekan_light"
                                 android:textColor="@color/greenPrimaryTextColor"
@@ -105,14 +106,14 @@
                                 android:background="@color/authorizeDividerColor" />
 
                             <!-- Button -->
-                            <Button
+
+                            <ir.shecan.widget.CustomButton
                                 android:id="@+id/btnContinue"
+                                style="@style/CustomButtonStyle"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginHorizontal="16dp"
-                                android:backgroundTint="#009B63"
-                                android:text="@string/continuee"
-                                android:textColor="#FFFFFF"/>
+                                android:layout_margin="8dp"
+                                android:text="@string/continuee" />
 
 
                         </LinearLayout>

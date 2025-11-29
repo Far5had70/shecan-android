@@ -188,4 +188,43 @@
         <item name="android:textColor">@color/greenPrimaryTextColor</item>
     </style>
 
+    <style name="ButtonBase" parent="Widget.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:elevation">0dp</item>
+        <item name="cornerRadius">12dp</item>
+<!--        <item name="insetTop">0dp</item>-->
+<!--        <item name="insetBottom">0dp</item>-->
+    </style>
+
+    <style name="ButtonPrimary" parent="ButtonBase">
+        <item name="backgroundTint">@color/greenMain</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="ButtonSecondary" parent="ButtonBase">
+        <item name="backgroundTint">@color/homeBackground</item>
+        <item name="strokeColor">@color/greenSecondaryTextColor</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="android:textColor">@color/greenSecondaryTextColor</item>
+    </style>
+
+    <style name="CustomButtonStyle">
+        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cb_primaryBackground">@color/greenMain</item>
+        <item name="cb_primaryTextColor">@android:color/white</item>
+
+        <item name="cb_secondaryBackground">@android:color/transparent</item>
+        <item name="cb_secondaryBorderColor">@color/black10</item>
+        <item name="cb_secondaryTextColor">@color/greenSecondaryTextColor</item>
+
+        <item name="cb_cornerRadius">12dp</item>
+        <item name="cb_defaultPadding">12dp</item>
+    </style>
+
+
+
 </resources>

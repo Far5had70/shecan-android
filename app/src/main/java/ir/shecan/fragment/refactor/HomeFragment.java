@@ -115,7 +115,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             app.getVpnState().setValue(1);
 
             if (isUpdateLinkMode(finalServiceItem)) {
-                String updaterUrl = "https://ddns.shecan.ir/update?password=" + finalServiceItem.getUpdateLink();
+                String updaterUrl = String.format("https://ddns.shecan.ir/update?password=%s", finalServiceItem.getUpdateLink());
                 Shecan.setUpdaterLink(updaterUrl);
                 ShecanVpnService.callCoreAPI(requireContext(), HomeFragment.this);
             } else {

@@ -64,7 +64,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                 getOnBackPressedDispatcher().onBackPressed()
         );
 
-        binding.btnLogin.setOnClickListener(v -> {
+        binding.btnSave.setOnClickListener(v -> {
             if (currentPosition == 1) {
                 updateProfile();
             } else {
@@ -176,11 +176,11 @@ public class UpdateProfileActivity extends AppCompatActivity {
     }
 
     private void showLoading(boolean loading) {
-        binding.btnLogin.setEnabled(!loading);
-        binding.btnLogin.setAlpha(loading ? 0.5f : 1f);
+        binding.btnSave.setEnabled(!loading);
+        binding.btnSave.setAlpha(loading ? 0.5f : 1f);
         binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
 
-        binding.btnLogin.setText(
+        binding.btnSave.setText(
                 loading ? "" : ContextCompat.getString(this, R.string.saveChange)
         );
     }

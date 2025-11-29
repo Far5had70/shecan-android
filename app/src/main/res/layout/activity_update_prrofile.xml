@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/homeBackground">
@@ -34,9 +35,9 @@
                     android:id="@+id/profileTab"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
                     android:layout_marginHorizontal="16dp"
-                    android:background="@drawable/profile_rounded_box">
+                    android:background="@drawable/profile_rounded_box"
+                    android:orientation="vertical">
 
                     <include
                         android:id="@+id/profileView"
@@ -52,10 +53,10 @@
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginVertical="12dp"
                         android:background="@drawable/edittext_profile_rounded_box"
-                        android:gravity="start"
-                        android:padding="14dp"
-                        android:hint="@string/persianName"
                         android:fontFamily="@font/iran_yekan_light"
+                        android:gravity="start"
+                        android:hint="@string/persianName"
+                        android:padding="14dp"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
                         android:textSize="14sp" />
@@ -67,10 +68,10 @@
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginVertical="12dp"
                         android:background="@drawable/edittext_profile_rounded_box"
-                        android:gravity="start"
-                        android:padding="14dp"
-                        android:hint="@string/persianFamilyName"
                         android:fontFamily="@font/iran_yekan_light"
+                        android:gravity="start"
+                        android:hint="@string/persianFamilyName"
+                        android:padding="14dp"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
                         android:textSize="14sp" />
@@ -79,14 +80,14 @@
                         android:id="@+id/edtEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginVertical="12dp"
                         android:background="@drawable/edittext_profile_rounded_box"
-                        android:gravity="start"
-                        android:padding="14dp"
-                        android:hint="@string/email"
                         android:fontFamily="@font/iran_yekan_light"
+                        android:gravity="start"
+                        android:hint="@string/email"
+                        android:inputType="textEmailAddress"
+                        android:padding="14dp"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
                         android:textSize="14sp" />
@@ -101,23 +102,23 @@
                     android:id="@+id/passwordTab"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:visibility="gone"
-                    android:orientation="vertical"
                     android:layout_marginHorizontal="16dp"
-                    android:background="@drawable/profile_rounded_box">
+                    android:background="@drawable/profile_rounded_box"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
                     <EditText
                         android:id="@+id/oldPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginVertical="12dp"
                         android:background="@drawable/edittext_profile_rounded_box"
-                        android:gravity="end"
-                        android:padding="14dp"
-                        android:hint="@string/password"
                         android:fontFamily="@font/iran_yekan_light"
+                        android:gravity="end"
+                        android:hint="@string/password"
+                        android:inputType="textPassword"
+                        android:padding="14dp"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
                         android:textSize="14sp" />
@@ -126,14 +127,14 @@
                         android:id="@+id/edtPasswordNew"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginVertical="12dp"
                         android:background="@drawable/edittext_profile_rounded_box"
-                        android:gravity="end"
-                        android:padding="14dp"
-                        android:hint="@string/passwordNew"
                         android:fontFamily="@font/iran_yekan_light"
+                        android:gravity="end"
+                        android:hint="@string/passwordNew"
+                        android:inputType="textPassword"
+                        android:padding="14dp"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
                         android:textSize="14sp" />
@@ -142,14 +143,14 @@
                         android:id="@+id/edtPasswordNewRepeat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginVertical="12dp"
                         android:background="@drawable/edittext_profile_rounded_box"
-                        android:gravity="end"
-                        android:padding="14dp"
-                        android:hint="@string/passwordNewRepeat"
                         android:fontFamily="@font/iran_yekan_light"
+                        android:gravity="end"
+                        android:hint="@string/passwordNewRepeat"
+                        android:inputType="textPassword"
+                        android:padding="14dp"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
                         android:textSize="14sp" />
@@ -172,37 +173,58 @@
         android:layout_gravity="bottom"
         android:background="@color/homeBackground"
         android:orientation="horizontal"
-        android:weightSum="3">
+        android:weightSum="10">
 
-        <Button
-            android:id="@+id/btnLogin"
+        <ir.shecan.widget.CustomButton
+            android:id="@+id/btnSave"
+            style="@style/CustomButtonStyle"
             android:layout_width="0dp"
-            android:layout_weight="2"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:backgroundTint="@color/greenMain"
-            android:text="@string/saveChange"
-            android:textColor="#FFFFFF"/>
+            android:layout_margin="8dp"
+            android:layout_weight="8"
+            android:text="@string/saveChange" />
 
-        <Button
+        <ir.shecan.widget.CustomButton
             android:id="@+id/btnCancel"
+            style="@style/CustomButtonStyle"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:backgroundTint="@color/homeBackground"
-            android:text="@string/cancel2"
-            android:textColor="@color/greenSecondaryTextColor"/>
+            android:layout_margin="8dp"
+            android:layout_weight="2"
+            android:text="@string/cancel"
+            app:type="secondary" />
+
+        <!--        <com.google.android.material.button.MaterialButton-->
+        <!--            android:id="@+id/btnLogin"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_weight="2"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            style="@style/ButtonPrimary"-->
+        <!--            android:layout_marginHorizontal="8dp"-->
+        <!--            android:backgroundTint="@color/greenMain"-->
+        <!--            android:text="@string/saveChange"-->
+        <!--            android:textColor="#FFFFFF"/>-->
+
+        <!--        <com.google.android.material.button.MaterialButton-->
+        <!--            android:id="@+id/btnCancel"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            style="@style/ButtonSecondary"-->
+        <!--            android:layout_marginHorizontal="8dp"-->
+        <!--            android:backgroundTint="@color/homeBackground"-->
+        <!--            android:text="@string/cancel2"-->
+        <!--            android:textColor="@color/greenSecondaryTextColor"/>-->
 
     </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progress"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center"
         android:indeterminateTint="@color/greenMain"
         android:indeterminateTintMode="src_in"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        android:layout_width="36dp"
-        android:layout_height="36dp" />
+        android:visibility="gone" />
 
 </FrameLayout>
