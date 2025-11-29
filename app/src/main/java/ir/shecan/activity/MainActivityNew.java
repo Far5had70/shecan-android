@@ -173,6 +173,7 @@ public class MainActivityNew extends AppCompatActivity {
                     }
             );
         }
+        updateConfigsIfSignedIn();
     }
 
     public void updateConfigsIfSignedIn() {

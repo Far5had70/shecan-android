@@ -78,8 +78,8 @@ public class ConfigListFragment extends ToolbarFragment {
 
                     @Override
                     public void onOptionClicked(ServiceItem item) {
-                        SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
-                        bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
+//                        SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance();
+//                        bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
                     }
                 }
         );
