@@ -47,6 +47,7 @@ public class ProfileFragment extends ToolbarFragment {
             updateUi();
         }
         ((MainActivityNew) getActivity()).updateLoginInformation();
+        ((MainActivityNew) getActivity()).binding.customBar.select(2);
     }
 
     private void updateUi() {
