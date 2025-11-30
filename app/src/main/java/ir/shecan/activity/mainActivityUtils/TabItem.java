@@ -5,7 +5,7 @@ import ir.shecan.fragment.refactor.HomeFragment;
 import ir.shecan.fragment.refactor.ProfileFragment;
 
 public enum TabItem {
-    CONFIG(0, "تراکنش ها", ConfigListFragment.class),
+    CONFIG(0, "سرویس ها", ConfigListFragment.class),
     HOME(1, null, HomeFragment.class),
     PROFILE(2, "تنظیمات", ProfileFragment.class);
 

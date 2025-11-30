@@ -3,6 +3,10 @@ package ir.shecan.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.core.content.ContextCompat;
@@ -35,7 +39,10 @@ public class CustomBottomBar extends LinearLayout {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         binding = CustomBottomBarBinding.inflate(inflater, this, true);
-
+        setClipChildren(false);
+        setClipToPadding(false);
+        setClickable(false);
+        setFocusable(false);
         setOrientation(HORIZONTAL);
     }
 
@@ -47,8 +54,10 @@ public class CustomBottomBar extends LinearLayout {
         Item item = new Item(itemBinding, inactiveRes, activeRes, title);
         items.add(item);
 
+        itemBinding.getRoot().setClickable(true);
+
         itemBinding.label.setText(title);
-        itemBinding.icon.setImageResource(inactiveRes);
+        itemBinding.iconNormal.setImageResource(inactiveRes);
 
         int index = items.size() - 1;
 
@@ -67,27 +76,25 @@ public class CustomBottomBar extends LinearLayout {
             Item it = items.get(i);
 
             if (i == index) {
-                it.binding.icon.setImageResource(it.activeRes);
-
-                // Scale 3X
-                it.binding.icon.animate().scaleX(3.5f).scaleY(3.5f).setDuration(0).start();
-
+                // آیکون فعال
+                it.binding.iconActive.setImageResource(it.activeRes);
+                it.binding.iconActive.setVisibility(VISIBLE);
+                it.binding.iconNormal.setVisibility(GONE);
                 it.binding.label.setTextColor(
                         ContextCompat.getColor(getContext(), R.color.primaryTextColor)
                 );
+
             } else {
-                it.binding.icon.setImageResource(it.inactiveRes);
-
-                // Scale back to normal
-                it.binding.icon.animate().scaleX(1f).scaleY(1f).setDuration(0).start();
-
+                // آیکون غیرفعال
+                it.binding.iconNormal.setImageResource(it.inactiveRes);
+                it.binding.iconNormal.setVisibility(VISIBLE);
+                it.binding.iconActive.setVisibility(GONE);
                 it.binding.label.setTextColor(
                         ContextCompat.getColor(getContext(), R.color.greenSecondaryTextColor)
                 );
             }
         }
     }
-
 
     private static class Item {
         BottomItemBinding binding;
@@ -101,6 +108,49 @@ public class CustomBottomBar extends LinearLayout {
             this.activeRes = activeRes;
             this.title = title;
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // لمس در فضای خالی نادیده گرفته شود
+        return false;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return false; // هیچی رو نگیر
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        float y = ev.getY();
+        float height = getHeight();
+
+        // فقط پایین‌ترین بخش کلیک‌پذیر باشد
+        float clickableHeight = height * 0.6f; // یعنی فقط 45% پایین کلیک شود
+
+        if (y < height - clickableHeight) {
+            // لمس در ناحیه غیرکلیک‌پذیر → عبور بده
+            return false;
+        }
+
+        // لمس در بخش واقعی bottom bar → اجازه بده فرزندان کلیک بگیرن
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void setIconSize(ImageView icon, float multiplier) {
+        int baseSize = dpToPx(52); // سایز اصلی (52dp)
+        int newSize = (int) (baseSize * multiplier);
+
+        ViewGroup.LayoutParams params = icon.getLayoutParams();
+        params.width = newSize;
+        params.height = newSize;
+        icon.setLayoutParams(params);
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
     }
 }
 

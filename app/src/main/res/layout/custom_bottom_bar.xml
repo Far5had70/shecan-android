@@ -1,7 +1,14 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
+<LinearLayout android:id="@+id/root"
     android:orientation="horizontal"
-    android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="200dp">
+    android:layout_height="200dp"
+    android:background="@drawable/bottom_bar_gradient"
+    android:layout_gravity="bottom"
+    android:gravity="bottom"
+    android:clickable="false"
+    android:focusable="false"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:splitMotionEvents="false"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 </LinearLayout>

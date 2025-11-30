@@ -117,7 +117,7 @@
     <string name="expire_date">تاریخ انقضا</string>
     <string name="serviceType">نوع سرویس</string>
     <string name="orderNo">کد سفارش</string>
-    <string name="connections">کانکشن‌ها</string>
+    <string name="connections">سرویس ها</string>
     <string name="connect">اتصال</string>
     <string name="setting">تنظیمات</string>
     <string name="newConnection">جدید</string>

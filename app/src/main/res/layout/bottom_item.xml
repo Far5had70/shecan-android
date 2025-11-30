@@ -1,28 +1,50 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:gravity="bottom|center_horizontal"
-    android:padding="6dp"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="0dp"
+    android:layout_height="wrap_content"
     android:layout_weight="1"
-    android:layout_height="match_parent">
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="52dp"
-        android:layout_height="52dp"
-        android:src="@drawable/ic_home"/>
+    <FrameLayout
+        android:id="@+id/imageParent"
+        android:layout_width="182dp"
+        android:layout_height="182dp"
+        android:layout_marginBottom="-20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <ImageView
+            android:id="@+id/iconNormal"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_gravity="center" />
+
+        <ImageView
+            android:id="@+id/iconActive"
+            android:layout_width="182dp"
+            android:layout_height="182dp"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
+
 
     <TextView
         android:id="@+id/label"
-        android:layout_marginTop="4dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Title"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:text="Home"
-        android:textSize="14sp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.85" />
 
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="16dp"/>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
