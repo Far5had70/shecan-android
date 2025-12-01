@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -56,14 +57,28 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
     @Override
     public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
-        Objects.requireNonNull(dialog.getWindow())
-                .setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        dialog.setOnShowListener(d -> {
+            BottomSheetDialog bottomSheetDialog = (BottomSheetDialog) d;
+            FrameLayout bottomSheet =
+                    bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+
+            if (bottomSheet != null) {
+                bottomSheet.setBackground(new ColorDrawable(Color.TRANSPARENT));
+            }
+        });
+
         return dialog;
     }
 
+//    @Override
+//    public int getTheme() {
+//        return R.style.AppTheme;
+//    }
+
     @Override
     public int getTheme() {
-        return R.style.AppTheme;
+        return R.style.BottomSheetTheme;
     }
 
     @Override
