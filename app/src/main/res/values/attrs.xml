@@ -51,4 +51,11 @@
         <attr name="cb_defaultPadding" format="dimension"/>
     </declare-styleable>
 
+    <declare-styleable name="ShadowLayout">
+        <attr name="shadowColor" format="color" />
+        <attr name="shadowSize" format="dimension" />
+        <attr name="shadowSpread" format="dimension" />
+        <attr name="shadowRadius" format="dimension" />
+    </declare-styleable>
+
 </resources>

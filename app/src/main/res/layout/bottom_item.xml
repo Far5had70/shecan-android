@@ -10,8 +10,8 @@
 
     <FrameLayout
         android:id="@+id/imageParent"
-        android:layout_width="182dp"
-        android:layout_height="182dp"
+        android:layout_width="157dp"
+        android:layout_height="157dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,14 +21,14 @@
 
         <ImageView
             android:id="@+id/iconNormal"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:layout_gravity="center" />
 
         <ImageView
             android:id="@+id/iconActive"
-            android:layout_width="182dp"
-            android:layout_height="182dp"
+            android:layout_width="157dp"
+            android:layout_height="157dp"
             android:layout_gravity="center" />
 
     </FrameLayout>

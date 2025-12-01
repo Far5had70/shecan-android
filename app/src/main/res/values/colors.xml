@@ -70,6 +70,8 @@
     <color name="bottomBarUnSelectedColor">#DFE8E6</color>
     <color name="inboxBoxColor">#FFFFFF</color>
     <color name="progressHolderColor">#F0F0F0</color>
+    <color name="littleStroke">#E2EBE9</color>
+    <color name="selectedConfigBackColor">#FFFFFF</color>
 
 
 </resources>

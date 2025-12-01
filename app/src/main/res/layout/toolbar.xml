@@ -1,15 +1,17 @@
 <com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/appBarLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="80dp"
     android:background="@android:color/transparent"
     android:fitsSystemWindows="false"
+    android:gravity="center"
     android:stateListAnimator="@null">
 
     <FrameLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize">
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="center">
 
         <TextView
             android:id="@+id/toolbar_title"

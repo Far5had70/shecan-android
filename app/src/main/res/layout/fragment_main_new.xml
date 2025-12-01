@@ -360,18 +360,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="8dp"
+                    android:layout_marginTop="8dp"
                     android:src="@drawable/ad"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-<!--                <include layout="@layout/button_layout"/>-->
+                <!--                <include layout="@layout/button_layout"/>-->
 
                 <ir.shecan.widget.PowerButtonView
                     android:id="@+id/vpnButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="90dp"
+                    android:layout_marginTop="150dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -379,57 +380,71 @@
                 <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="60dp"
-                    android:focusable="true"
                     android:clickable="true"
+                    android:focusable="true"
                     app:layout_constraintBottom_toBottomOf="@+id/vpnButton"
                     app:layout_constraintEnd_toEndOf="@+id/vpnButton"
                     app:layout_constraintStart_toStartOf="@+id/vpnButton" />
 
-<!--                <ImageView-->
-<!--                    android:id="@+id/loadingImage"-->
-<!--                    android:layout_width="250dp"-->
-<!--                    android:layout_height="250dp"-->
-<!--                    app:layout_constraintBottom_toBottomOf="@+id/bottomGuideLine"-->
-<!--                    app:layout_constraintEnd_toStartOf="@+id/g80"-->
-<!--                    app:layout_constraintStart_toStartOf="@+id/g20"-->
-<!--                    app:layout_constraintTop_toTopOf="@+id/topGuideLine" />-->
+                <!--                <ImageView-->
+                <!--                    android:id="@+id/loadingImage"-->
+                <!--                    android:layout_width="250dp"-->
+                <!--                    android:layout_height="250dp"-->
+                <!--                    app:layout_constraintBottom_toBottomOf="@+id/bottomGuideLine"-->
+                <!--                    app:layout_constraintEnd_toStartOf="@+id/g80"-->
+                <!--                    app:layout_constraintStart_toStartOf="@+id/g20"-->
+                <!--                    app:layout_constraintTop_toTopOf="@+id/topGuideLine" />-->
 
-                <LinearLayout
-                    android:id="@+id/chooseConfig"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_select_config_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:orientation="vertical"
                     app:layout_constraintEnd_toEndOf="@+id/vpnButton"
                     app:layout_constraintStart_toStartOf="@+id/vpnButton"
                     app:layout_constraintTop_toBottomOf="@+id/vpnButton">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/chooseConfig"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/selected_config"
-                        android:textColor="@color/selectedConfigColor"
-                        android:textStyle="bold" />
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_select_config_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/selected_config"
+                            android:textColor="@color/selectedConfigColor"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="8dp"
+                            android:src="@drawable/ic_arrow_bottom" />
+
+                    </LinearLayout>
+
+                    <ir.shecan.widget.ServiceStatusView
+                        android:id="@+id/servicePanel"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:src="@drawable/ic_arrow_bottom" />
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_marginTop="55dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/chooseConfig" />
 
-                </LinearLayout>
-
-                <ir.shecan.widget.ServiceStatusView
-                    android:id="@+id/servicePanel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/chooseConfig" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
             <!--            <ImageView-->
