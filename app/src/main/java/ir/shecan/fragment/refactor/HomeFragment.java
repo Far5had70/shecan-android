@@ -61,7 +61,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean isUpdateVersionCheck = false;
     private ScheduledExecutorService scheduler;
     MainActivityNew activity;
-    private BannerViewModel bannerUrl;
     private static final String TAG = "HomeFragment";
 
     @Nullable
@@ -73,7 +72,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         setupDonatePadding();
 
-        if (bannerUrl == null) updateBanner();
+        if (activity.bannerUrl == null) updateBanner();
+        else handleBannerImage(activity.bannerUrl);
 
         AppStorage appStorage = new AppStorage(getContext());
         ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
@@ -299,52 +299,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         binding = null;
     }
 
-//    public void updateBanner() {
-//
-//        String url = "https://n8n.coolify.shcn.ir/webhook/banner?type=1";
-//
-//        StringRequest request = new StringRequest(
-//                Request.Method.GET,
-//                url,
-//                response -> {
-//                    try {
-//                        JSONArray arr = new JSONArray(response);
-//
-//                        // کوچکترین order
-//                        JSONObject best = arr.getJSONObject(0);
-//                        for (int i = 1; i < arr.length(); i++) {
-//                            if (arr.getJSONObject(i).getInt("order") < best.getInt("order")) {
-//                                best = arr.getJSONObject(i);
-//                            }
-//                        }
-//
-//                        int type = best.getInt("type");
-//
-//                        if (type == 1) {
-//                            String img = best.getString("imageURL");
-//                            Glide.with(getContext()).load(img).into(binding.banner);
-//
-//                        } else if (type == 2) {
-//                            String base = best.getString("imageBase64");
-//                            byte[] decoded = Base64.decode(base, Base64.DEFAULT);
-//                            Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-//                            binding.banner.setImageBitmap(bmp);
-//                        }
-//
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                },
-//                error -> {
-//                    Log.e("ERROR", error.toString());
-//                }
-//        );
-//
-//        Volley.newRequestQueue(getContext()).add(request);
-//    }
-//
-
-
     public void updateBanner() {
         AuthApi auth = new AuthApi(getContext());
 
@@ -352,29 +306,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 new ApiCallback<BannerViewModel>() {
                     @Override
                     public void onSuccess(BannerViewModel res, boolean fromCache) {
-                        bannerUrl = res;
-
-                        // binding.banner is imageview
-
-                        if (res.getType() == 1) {
-                            // is url
-
-                            if (!isAdded() || binding == null) return;
-
-                            String url = res.getImageURL();
-
-                            Glide.with(requireContext())
-                                    .load(url)
-                                    .into(binding.banner);
-
-
-                        } else if (res.getType() == 2) {
-                            // is base64
-                            String base64 = res.getImageBase64();
-                            byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            binding.banner.setImageBitmap(decodedByte);
-                        }
+                        activity.bannerUrl = res;
+                        handleBannerImage(res);
                     }
 
                     @Override
@@ -383,5 +316,28 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                     }
                 }
         );
+    }
+
+    private void handleBannerImage(BannerViewModel bannerUrl) {
+
+        if (!isAdded() || binding == null) return;
+
+        if (bannerUrl.getType() == 1) {
+            // is url
+            String url = bannerUrl.getImageURL();
+            Glide.with(requireContext())
+                    .load(url)
+                    .into(binding.banner);
+        } else if (bannerUrl.getType() == 2) {
+            // is base64
+            String base64 = bannerUrl.getImageBase64();
+            byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            binding.banner.setImageBitmap(decodedByte);
+        }
+
+        binding.banner.setOnClickListener(view -> {
+            AppUtils.openUrl(bannerUrl.getUrl(), getActivity());
+        });
     }
 }

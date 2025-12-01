@@ -78,6 +78,7 @@ public class MainActivityNew extends AppCompatActivity {
 
     private VpnManager vpnManager;
     private ThemeManager themeManager;
+    public BannerViewModel bannerUrl;
 
     public static MainActivityNew getInstance() {
         return instance;
