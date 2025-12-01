@@ -47,6 +47,7 @@
     <color name="progressHolderColor">#263831</color>
     <color name="littleStroke">#2C3E37</color>
     <color name="selectedConfigBackColor">#14251F</color>
+    <color name="dividerStrokeColor">#143328</color>
 
 
 

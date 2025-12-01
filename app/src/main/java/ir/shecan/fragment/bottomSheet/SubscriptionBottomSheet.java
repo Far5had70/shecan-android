@@ -1,5 +1,8 @@
 package ir.shecan.fragment.bottomSheet;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -21,9 +24,12 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
+import ir.shecan.constant.Constant;
 import ir.shecan.constant.DurationType;
+import ir.shecan.constant.RequestStatus;
 import ir.shecan.databinding.BottomSheetSubscriptionBinding;
 import ir.shecan.modelDto.ServiceItem;
+import ir.shecan.util.AppUtils;
 import saman.zamani.persiandate.PersianDate;
 import saman.zamani.persiandate.PersianDateFormat;
 
@@ -47,11 +53,11 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         return binding.getRoot();
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
-        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.parseColor("#80000000")));
+        Objects.requireNonNull(dialog.getWindow())
+                .setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return dialog;
     }
 
@@ -75,12 +81,12 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
     private void bindUi() {
         // تاریخ شمسی
         String startShamsi = convertToShamsi(item.startDate);
-        String endShamsi   = convertToShamsi(item.dueDate);
+        String endShamsi = convertToShamsi(item.dueDate);
 
         // محاسبات
         long[] totalLeft = calculateTotalAndLeftDays(item.startDate, item.dueDate);
         long totalDays = totalLeft[0];
-        long daysLeft  = totalLeft[1];
+        long daysLeft = totalLeft[1];
 
         int percentUsed = calculateUsedPercent(totalDays, daysLeft, item.doneRatio);
         int percentRemaining = Math.max(0, 100 - percentUsed);
@@ -101,8 +107,14 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
 
         // وضعیت سرویس
         binding.txtStatus.setText(item.getStatusText() != null ? item.getStatusText() : "");
-        try { binding.txtStatus.setTextColor(item.getStatusColor()); } catch (Exception ignored) {}
-        try { binding.statusBoxIcon.setImageResource(item.getStatusIcon()); } catch (Exception ignored) {}
+        try {
+            binding.txtStatus.setTextColor(item.getStatusColor());
+        } catch (Exception ignored) {
+        }
+        try {
+            binding.statusBoxIcon.setImageResource(item.getStatusIcon());
+        } catch (Exception ignored) {
+        }
 
         // متن باقی‌مانده
         String pretty = buildRemainingMessage(totalDays, daysLeft, item.cfDuration);
@@ -121,6 +133,36 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         });
 
         binding.ivChevron.setOnClickListener(v -> dismiss());
+
+        binding.btnSupport.setOnClickListener(view -> {
+            AppUtils.openUrl(Constant.TicketUrl, getActivity());
+        });
+
+        binding.btnRenew.setOnClickListener(view -> {
+            AppUtils.openUrl(Constant.PlanUrl, getActivity());
+        });
+
+        binding.btnBuyService.setOnClickListener(view -> {
+            AppUtils.openUrl(Constant.PlanUrl, getActivity());
+        });
+
+        binding.btnCheckAgain.setOnClickListener(view -> {
+            AppUtils.openUrl(Constant.PlanUrl, getActivity());
+        });
+
+        if (item.statusId == RequestStatus.SUPPORT_FINISHED.getValue()) {
+            binding.cardBuyService.setVisibility(VISIBLE);
+            binding.cardWaitingForActivation.setVisibility(GONE);
+            binding.cardRemaining.setVisibility(GONE);
+        } else if (item.statusId == RequestStatus.WAITING_FOR_ACTIVATION.getValue()) {
+            binding.cardBuyService.setVisibility(GONE);
+            binding.cardWaitingForActivation.setVisibility(VISIBLE);
+            binding.cardRemaining.setVisibility(VISIBLE);
+        } else {
+            binding.cardBuyService.setVisibility(GONE);
+            binding.cardWaitingForActivation.setVisibility(GONE);
+            binding.cardRemaining.setVisibility(VISIBLE);
+        }
     }
 
     // تبدیل میلادی به شمسی
@@ -154,12 +196,12 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
                 return new long[]{-1, -1};
 
             long total = end.getTime() - start.getTime();
-            long left  = end.getTime() - System.currentTimeMillis();
+            long left = end.getTime() - System.currentTimeMillis();
 
             long totalDays = Math.max(0, TimeUnit.MILLISECONDS.toDays(total));
-            long daysLeft  = Math.max(0, TimeUnit.MILLISECONDS.toDays(left));
+            long daysLeft = Math.max(0, TimeUnit.MILLISECONDS.toDays(left));
 
-            return new long[]{ totalDays , daysLeft };
+            return new long[]{totalDays, daysLeft};
 
         } catch (Exception e) {
             return new long[]{-1, -1};
@@ -202,7 +244,7 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
 
             long days = TimeUnit.MILLISECONDS.toDays(diff);
             long hours = TimeUnit.MILLISECONDS.toHours(diff) - TimeUnit.DAYS.toHours(days);
-            long mins  = TimeUnit.MILLISECONDS.toMinutes(diff)
+            long mins = TimeUnit.MILLISECONDS.toMinutes(diff)
                     - TimeUnit.DAYS.toMinutes(days)
                     - TimeUnit.HOURS.toMinutes(hours);
 

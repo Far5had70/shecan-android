@@ -18,6 +18,7 @@ import ir.shecan.activity.MainActivityNew;
 import ir.shecan.activity.ThemeActivity;
 import ir.shecan.activity.UpdateProfileActivity;
 import ir.shecan.adapter.ProfileAdapter;
+import ir.shecan.constant.Constant;
 import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.modelDto.ProfileItem;
@@ -84,17 +85,17 @@ public class ProfileFragment extends ToolbarFragment {
 
                 case 2:
                     // تراکنش‌ها
-                    AppUtils.openUrl("https://my.shecan.ir/new-dashboard/transactions", getActivity());
+                    AppUtils.openUrl(Constant.TransactionUrl, getActivity());
                     break;
 
                 case 3:
                     // پشتیبانی دامنه‌ها
-                    AppUtils.openUrl("https://my.shecan.ir/new-dashboard/domains", getActivity());
+                    AppUtils.openUrl(Constant.DomainUrl, getActivity());
                     break;
 
                 case 4:
                     // تیکت‌ها
-                    AppUtils.openUrl("https://my.shecan.ir/new-dashboard/support", getActivity());
+                    AppUtils.openUrl(Constant.TicketUrl, getActivity());
                     break;
 
                 case 5:

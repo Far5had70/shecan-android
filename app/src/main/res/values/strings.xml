@@ -152,4 +152,6 @@
     <string name="passworsNotSame">رمزهای عبور وارد شده یکسان نمی باشند</string>
     <string name="companyName">نام شرکت</string>
     <string name="saveChange">ذخیره تغییرات</string>
+    <string name="checkAgain">بررسی مجدد</string>
+    <string name="buyService">خرید سرویس</string>
 </resources>

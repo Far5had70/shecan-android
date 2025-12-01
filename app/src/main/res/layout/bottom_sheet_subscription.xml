@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,12 +7,13 @@
     android:paddingTop="20dp"
     android:paddingStart="20dp"
     android:paddingEnd="20dp"
-    android:background="@color/lightBack">
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottomsheet">
 
     <!-- header row: support button, status chip, chevron -->
     <LinearLayout
         android:id="@+id/headerRow"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
@@ -20,23 +21,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_config_detail">
-
-            <TextView
-                android:id="@+id/btnSupport"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingVertical="3dp"
-                android:paddingHorizontal="8dp"
-                android:textColor="@color/primaryTextColor"
-                android:text="پشتیبانی"
-                />
-
-        </FrameLayout>
-
+        <ImageView
+            android:id="@+id/ivChevron"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/icon_circle_background"
+            android:padding="8dp"
+            android:src="@drawable/ic_chevron_bottom"
+            android:contentDescription=""
+            app:tint="@color/greenDark" />
         <FrameLayout android:layout_width="8dp" android:layout_height="0dp" />
 
         <LinearLayout
@@ -73,19 +66,30 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <ImageView
-            android:id="@+id/ivChevron"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_chevron_bottom"
-            android:contentDescription=""
-            app:tint="@color/primaryTextColor" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_config_detail">
+
+            <TextView
+                android:id="@+id/btnSupport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="3dp"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/greenSecondaryTextColor"
+                android:text="پشتیبانی"
+                />
+
+        </FrameLayout>
+
     </LinearLayout>
 
     <FrameLayout
         android:id="@+id/cardInfo"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         app:layout_constraintTop_toBottomOf="@id/headerRow"
@@ -284,10 +288,109 @@
 
     </FrameLayout>
 
-    <!-- remaining time card (contains circular progress include + text + button) -->
+    <LinearLayout
+        android:id="@+id/cardWaitingForActivation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layoutDirection="ltr"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_round_button"
+        app:layout_constraintTop_toBottomOf="@id/cardInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:gravity="start">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="بررسی وضعیت سرویس"
+                android:textColor="@color/primaryTextColor"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:paddingTop="8dp"
+                android:paddingHorizontal="16dp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="13sp"
+            android:padding="8dp"
+            android:text="تا آماده سازی اتصال شما به سرویس شکن ممکن است ۳۰ دقیقه زمان ببرد. به محض آماده شدن سرویس امکان اعلام IP برای شما فعال می‌شود."/>
+
+
+        <ir.shecan.widget.CustomButton
+            android:id="@+id/btnCheckAgain"
+            style="@style/CustomButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/checkAgain" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cardBuyService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layoutDirection="ltr"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_round_button"
+        app:layout_constraintTop_toBottomOf="@id/cardInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:gravity="start">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="راه‌اندازی مجدد سرویس"
+                android:textColor="@color/primaryTextColor"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:paddingTop="8dp"
+                android:paddingHorizontal="16dp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="13sp"
+            android:padding="8dp"
+            android:text="می‌تونی دوباره سرویست رو راه بندازی"/>
+
+
+        <ir.shecan.widget.CustomButton
+            android:id="@+id/btnBuyService"
+            style="@style/CustomButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/buyService" />
+
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/cardRemaining"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layoutDirection="ltr"
         android:layout_marginTop="12dp"
@@ -320,10 +423,11 @@
                     android:layout_marginTop="6dp"
                     android:textColor="@color/greenSecondaryTextColor" />
 
-                <Button
+                <ir.shecan.widget.CustomButton
                     android:id="@+id/btnRenew"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:cb_primaryBackground="@color/colorAccent"
                     android:layout_marginTop="12dp"
                     android:text="تمدید سرویس"
                     android:textStyle="bold"
@@ -371,37 +475,4 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- footer: small draggable indicator and settings label -->
-<!--    <TextView-->
-<!--        android:id="@+id/tvSettings"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="14dp"-->
-<!--        android:gravity="center"-->
-<!--        android:text="تنظیمات دستی"-->
-<!--        android:textSize="13sp"-->
-<!--        android:textColor="@color/serviceRowBodyColor"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/cardRemaining"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent" />-->
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCustomConfig"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/secondaryButtonColor"
-        android:layout_marginTop="16dp"
-        android:text="تنظیمات دستی"
-        android:textAllCaps="false"
-        android:textColor="@color/primaryTextColor"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:icon="@drawable/ic_chevron_top"
-        app:iconGravity="textStart"
-        app:iconSize="24dp"
-        app:iconTint="@color/primaryTextColor"
-        app:layout_constraintTop_toBottomOf="@id/cardRemaining"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
