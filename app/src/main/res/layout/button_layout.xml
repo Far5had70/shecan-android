@@ -19,6 +19,19 @@
         app:layout_constraintStart_toStartOf="@id/circle"
         app:layout_constraintEnd_toEndOf="@id/circle" />
 
+    <!-- ring = 86% سایز circle -->
+    <ImageView
+        android:id="@+id/lightBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.86"
+        app:layout_constraintDimensionRatio="1:1"
+        android:src="@drawable/ic_button_light_background"
+        app:layout_constraintBottom_toBottomOf="@id/circle"
+        app:layout_constraintTop_toTopOf="@id/circle"
+        app:layout_constraintStart_toStartOf="@id/circle"
+        app:layout_constraintEnd_toEndOf="@id/circle" />
+
     <!-- background = 66% سایز circle -->
     <ImageView
         android:id="@+id/background"
@@ -31,6 +44,19 @@
         app:layout_constraintTop_toTopOf="@id/circle"
         app:layout_constraintStart_toStartOf="@id/circle"
         app:layout_constraintEnd_toEndOf="@id/circle" />
+
+    <ImageView
+        android:id="@+id/background2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.66"
+        app:layout_constraintDimensionRatio="1:1"
+        android:src="@drawable/ic_back_button"
+        app:layout_constraintBottom_toBottomOf="@id/circle"
+        app:layout_constraintTop_toTopOf="@id/circle"
+        app:layout_constraintStart_toStartOf="@id/circle"
+        app:layout_constraintEnd_toEndOf="@id/circle" />
+
 
     <!-- بزرگترین لایه (circle = 330px) -->
     <ImageView

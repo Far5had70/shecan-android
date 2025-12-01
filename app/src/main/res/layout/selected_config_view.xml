@@ -24,8 +24,6 @@
         android:layout_centerHorizontal="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/servicePanel"
-        app:layout_constraintTop_toTopOf="@+id/servicePanel"
         app:shadowColor="#4a000000"
         app:shadowRadius="10dp"
         app:shadowSize="20dp"
@@ -52,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layoutDirection="ltr"
                 android:clipToPadding="false"
-                android:padding="15dp">
+                android:padding="8dp">
 
                 <FrameLayout
                     android:id="@+id/iconWrap"
@@ -117,7 +115,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/primaryTextColor"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textStyle="bold"
                         tools:text="۲۹۳۲۸۶۴" />
                 </LinearLayout>
@@ -151,7 +149,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/primaryTextColor"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textStyle="bold"
                         tools:text="برنزی" />
                 </LinearLayout>
@@ -185,7 +183,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/primaryTextColor"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textStyle="bold"
                         tools:text="۱۴۰۴/۰۶/۲۸" />
                 </LinearLayout>
