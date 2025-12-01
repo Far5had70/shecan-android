@@ -52,6 +52,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES"/>
+            </intent-filter>
+
             <!-- Leanback Launcher (Android TV) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -62,8 +66,6 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-        <activity android:name="ir.shecan.activity.LoginActivity" />
-        <activity android:name="ir.shecan.activity.OtpActivity" />
         <activity android:name="ir.shecan.activity.AuthorizeActivity" />
         <activity android:name="ir.shecan.activity.ThemeActivity" />
         <activity android:name="ir.shecan.activity.UpdateProfileActivity" />
@@ -98,6 +100,7 @@
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
         </service>
 

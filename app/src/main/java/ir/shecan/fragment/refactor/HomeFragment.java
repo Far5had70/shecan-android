@@ -31,6 +31,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -292,6 +294,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (binding != null) binding.bannerSlider.stop();
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();
             scheduler = null;
@@ -302,12 +305,12 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void updateBanner() {
         AuthApi auth = new AuthApi(getContext());
 
-        auth.banner(
-                new ApiCallback<BannerViewModel>() {
+        auth.bannerList(
+                new ApiCallback<List<BannerViewModel>>() {
                     @Override
-                    public void onSuccess(BannerViewModel res, boolean fromCache) {
-                        activity.bannerUrl = res;
-                        handleBannerImage(res);
+                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+                        activity.bannerUrl = list;
+                        handleBannerImage(list);
                     }
 
                     @Override
@@ -318,26 +321,30 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         );
     }
 
-    private void handleBannerImage(BannerViewModel bannerUrl) {
+
+    private void handleBannerImage(List<BannerViewModel> banners) {
 
         if (!isAdded() || binding == null) return;
 
-        if (bannerUrl.getType() == 1) {
-            // is url
-            String url = bannerUrl.getImageURL();
-            Glide.with(requireContext())
-                    .load(url)
-                    .into(binding.banner);
-        } else if (bannerUrl.getType() == 2) {
-            // is base64
-            String base64 = bannerUrl.getImageBase64();
-            byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            binding.banner.setImageBitmap(decodedByte);
+        List<String> slideList = new ArrayList<>();
+
+        for (BannerViewModel banner:banners) {
+            if (banner.getType() == 1) {
+                slideList.add(banner.getImageURL());
+            } else if (banner.getType() == 2) {
+                slideList.add(banner.getImageBase64());
+            }
         }
 
-        binding.banner.setOnClickListener(view -> {
-            AppUtils.openUrl(bannerUrl.getUrl(), getActivity());
+        binding.bannerSlider.setBanners(banners);
+        binding.bannerSlider.start();
+
+        binding.bannerSlider.getImageView().setOnClickListener(v -> {
+            BannerViewModel banner = binding.bannerSlider.getCurrentBanner();
+            if (banner != null && banner.getUrl() != null && !banner.getUrl().isEmpty()) {
+                AppUtils.openUrl(banner.getUrl(), getActivity());
+            }
         });
     }
+
 }

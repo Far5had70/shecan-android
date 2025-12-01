@@ -79,7 +79,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
             handleTabChange(index);
         });
 
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.OrderWebPageUrl, this));
+        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
 
     }
 

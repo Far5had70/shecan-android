@@ -78,7 +78,7 @@ public class MainActivityNew extends AppCompatActivity {
 
     private VpnManager vpnManager;
     private ThemeManager themeManager;
-    public BannerViewModel bannerUrl;
+    public List<BannerViewModel> bannerUrl;
 
     public static MainActivityNew getInstance() {
         return instance;
@@ -143,7 +143,7 @@ public class MainActivityNew extends AppCompatActivity {
     }
 
     private void vipClickHandler() {
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.OrderWebPageUrl, this));
+        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
     }
 
     private void onBackPressedHandler() {

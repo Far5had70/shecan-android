@@ -2,6 +2,7 @@ package ir.shecan.api;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,6 +239,36 @@ public class AuthApi {
                             }
                         }
                         callback.onSuccess(list.get(minIndex), false);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        callback.onError(statusCode, message);
+                    }
+                },
+                BannerViewModel.class
+        );
+    }
+
+    public void bannerList(ApiCallback<List<BannerViewModel>> callback) {
+
+        repo.requestList(
+                "banner",
+                null,
+                "https://n8n.coolify.shcn.ir/webhook/banner?type=1",
+                HttpMethod.GET,
+                false,
+                new ApiCallback<List<BannerViewModel>>() {
+                    @Override
+                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+
+                        if (list == null || list.isEmpty()) {
+                            callback.onSuccess(new ArrayList<>(), false);
+                            return;
+                        }
+
+                        // کل لیست را بده UI — بدون انتخاب کوچک‌ترین order
+                        callback.onSuccess(list, false);
                     }
 
                     @Override

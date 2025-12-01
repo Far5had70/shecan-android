@@ -45,7 +45,7 @@ public class ThemeActivity extends AppCompatActivity {
     }
 
     private void vipClickHandler() {
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.OrderWebPageUrl, this));
+        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
     }
 
     private void setupRecycler() {
