@@ -27,7 +27,7 @@
     </style>
 
     <style name="MaterialButtonStyle" parent="Widget.MaterialComponents.Button">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:elevation">0dp</item>
         <item name="android:minHeight">48dp</item>
@@ -36,7 +36,7 @@
     </style>
 
     <style name="EditTextStyle" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:textSize">15sp</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textColorHint">@android:color/darker_gray</item>
@@ -60,7 +60,7 @@
 
 
         <!-- Font of hint -->
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar">
@@ -90,33 +90,33 @@
     </style>
 
     <style name="TextViewStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="TextViewRegularStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="TextViewBoldStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="TextViewLightStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="TextViewSubBarStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="TextViewLogoStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:textSize">60sp</item>
         <item name="android:letterSpacing">-0.065</item>
     </style>
 
     <style name="ButtonStyle">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:elevation">0dp</item>
         <item name="android:outlineProvider">none</item>
@@ -130,7 +130,7 @@
     </style>
 
     <style name="TextViewNoticeStyle" parent="android:Widget.TextView">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:letterSpacing">0.2</item>
     </style>
 
@@ -143,7 +143,7 @@
 
     <style name="Widget.NavigationView"
         parent="Widget.Design.NavigationView">
-        <item name="fontFamily">@font/iran_yekan_light</item>
+        <item name="fontFamily">@font/iran_yekan_bakh_vm</item>
     </style>
 
     <style name="TextViewStatus" parent="TextViewRegularStyle">
@@ -189,7 +189,7 @@
     </style>
 
     <style name="ButtonBase" parent="Widget.MaterialComponents.Button">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:elevation">0dp</item>
         <item name="cornerRadius">12dp</item>
@@ -211,7 +211,7 @@
     </style>
 
     <style name="CustomButtonStyle">
-        <item name="android:fontFamily">@font/iran_yekan_light</item>
+        <item name="android:fontFamily">@font/iran_yekan_bakh_vm</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="cb_primaryBackground">@color/greenMain</item>

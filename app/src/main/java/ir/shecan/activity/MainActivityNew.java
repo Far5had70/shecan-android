@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -22,6 +23,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.List;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
@@ -35,7 +38,9 @@ import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.fragment.refactor.HomeFragment;
+import ir.shecan.fragment.refactor.SignUpFragment;
 import ir.shecan.modelDto.AccountViewModel;
+import ir.shecan.modelDto.BannerViewModel;
 import ir.shecan.modelDto.IssuesViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;

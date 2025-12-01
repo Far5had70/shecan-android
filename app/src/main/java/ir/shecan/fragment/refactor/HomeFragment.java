@@ -1,14 +1,19 @@
 package ir.shecan.fragment.refactor;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +21,14 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.concurrent.Executors;
@@ -25,11 +38,14 @@ import java.util.concurrent.TimeUnit;
 import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.activity.MainActivityNew;
+import ir.shecan.api.ApiCallback;
+import ir.shecan.api.AuthApi;
 import ir.shecan.databinding.FragmentMainNewBinding;
 import ir.shecan.dialog.ContactSupportDialog;
 import ir.shecan.dialog.RenewalDialog;
 import ir.shecan.dialog.UpdateDialog;
 import ir.shecan.fragment.ToolbarFragment;
+import ir.shecan.modelDto.BannerViewModel;
 import ir.shecan.modelDto.IssuesViewModel;
 import ir.shecan.modelDto.ServiceItem;
 import ir.shecan.service.BaseApiResponseListener;
@@ -45,6 +61,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean isUpdateVersionCheck = false;
     private ScheduledExecutorService scheduler;
     MainActivityNew activity;
+    private BannerViewModel bannerUrl;
     private static final String TAG = "HomeFragment";
 
     @Nullable
@@ -55,6 +72,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         activity = (MainActivityNew) getActivity();
 
         setupDonatePadding();
+
+        if (bannerUrl == null) updateBanner();
 
         AppStorage appStorage = new AppStorage(getContext());
         ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
@@ -87,7 +106,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         Shecan app = (Shecan) requireContext().getApplicationContext();
         app.getVpnState().observe(getViewLifecycleOwner(), state -> {
             if (state != null && binding != null) {
-                switch (state){
+                switch (state) {
                     case 0:
                         binding.vpnButton.showLoading(false);
                         break;
@@ -108,8 +127,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         });
 
 
-        if (serviceItem == null){
-            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free) , "", ""  , 0 , 0 , IssuesViewModel.IssuesDTO.createDefault());
+        if (serviceItem == null) {
+            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free), "", "", 0, 0, IssuesViewModel.IssuesDTO.createDefault());
         }
         try {
             binding.servicePanel.setStatus(serviceItem);
@@ -126,10 +145,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private boolean isUpdateLinkMode(ServiceItem serviceItem) {
-        if (serviceItem == null){
+        if (serviceItem == null) {
             return false;
         }
-        if (serviceItem.getUpdateLink() == null){
+        if (serviceItem.getUpdateLink() == null) {
             return false;
         }
         return !serviceItem.getUpdateLink().isEmpty();
@@ -278,5 +297,91 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             scheduler = null;
         }
         binding = null;
+    }
+
+//    public void updateBanner() {
+//
+//        String url = "https://n8n.coolify.shcn.ir/webhook/banner?type=1";
+//
+//        StringRequest request = new StringRequest(
+//                Request.Method.GET,
+//                url,
+//                response -> {
+//                    try {
+//                        JSONArray arr = new JSONArray(response);
+//
+//                        // کوچکترین order
+//                        JSONObject best = arr.getJSONObject(0);
+//                        for (int i = 1; i < arr.length(); i++) {
+//                            if (arr.getJSONObject(i).getInt("order") < best.getInt("order")) {
+//                                best = arr.getJSONObject(i);
+//                            }
+//                        }
+//
+//                        int type = best.getInt("type");
+//
+//                        if (type == 1) {
+//                            String img = best.getString("imageURL");
+//                            Glide.with(getContext()).load(img).into(binding.banner);
+//
+//                        } else if (type == 2) {
+//                            String base = best.getString("imageBase64");
+//                            byte[] decoded = Base64.decode(base, Base64.DEFAULT);
+//                            Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+//                            binding.banner.setImageBitmap(bmp);
+//                        }
+//
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                },
+//                error -> {
+//                    Log.e("ERROR", error.toString());
+//                }
+//        );
+//
+//        Volley.newRequestQueue(getContext()).add(request);
+//    }
+//
+
+
+    public void updateBanner() {
+        AuthApi auth = new AuthApi(getContext());
+
+        auth.banner(
+                new ApiCallback<BannerViewModel>() {
+                    @Override
+                    public void onSuccess(BannerViewModel res, boolean fromCache) {
+                        bannerUrl = res;
+
+                        // binding.banner is imageview
+
+                        if (res.getType() == 1) {
+                            // is url
+
+                            if (!isAdded() || binding == null) return;
+
+                            String url = res.getImageURL();
+
+                            Glide.with(requireContext())
+                                    .load(url)
+                                    .into(binding.banner);
+
+
+                        } else if (res.getType() == 2) {
+                            // is base64
+                            String base64 = res.getImageBase64();
+                            byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            binding.banner.setImageBitmap(decodedByte);
+                        }
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
     }
 }

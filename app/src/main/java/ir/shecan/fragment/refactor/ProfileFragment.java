@@ -80,19 +80,27 @@ public class ProfileFragment extends ToolbarFragment {
                 case 1:
                     getActivity().startActivity(new Intent(getActivity(), ThemeActivity.class));
                     break;
+
                 case 2:
-//                    openFragment(TransactionFragment.class);
-//                    getActivity().startActivity(new Intent(getActivity(), AuthorizeActivity.class));
+                    // تراکنش‌ها
+                    openUrl("https://my.shecan.ir/new-dashboard/transactions");
                     break;
+
                 case 3:
-//                    openFragment(DomainSupportFragment.class);
+                    // پشتیبانی دامنه‌ها
+                    openUrl("https://my.shecan.ir/new-dashboard/domains");
                     break;
+
                 case 4:
-//                    openFragment(TicketFragment.class);
+                    // تیکت‌ها
+                    openUrl("https://my.shecan.ir/new-dashboard/support");
                     break;
+
                 case 5:
-//                    openFragment(AboutFragment.class);
+                    // درباره ما
+                    openUrl("https://shecan.ir");
                     break;
+
                 case 6:
                     storage.clearAll();
                     updateUi();
@@ -108,6 +116,12 @@ public class ProfileFragment extends ToolbarFragment {
         if (getActivity() instanceof MainActivityNew) {
             ((MainActivityNew) getActivity()).switchFragment(fragmentClass, false, true);
         }
+    }
+
+    private void openUrl(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(android.net.Uri.parse(url));
+        startActivity(intent);
     }
 
     @Override

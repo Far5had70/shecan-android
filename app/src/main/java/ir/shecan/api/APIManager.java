@@ -240,7 +240,7 @@ public class APIManager {
             }
 
             Gson gson = new GsonBuilder()
-                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+//                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
 
             JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;

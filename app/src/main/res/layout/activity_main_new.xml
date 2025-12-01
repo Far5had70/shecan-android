@@ -29,6 +29,13 @@
             android:layout_height="match_parent" />
 
         <ir.shecan.widget.CustomBottomBar
+            android:id="@+id/customBarBackground"
+            android:layout_width="match_parent"
+            android:background="@drawable/bottom_bar_gradient"
+            android:layout_height="200dp"
+            android:layout_gravity="bottom"/>
+
+        <ir.shecan.widget.CustomBottomBar
             android:id="@+id/customBar"
             android:layout_width="match_parent"
             android:layout_height="200dp"

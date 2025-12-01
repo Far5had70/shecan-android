@@ -11,6 +11,7 @@ import ir.shecan.modelDio.LoginApiInput;
 import ir.shecan.modelDio.SendOtpApiInput;
 import ir.shecan.modelDio.VerifyApiInput;
 import ir.shecan.modelDto.AccountViewModel;
+import ir.shecan.modelDto.BannerViewModel;
 import ir.shecan.modelDto.EmptyResponse;
 import ir.shecan.modelDto.ExistApiViewModel;
 import ir.shecan.modelDto.IssuesViewModel;
@@ -205,6 +206,46 @@ public class AuthApi {
                 false,
                 callback,
                 IssuesViewModel.class
+        );
+    }
+
+
+
+    // ---------------------------------------------------
+    // 9) banner
+    // ---------------------------------------------------
+    public void banner(ApiCallback<BannerViewModel> callback) {
+
+        repo.requestList(
+                "banner",
+                null,
+                "https://n8n.coolify.shcn.ir/webhook/banner?type=1",
+                HttpMethod.GET,
+                false,
+                new ApiCallback<List<BannerViewModel>>() {
+                    @Override
+                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+
+                        if (list == null || list.isEmpty()) {
+                            callback.onSuccess(null, false);
+                            return;
+                        }
+                        // کوچکترین اوردر برداشته شود
+                        int minIndex = 0;
+                        for (int i = 1; i < list.size(); i++) {
+                            if (list.get(i).getOrder() < list.get(minIndex).getOrder()) {
+                                minIndex = i;
+                            }
+                        }
+                        callback.onSuccess(list.get(minIndex), false);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        callback.onError(statusCode, message);
+                    }
+                },
+                BannerViewModel.class
         );
     }
 }
