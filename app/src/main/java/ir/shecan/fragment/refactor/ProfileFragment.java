@@ -23,6 +23,7 @@ import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.modelDto.ProfileItem;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
+import ir.shecan.util.AppUtils;
 
 public class ProfileFragment extends ToolbarFragment {
 
@@ -83,22 +84,22 @@ public class ProfileFragment extends ToolbarFragment {
 
                 case 2:
                     // تراکنش‌ها
-                    openUrl("https://my.shecan.ir/new-dashboard/transactions");
+                    AppUtils.openUrl("https://my.shecan.ir/new-dashboard/transactions", getActivity());
                     break;
 
                 case 3:
                     // پشتیبانی دامنه‌ها
-                    openUrl("https://my.shecan.ir/new-dashboard/domains");
+                    AppUtils.openUrl("https://my.shecan.ir/new-dashboard/domains", getActivity());
                     break;
 
                 case 4:
                     // تیکت‌ها
-                    openUrl("https://my.shecan.ir/new-dashboard/support");
+                    AppUtils.openUrl("https://my.shecan.ir/new-dashboard/support", getActivity());
                     break;
 
                 case 5:
                     // درباره ما
-                    openUrl("https://shecan.ir");
+                    AppUtils.openUrl("https://shecan.ir", getActivity());
                     break;
 
                 case 6:
@@ -116,12 +117,6 @@ public class ProfileFragment extends ToolbarFragment {
         if (getActivity() instanceof MainActivityNew) {
             ((MainActivityNew) getActivity()).switchFragment(fragmentClass, false, true);
         }
-    }
-
-    private void openUrl(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(android.net.Uri.parse(url));
-        startActivity(intent);
     }
 
     @Override

@@ -47,7 +47,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
 
             binding.txtOrderCode.setText(item.getOrderCode().equals("0") ? "-" : item.getOrderCode());
             binding.txtServiceType.setText(item.getServiceType());
-            binding.txtStatus.setText(item.getStatusText());
+            binding.txtStatus.setText(item.getOrderCode().equals("0") ? context.getString(R.string.readyToConnect) : item.getStatusText());
             binding.txtStatus.setTextColor(item.getStatusColor());
             binding.statusBoxIcon.setImageResource(item.getStatusIcon());
 

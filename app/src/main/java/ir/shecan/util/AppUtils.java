@@ -1,6 +1,8 @@
 package ir.shecan.util;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
@@ -56,5 +58,9 @@ public class AppUtils {
         return 0;
     }
 
-
+    public static void openUrl(String url, Activity activity) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(android.net.Uri.parse(url));
+        activity.startActivity(intent);
+    }
 }

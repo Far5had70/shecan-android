@@ -14,11 +14,13 @@ import androidx.core.content.ContextCompat;
 import ir.shecan.R;
 import ir.shecan.api.ApiCallback;
 import ir.shecan.api.AuthApi;
+import ir.shecan.constant.Constant;
 import ir.shecan.databinding.ActivityUpdatePrrofileBinding;
 import ir.shecan.modelDto.AccountViewModel;
 import ir.shecan.modelDto.EmptyResponse;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
+import ir.shecan.util.AppUtils;
 
 public class UpdateProfileActivity extends AppCompatActivity {
 
@@ -76,6 +78,9 @@ public class UpdateProfileActivity extends AppCompatActivity {
             currentPosition = index;
             handleTabChange(index);
         });
+
+        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.OrderWebPageUrl, this));
+
     }
 
     private void handleTabChange(int index) {

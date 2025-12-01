@@ -73,7 +73,7 @@ public class ServiceItem {
     // گترهای قبلی
     public String getOrderCode() { return orderCode; }
     public String getServiceType() { return serviceType; }
-    public String getStatusText() { return statusText; }
+    public String getStatusText() { return statusName; }
     public String getUpdateLink() { return updateLink; }
     public int getStatusIcon() { return statusIcon; }
     public int getStatusColor() { return statusColor; }

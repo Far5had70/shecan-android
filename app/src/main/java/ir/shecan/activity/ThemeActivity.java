@@ -16,10 +16,12 @@ import java.util.List;
 
 import ir.shecan.R;
 import ir.shecan.adapter.ThemeAdapter;
+import ir.shecan.constant.Constant;
 import ir.shecan.databinding.ActivityThemeBinding;
 import ir.shecan.modelDto.AppConfig;
 import ir.shecan.modelDto.ThemeItem;
 import ir.shecan.storage.AppStorage;
+import ir.shecan.util.AppUtils;
 
 public class ThemeActivity extends AppCompatActivity {
 
@@ -38,6 +40,12 @@ public class ThemeActivity extends AppCompatActivity {
         );
 
         setupRecycler();
+
+        vipClickHandler();
+    }
+
+    private void vipClickHandler() {
+        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.OrderWebPageUrl, this));
     }
 
     private void setupRecycler() {

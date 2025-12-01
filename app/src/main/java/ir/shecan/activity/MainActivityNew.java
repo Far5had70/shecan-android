@@ -35,6 +35,7 @@ import ir.shecan.activity.mainActivityUtils.ThemeManager;
 import ir.shecan.activity.mainActivityUtils.VpnManager;
 import ir.shecan.api.ApiCallback;
 import ir.shecan.api.AuthApi;
+import ir.shecan.constant.Constant;
 import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.fragment.ToolbarFragment;
 import ir.shecan.fragment.refactor.HomeFragment;
@@ -44,6 +45,7 @@ import ir.shecan.modelDto.BannerViewModel;
 import ir.shecan.modelDto.IssuesViewModel;
 import ir.shecan.modelDto.VerifyApiViewModel;
 import ir.shecan.storage.AppStorage;
+import ir.shecan.util.AppUtils;
 import ir.shecan.widget.CustomBottomBar;
 
 public class MainActivityNew extends AppCompatActivity {
@@ -135,6 +137,12 @@ public class MainActivityNew extends AppCompatActivity {
         LaunchHandler.handle(this, getIntent());
 
         onBackPressedHandler();
+
+        vipClickHandler();
+    }
+
+    private void vipClickHandler() {
+        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.OrderWebPageUrl, this));
     }
 
     private void onBackPressedHandler() {
