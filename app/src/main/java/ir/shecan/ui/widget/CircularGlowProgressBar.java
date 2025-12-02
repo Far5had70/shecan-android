@@ -48,14 +48,14 @@ public class CircularGlowProgressBar extends View {
 
         // 🎨 حلقه پس‌زمینه خاکستری
         backgroundRingPaint.setStyle(Paint.Style.STROKE);
-        backgroundRingPaint.setStrokeWidth(40f);   // ضخیم‌تر
+        backgroundRingPaint.setStrokeWidth(60f);   // ضخیم‌تر
         backgroundRingPaint.setColor(ContextCompat.getColor(getContext(), R.color.progressHolderColor));
         backgroundRingPaint.setStrokeCap(Paint.Cap.ROUND);
         backgroundRingPaint.setAlpha(80);         // کمی محو
 
         // 🎨 حلقه اصلی رنگی
         ringPaint.setStyle(Paint.Style.STROKE);
-        ringPaint.setStrokeWidth(22f);
+        ringPaint.setStrokeWidth(33f);
         ringPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // 🎨 گلو داخلی

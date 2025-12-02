@@ -48,6 +48,12 @@
     <color name="littleStroke">#2C3E37</color>
     <color name="selectedConfigBackColor">#14251F</color>
     <color name="dividerStrokeColor">#143328</color>
+    <color name="greenLightBack">#0E221B</color>
+    <color name="orangeMain">#EE5F1D</color>
+    <color name="greenAvatarBack">#2A4A3F</color>
+    <color name="tabButtonGrayNotSelectedColor">#1A2F28</color>
+    <color name="tabButtonGraySelectedColor">#1AFFFFFF</color>
+    <color name="exitButtonBackgroundColor">#13231D</color>
 
 
 

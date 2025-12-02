@@ -37,9 +37,18 @@ public class ProfileFragment extends ToolbarFragment {
 
         storage = new AppStorage(getContext());
 
+        adjustUi();
+
         setupRecycler();
 
         return binding.getRoot();
+    }
+
+    private void adjustUi() {
+        binding.btnExit.setOnClickListener(view -> {
+            storage.clearAll();
+            updateUi();
+        });
     }
 
     @Override
@@ -71,7 +80,6 @@ public class ProfileFragment extends ToolbarFragment {
         list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
         list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
         list.add(new ProfileItem(R.drawable.ic_info, "درباره"));
-        list.add(new ProfileItem(R.drawable.ic_info, "خروج"));
 
         ProfileAdapter adapter = new ProfileAdapter(list, (position, item) -> {
             switch (position) {
@@ -101,11 +109,6 @@ public class ProfileFragment extends ToolbarFragment {
                 case 5:
                     // درباره ما
                     AppUtils.openUrl("https://shecan.ir", getActivity());
-                    break;
-
-                case 6:
-                    storage.clearAll();
-                    updateUi();
                     break;
             }
         });

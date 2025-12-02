@@ -21,18 +21,24 @@ public class CustomButton extends AppCompatButton {
     private int secondaryBorder;
     private int secondaryText;
     private float radius;
-    private int defaultPadding;
+
+    private int xmlTextColor;
+
+    private int paddingAll;
+    private int paddingVertical;
+    private int paddingHorizontal;
 
     public CustomButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         loadAttrs(context, attrs);
+        init();
     }
 
     private void loadAttrs(Context context, AttributeSet attrs) {
+
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CustomButton);
 
         int typeValue = a.getInt(R.styleable.CustomButton_type, 0);
-        Type type = typeValue == 0 ? Type.PRIMARY : Type.SECONDARY;
 
         primaryBg = a.getColor(R.styleable.CustomButton_cb_primaryBackground, 0xFF0BA36A);
         primaryText = a.getColor(R.styleable.CustomButton_cb_primaryTextColor, 0xFFFFFFFF);
@@ -42,47 +48,65 @@ public class CustomButton extends AppCompatButton {
         secondaryText = a.getColor(R.styleable.CustomButton_cb_secondaryTextColor, 0xFF0BA36A);
 
         radius = a.getDimension(R.styleable.CustomButton_cb_cornerRadius, 40f);
-        defaultPadding = (int) a.getDimension(R.styleable.CustomButton_cb_defaultPadding, 30);
+
+        xmlTextColor = a.getColor(R.styleable.CustomButton_cb_textColor, -1);
+
+        paddingAll = (int) a.getDimension(R.styleable.CustomButton_cb_padding, -1);
+        paddingVertical = (int) a.getDimension(R.styleable.CustomButton_cb_paddingVertical, -1);
+        paddingHorizontal = (int) a.getDimension(R.styleable.CustomButton_cb_paddingHorizontal, -1);
 
         a.recycle();
 
-        init(type);
+        setTag(typeValue == 0 ? Type.PRIMARY : Type.SECONDARY);
     }
 
-    private GradientDrawable createDrawable(Type type) {
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setCornerRadius(radius);
+    private void init() {
+
+        Type type = (Type) getTag();
+
+        GradientDrawable shape = new GradientDrawable();
+        shape.setCornerRadius(radius);
 
         if (type == Type.PRIMARY) {
-            drawable.setColor(primaryBg);
-            drawable.setStroke(0, 0);
+            shape.setColor(primaryBg);
+            shape.setStroke(0, 0);
         } else {
-            drawable.setColor(secondaryBg);
-            drawable.setStroke(3, secondaryBorder);
+            shape.setColor(secondaryBg);
+            shape.setStroke(3, secondaryBorder);
         }
-        return drawable;
-    }
 
-    private void init(Type type) {
-        GradientDrawable shape = createDrawable(type);
-
-        // ripple
-        int rippleColor = 0x22000000;
         RippleDrawable ripple = new RippleDrawable(
-                ColorStateList.valueOf(rippleColor),
+                ColorStateList.valueOf(0x00000000), // بدون سایه
                 shape,
                 null
         );
 
         setBackground(ripple);
-
         setAllCaps(false);
-        setPadding(defaultPadding, defaultPadding / 2, defaultPadding, defaultPadding / 2);
 
-        if (type == Type.PRIMARY) {
-            setTextColor(primaryText);
-        } else {
-            setTextColor(secondaryText);
+        // لغو ارتفاع پیش‌فرض
+        setMinHeight(0);
+        setMinimumHeight(0);
+
+        applyPadding();
+        applyTextColor(type);
+    }
+
+    private void applyPadding() {
+        int finalV = paddingVertical != -1 ? paddingVertical :
+                paddingAll != -1 ? paddingAll : 20;
+
+        int finalH = paddingHorizontal != -1 ? paddingHorizontal :
+                paddingAll != -1 ? paddingAll : 20;
+
+        setPadding(finalH, finalV, finalH, finalV);
+    }
+
+    private void applyTextColor(Type type) {
+        if (xmlTextColor != -1) {
+            setTextColor(xmlTextColor);
+            return;
         }
+        setTextColor(type == Type.PRIMARY ? primaryText : secondaryText);
     }
 }

@@ -154,4 +154,8 @@
     <string name="saveChange">ذخیره تغییرات</string>
     <string name="checkAgain">بررسی مجدد</string>
     <string name="buyService">خرید سرویس</string>
+    <string name="familyName">نام خانوادگی</string>
+    <string name="name">نام</string>
+    <string name="phoneNumber">تلفن همراه</string>
+    <string name="exit">خروج از حساب</string>
 </resources>

@@ -49,6 +49,15 @@
 
         <attr name="cb_cornerRadius" format="dimension"/>
         <attr name="cb_defaultPadding" format="dimension"/>
+
+        <!-- پدینگ -->
+        <attr name="cb_padding" format="dimension"/>
+        <attr name="cb_paddingVertical" format="dimension"/>
+        <attr name="cb_paddingHorizontal" format="dimension"/>
+
+        <!-- رنگ متن ورودی از XML -->
+        <attr name="cb_textColor" format="color"/>
+
     </declare-styleable>
 
     <declare-styleable name="ShadowLayout">

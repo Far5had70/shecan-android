@@ -1,49 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:openDrawer="start">
+    android:layout_height="match_parent">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <!-- Toolbar باید دقیقا اولین child باشه -->
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="?actionBarSize" />
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
-            android:id="@+id/id_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".ui.activity.MainActivity"
-            tools:showIn="@layout/app_bar_main" />
+    <!-- محتوای صفحه -->
+    <FrameLayout
+        android:id="@+id/id_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_below="@id/toolbar" />
 
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <!-- Bottom bar -->
+    <FrameLayout
+        android:id="@+id/customBarBackground"
+        android:layout_width="match_parent"
+        android:layout_height="157dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bottom_bar_gradient" />
 
-        <FrameLayout
-            android:id="@+id/frame_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <ir.shecan.ui.widget.CustomBottomBar
+        android:id="@+id/customBar"
+        android:layout_width="match_parent"
+        android:layout_height="157dp"
+        android:layout_gravity="bottom" />
 
-        <FrameLayout
-            android:id="@+id/customBarBackground"
-            android:layout_width="match_parent"
-            android:background="@drawable/bottom_bar_gradient"
-            android:layout_marginBottom="-20dp"
-            android:layout_height="157dp"
-            android:layout_gravity="bottom"/>
-
-        <ir.shecan.ui.widget.CustomBottomBar
-            android:id="@+id/customBar"
-            android:layout_width="match_parent"
-            android:layout_marginBottom="-20dp"
-            android:layout_height="157dp"
-            android:layout_gravity="bottom"
-            android:background="@null" />
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

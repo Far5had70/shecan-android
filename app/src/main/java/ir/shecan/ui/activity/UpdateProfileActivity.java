@@ -3,6 +3,8 @@ package ir.shecan.ui.activity;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -53,7 +55,15 @@ public class UpdateProfileActivity extends AppCompatActivity {
         binding.edtPersianName.setText(token.getFirstname());
         binding.edtPersianFamilyName.setText(token.getLastname());
         binding.edtEmail.setText(token.getMail());
+        binding.edtPhoneNumber.setText(token.getLogin());
         handleTabChange(1);
+
+        adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
+        binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
+
+        binding.toolbar.toolbarLogo.setVisibility(GONE);
+        binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
+        binding.toolbar.toolbarTitle.setText("حساب کاربری");
     }
 
     private void initListeners() {
@@ -130,6 +140,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                 binding.edtPersianFamilyName.getText().toString(),
                 null,
                 binding.edtEmail.getText().toString(),
+                binding.edtPhoneNumber.getText().toString(),
                 new ApiCallback<EmptyResponse>() {
                     @Override
                     public void onSuccess(EmptyResponse data, boolean fromCache) {

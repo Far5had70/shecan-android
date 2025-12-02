@@ -1,15 +1,26 @@
 package ir.shecan.ui.fragment.refactor;
+
+import static android.view.View.GONE;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ir.shecan.core.util.AppUtils;
+import ir.shecan.data.api.ApiCallback;
+import ir.shecan.data.api.AuthApi;
+import ir.shecan.data.modelDto.BannerViewModel;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
+import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.adapter.ServiceAdapter;
 import ir.shecan.databinding.FragmentConfigListBinding;
 import ir.shecan.ui.fragment.ToolbarFragment;
@@ -22,16 +33,27 @@ import ir.shecan.data.storage.AppStorage;
 public class ConfigListFragment extends ToolbarFragment {
 
     private FragmentConfigListBinding binding;
+    MainActivityNew activity;
 
     @SuppressLint({"JavascriptInterface", "SetJavaScriptEnabled", "addJavascriptInterface"})
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentConfigListBinding.inflate(inflater, container, false);
+        activity = (MainActivityNew) getActivity();
 
         AppStorage appStorage = new AppStorage(getContext());
         List<ServiceItem> serviceItems = buildServiceItems(appStorage);
 
         setupRecyclerView(serviceItems, appStorage);
+
+        VerifyApiViewModel token = appStorage.getToken(VerifyApiViewModel.class);
+        if (token == null || token.getApiKey() == null) {
+            binding.dividerHeader.setVisibility(GONE);
+            if (activity.bannerUrl == null) updateBanner();
+            else handleBannerImage(activity.bannerUrl);
+        }else {
+            binding.bannerSlider.setVisibility(GONE);
+        }
 
         return binding.getRoot();
     }
@@ -93,14 +115,63 @@ public class ConfigListFragment extends ToolbarFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (binding != null) binding.bannerSlider.stop();
         binding = null;
     }
 
     @Override
-    public void checkStatus() {}
+    public void checkStatus() {
+    }
 
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    public void updateBanner() {
+        AuthApi auth = new AuthApi(getContext());
+
+        auth.bannerList(
+                new ApiCallback<List<BannerViewModel>>() {
+                    @Override
+                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+                        if (!isAdded()) return;
+                        activity.bannerUrl = list;
+                        handleBannerImage(list);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        if (!isAdded()) return;
+                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+    }
+
+
+    private void handleBannerImage(List<BannerViewModel> banners) {
+
+        if (!isAdded() || binding == null) return;
+
+        List<String> slideList = new ArrayList<>();
+
+        for (BannerViewModel banner : banners) {
+            if (banner.getType() == 1) {
+                slideList.add(banner.getImageURL());
+            } else if (banner.getType() == 2) {
+                slideList.add(banner.getImageBase64());
+            }
+        }
+
+        binding.bannerSlider.setBanners(banners);
+        binding.bannerSlider.start();
+
+        binding.bannerSlider.getImageView().setOnClickListener(v -> {
+            BannerViewModel banner = binding.bannerSlider.getCurrentBanner();
+            if (banner != null && banner.getUrl() != null && !banner.getUrl().isEmpty()) {
+                AppUtils.openUrl(banner.getUrl(), getActivity());
+            }
+        });
     }
 }

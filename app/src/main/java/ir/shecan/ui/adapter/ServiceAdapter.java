@@ -1,5 +1,9 @@
 package ir.shecan.ui.adapter;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,19 +49,23 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
 
         public void bind(Context context, ServiceItem item, boolean isSelected, OnMoreClickListener listener) {
 
-            binding.txtOrderCode.setText(item.getOrderCode().equals("0") ? "-" : item.getOrderCode());
+            boolean isFreeMode = item.getOrderCode().equals("0");
+
+            binding.txtOrderCode.setText(isFreeMode ? "-" : item.getOrderCode());
             binding.txtServiceType.setText(item.getServiceType());
-            binding.txtStatus.setText(item.getOrderCode().equals("0") ? context.getString(R.string.readyToConnect) : item.getStatusText());
+            binding.txtStatus.setText(isFreeMode ? context.getString(R.string.readyToConnect) : item.getStatusText());
             binding.txtStatus.setTextColor(item.getStatusColor());
             binding.statusBoxIcon.setImageResource(item.getStatusIcon());
 
             if (isSelected) {
-                binding.greenHalfOval.setVisibility(View.VISIBLE);
+                binding.greenHalfOval.setVisibility(VISIBLE);
                 binding.root.setBackgroundColor(ContextCompat.getColor(context, R.color.lightBack));
             } else {
-                binding.greenHalfOval.setVisibility(View.INVISIBLE);
+                binding.greenHalfOval.setVisibility(INVISIBLE);
                 binding.root.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
             }
+
+            binding.btnOptions.setVisibility(isFreeMode ? INVISIBLE : VISIBLE);
 
             binding.btnOptions.setOnClickListener(v -> listener.onBackgroundClicked(item));
 

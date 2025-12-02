@@ -5,6 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.Build;
+import android.view.View;
+import android.view.Window;
+
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+
+import ir.shecan.R;
 
 public class AppUtils {
 //    public static long getVersionCode(Context context) {
@@ -63,4 +72,54 @@ public class AppUtils {
         intent.setData(android.net.Uri.parse(url));
         activity.startActivity(intent);
     }
+
+    public static void adjustUIForFragment(Activity activity, int statusBarColor, int bottomNavigationColor) {
+
+        int mode = AppCompatDelegate.getDefaultNightMode();
+        boolean isLight = (mode == AppCompatDelegate.MODE_NIGHT_NO);
+        applyStatusBarMode(activity, isLight, statusBarColor);
+        applyNavigationBarMode(activity, isLight, bottomNavigationColor);
+    }
+
+    public static void applyStatusBarMode(Activity activity, boolean isLightMode, int statusBarColor) {
+        Window window = activity.getWindow();
+        window.setStatusBarColor(ContextCompat.getColor(activity, statusBarColor));
+
+        if (isLightMode) {
+            // حالت آیکون‌های تیره (API 23+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                window.getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                );
+            }
+        } else {
+            // حذف حالت آیکون‌های تیره
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                window.getDecorView().setSystemUiVisibility(0);
+            }
+        }
+    }
+
+    public static void applyNavigationBarMode(Activity activity, boolean isLightMode, int navigationBarColor) {
+        Window window = activity.getWindow();
+        window.setNavigationBarColor(ContextCompat.getColor(activity, navigationBarColor));
+
+        if (isLightMode) {
+            // آیکون‌های تیره (API 26+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                window.getDecorView().setSystemUiVisibility(
+                        window.getDecorView().getSystemUiVisibility()
+                                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                );
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                int flags = window.getDecorView().getSystemUiVisibility();
+                flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                window.getDecorView().setSystemUiVisibility(flags);
+            }
+        }
+    }
+
+
 }

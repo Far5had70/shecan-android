@@ -10,7 +10,7 @@
     android:layout_gravity="center_vertical"
     android:paddingStart="20dp"
     android:paddingEnd="20dp"
-    android:paddingVertical="32dp"
+    android:paddingVertical="36dp"
     android:layout_marginBottom="12dp">
 
 
@@ -34,7 +34,8 @@
         android:layout_weight="1"
         android:gravity="start"
         android:text="خودکار"
-        android:textSize="16sp"
-        android:textColor="@color/primaryTextColor" />
+        android:textStyle="bold"
+        android:textColor="@color/primaryTextColor"
+        android:textSize="16sp" />
 
 </LinearLayout>

@@ -1,6 +1,9 @@
 package ir.shecan.ui.activity;
 
+import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+
+import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +12,7 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
@@ -33,15 +37,23 @@ public class ThemeActivity extends AppCompatActivity {
 
         binding = ActivityThemeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        adjustUi();
+        setupRecycler();
+        vipClickHandler();
+    }
 
+    private void adjustUi() {
         binding.toolbar.back.setVisibility(VISIBLE);
         binding.toolbar.back.setOnClickListener(v ->
                 getOnBackPressedDispatcher().onBackPressed()
         );
 
-        setupRecycler();
+        adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
+        binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
 
-        vipClickHandler();
+        binding.toolbar.toolbarLogo.setVisibility(GONE);
+        binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
+        binding.toolbar.toolbarTitle.setText("حالت نمایش");
     }
 
     private void vipClickHandler() {

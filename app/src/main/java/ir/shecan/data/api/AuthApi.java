@@ -144,6 +144,7 @@ public class AuthApi {
             String lastname,
             String companyName,
             String mail,
+            String phoneNumber,
             ApiCallback<EmptyResponse> callback
     ) {
 
@@ -151,6 +152,7 @@ public class AuthApi {
         payload.put("api_key", apiKey);
         payload.put("firstname", firstname);
         payload.put("lastname", lastname);
+        payload.put("phoneNumber", phoneNumber);
 
         if (companyName != null) payload.put("company_name", companyName);
 

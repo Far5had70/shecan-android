@@ -3,10 +3,15 @@ package ir.shecan.ui.activity;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
+import static ir.shecan.core.util.AppUtils.applyNavigationBarMode;
+import static ir.shecan.core.util.AppUtils.applyStatusBarMode;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -16,7 +21,9 @@ import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -227,6 +234,20 @@ public class MainActivityNew extends AppCompatActivity {
         bar.setOnItemSelected(index -> {
             currentTab = index;
             updateFragment(index);
+            switch (index){
+                case 0:
+                    adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
+                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
+                    break;
+                case 1:
+                    adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
+                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightBack));
+                    break;
+                case 2:
+                    adjustUIForFragment(this, R.color.profileBackground, R.color.mainBack);
+                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.profileBackground));
+                    break;
+            }
         });
 
         updateFragment(1);
@@ -257,58 +278,9 @@ public class MainActivityNew extends AppCompatActivity {
             return;
         }
 
-        adjustUIForFragment(isHome);
+        adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
+        binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightBack));
     }
-
-    private void adjustUIForFragment(boolean isHome) {
-        Window window = getWindow();
-        CoordinatorLayout coordinatorLayout = binding.idContent;
-        AppBarLayout appBarLayout = binding.toolbar.appBarLayout;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View decor = window.getDecorView();
-            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            if (isHome) {
-                // حالت ترنسپرنت
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
-
-                // فقط API >= 27 از nav-bar transparent درست پشتیبانی میکنه
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                    window.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
-                }
-
-                window.getDecorView().setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                );
-
-                appBarLayout.setPadding(0, getStatusBarHeight(), 0, getStatusBarHeight());
-            } else {
-                // حالت معمول
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(fetchPrimaryDarkColor());
-                window.setNavigationBarColor(fetchPrimaryDarkColor());
-
-                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-
-                appBarLayout.setPadding(0, 0, 0, 0);
-            }
-        }
-
-        coordinatorLayout.requestLayout();
-    }
-
 
     public void activateService() {
         if (vpnManager != null) vpnManager.startVpnActivation();
@@ -316,14 +288,6 @@ public class MainActivityNew extends AppCompatActivity {
 
     public void applyThemeForRecreate() {
         if (themeManager != null) themeManager.applyTheme();
-    }
-
-    private int fetchPrimaryDarkColor() {
-        return getTheme().obtainStyledAttributes(new int[]{R.color.lightBack}).getColor(0, 0);
-    }
-
-    public int getStatusBarHeight() {
-        return (int) Math.ceil(50 * getResources().getDisplayMetrics().density);
     }
 
     @Override

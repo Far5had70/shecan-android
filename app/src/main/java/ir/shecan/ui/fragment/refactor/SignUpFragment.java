@@ -60,6 +60,7 @@ public class SignUpFragment extends Fragment {
                     binding.edtPersianFamilyName.getText().toString(),
                     binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
+                    null,
                     new ApiCallback<EmptyResponse>() {
                         @Override
                         public void onSuccess(EmptyResponse data, boolean fromCache) {
@@ -89,6 +90,7 @@ public class SignUpFragment extends Fragment {
                     binding.edtPersianFamilyName.getText().toString(),
                     binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
+                    null,
                     new ApiCallback<EmptyResponse>() {
                         @Override
                         public void onSuccess(EmptyResponse data, boolean fromCache) {

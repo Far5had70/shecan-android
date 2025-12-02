@@ -3,12 +3,12 @@
     android:shape="rectangle">
 
     <!-- رنگ بک‌گراند BottomSheet -->
-    <solid android:color="@color/lightBack" />
+    <solid android:color="@color/greenLightBack" />
 
     <!-- radius فقط برای بالا -->
     <corners
-        android:topLeftRadius="24dp"
-        android:topRightRadius="24dp"
+        android:topLeftRadius="42dp"
+        android:topRightRadius="42dp"
         android:bottomLeftRadius="0dp"
         android:bottomRightRadius="0dp" />
 
