@@ -41,19 +41,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import io.sentry.android.core.SentryAndroid;
-import ir.shecan.activity.MainActivityNew;
-import ir.shecan.service.BaseApiResponseListener;
-import ir.shecan.service.ConnectionStatusApiListener;
-import ir.shecan.service.CoreApiResponseListener;
-import ir.shecan.service.ShecanVpnService;
-import ir.shecan.service.VolleyHelper;
-import ir.shecan.util.Configurations;
-import ir.shecan.util.LanguageHelper;
-import ir.shecan.util.Logger;
-import ir.shecan.util.Rule;
-import ir.shecan.util.server.DNSServer;
-import ir.shecan.util.server.DNSServerHelper;
-import ir.shecan.util.server.LocaleHelper;
+import ir.shecan.ui.activity.MainActivityNew;
+import ir.shecan.core.service.BaseApiResponseListener;
+import ir.shecan.core.service.ConnectionStatusApiListener;
+import ir.shecan.core.service.CoreApiResponseListener;
+import ir.shecan.core.service.ShecanVpnService;
+import ir.shecan.core.service.VolleyHelper;
+import ir.shecan.core.util.Configurations;
+import ir.shecan.core.util.LanguageHelper;
+import ir.shecan.core.util.Logger;
+import ir.shecan.core.util.Rule;
+import ir.shecan.core.util.server.DNSServer;
+import ir.shecan.core.util.server.DNSServerHelper;
+import ir.shecan.core.util.server.LocaleHelper;
 
 /**
  * Shecan Project

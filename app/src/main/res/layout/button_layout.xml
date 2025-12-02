@@ -85,7 +85,7 @@
         app:layout_constraintEnd_toEndOf="@id/circle" />
 
     <!-- Loading Circle دور دکمه -->
-    <ir.shecan.widget.LoadingCircleView
+    <ir.shecan.ui.widget.LoadingCircleView
         android:id="@+id/loadingCircle"
         android:layout_width="0dp"
         android:layout_height="0dp"

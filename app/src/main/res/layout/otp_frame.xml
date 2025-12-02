@@ -84,7 +84,7 @@
         android:layout_width="wrap_content"
         android:layout_height="32dp"/>
 
-    <ir.shecan.widget.CustomButton
+    <ir.shecan.ui.widget.CustomButton
         android:id="@+id/btnVerify"
         style="@style/CustomButtonStyle"
         android:layout_width="match_parent"

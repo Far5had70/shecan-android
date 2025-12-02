@@ -7,7 +7,7 @@
     android:background="@drawable/background_on"
     android:fillViewport="true"
     android:paddingTop="80dp"
-    tools:context="ir.shecan.fragment.HomeFragment">
+    tools:context=".ui.fragment.HomeFragment">
 
     <ScrollView
         android:id="@+id/fragment_main"

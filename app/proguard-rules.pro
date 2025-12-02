@@ -23,10 +23,10 @@
 -keep class ir.shecan.** { *; }
 
 # Keep DNS or VPN-related classes (Modify based on your actual package names)
--keep class ir.shecan.provider.** { *; }
--keep class ir.shecan.receiver.** { *; }
--keep class ir.shecan.service.** { *; }
--keep class ir.shecan.util.** { *; }
+-keep class ir.shecan.core.provider.** { *; }
+-keep class ir.shecan.core.receiver.** { *; }
+-keep class ir.shecan.core.service.** { *; }
+-keep class ir.shecan.core.util.** { *; }
 
 # Keep all classes that use reflection
 -keepattributes *Annotation*

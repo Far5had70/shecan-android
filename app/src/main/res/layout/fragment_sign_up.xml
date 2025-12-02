@@ -125,7 +125,7 @@
                                 android:layout_height="wrap_content"
                                 android:weightSum="2">
 
-                                <ir.shecan.widget.CustomButton
+                                <ir.shecan.ui.widget.CustomButton
                                     android:id="@+id/btnLogin"
                                     style="@style/CustomButtonStyle"
                                     android:layout_width="0dp"
@@ -134,7 +134,7 @@
                                     android:layout_margin="8dp"
                                     android:text="@string/login" />
 
-                                <ir.shecan.widget.CustomButton
+                                <ir.shecan.ui.widget.CustomButton
                                     android:id="@+id/btnPassword"
                                     style="@style/CustomButtonStyle"
                                     android:layout_width="0dp"

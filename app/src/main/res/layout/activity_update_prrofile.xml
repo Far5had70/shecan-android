@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <ir.shecan.widget.ProfileTabBar
+        <ir.shecan.ui.widget.ProfileTabBar
             android:id="@+id/profileTabBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -175,7 +175,7 @@
         android:orientation="horizontal"
         android:weightSum="10">
 
-        <ir.shecan.widget.CustomButton
+        <ir.shecan.ui.widget.CustomButton
             android:id="@+id/btnSave"
             style="@style/CustomButtonStyle"
             android:layout_width="0dp"
@@ -184,7 +184,7 @@
             android:layout_weight="8"
             android:text="@string/saveChange" />
 
-        <ir.shecan.widget.CustomButton
+        <ir.shecan.ui.widget.CustomButton
             android:id="@+id/btnCancel"
             style="@style/CustomButtonStyle"
             android:layout_width="0dp"
