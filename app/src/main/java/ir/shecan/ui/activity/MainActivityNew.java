@@ -226,10 +226,19 @@ public class MainActivityNew extends AppCompatActivity {
     }
 
     private void setupCustomBottomBar() {
+
+        String settingTitle = getString(R.string.setting);
+        AppStorage storage = new AppStorage(getApplicationContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+        if (token == null || token.getApiKey() == null) {
+            settingTitle = getString(R.string.login);
+        }
+
         CustomBottomBar bar = binding.customBar;
+        bar.removeItems();
         bar.addItem(getString(R.string.connections), R.drawable.ic_connection_inactive, R.drawable.ic_config_active);
         bar.addItem(getString(R.string.connect), R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_active);
-        bar.addItem(getString(R.string.setting), R.drawable.ic_setting_inactive, R.drawable.ic_profile_active);
+        bar.addItem(settingTitle, R.drawable.ic_setting_inactive, R.drawable.ic_profile_active);
 
         bar.setOnItemSelected(index -> {
             currentTab = index;
@@ -296,6 +305,7 @@ public class MainActivityNew extends AppCompatActivity {
         if (themeManager != null && themeManager.handleOnResume()) {
             recreate();
         }
+        setupCustomBottomBar();
     }
 
     @Override

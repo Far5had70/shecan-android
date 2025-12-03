@@ -52,7 +52,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/name"
                         />
@@ -71,6 +71,9 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:inputType="text"
+                        android:imeOptions="actionNext"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
 
@@ -79,7 +82,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/familyName"
                         />
@@ -98,6 +101,9 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:inputType="text"
+                        android:imeOptions="actionNext"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
                     <TextView
@@ -105,7 +111,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/phoneNumber"
                         />
@@ -124,6 +130,9 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:inputType="phone"
+                        android:imeOptions="actionNext"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
                     <TextView
@@ -131,7 +140,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/email"
                         />
@@ -151,6 +160,8 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:imeOptions="actionDone"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
                     <FrameLayout
@@ -173,7 +184,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/password"
                         />
@@ -193,6 +204,8 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:imeOptions="actionNext"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
 
@@ -201,7 +214,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/passwordNew"
                         />
@@ -221,6 +234,8 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:imeOptions="actionNext"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
 
@@ -229,7 +244,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:textStyle="bold"
-                        android:textSize="14dp"
+                        android:textSize="14sp"
                         android:textColor="@color/greenDark"
                         android:text="@string/passwordNewRepeat"
                         />
@@ -249,6 +264,8 @@
                         android:textStyle="bold"
                         android:textColor="@color/greenPrimaryTextColor"
                         android:textColorHint="@color/greenPrimaryTextColor"
+                        android:imeOptions="actionDone"
+                        android:maxLines="1"
                         android:textSize="14sp" />
 
                     <FrameLayout

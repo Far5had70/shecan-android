@@ -68,6 +68,12 @@ public class CustomBottomBar extends LinearLayout {
         binding.getRoot().addView(itemBinding.getRoot());
     }
 
+    public void removeItems() {
+        binding.getRoot().removeAllViews();
+        items.clear();
+        selectedIndex = -1;
+    }
+
     public void select(int index) {
         selectedIndex = index;
 
