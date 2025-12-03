@@ -229,6 +229,7 @@ public class APIManager {
             String url,
             HttpMethod method,
             boolean useCache,
+            boolean isPublicApi,
             ApiCallback<List<T>> callback,
             Class<T> clazz
     ) {
@@ -240,11 +241,16 @@ public class APIManager {
             }
 
             Gson gson = new GsonBuilder()
-//                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
+
+            if(isPublicApi){
+                gson = new GsonBuilder().create();
+            }
 
             JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
 
+            Gson finalGson = gson;
             CustomJsonArrayRequest request = new CustomJsonArrayRequest(
                     convertMethod(method),
                     url,
@@ -256,7 +262,7 @@ public class APIManager {
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject item = jsonArray.optJSONObject(i);
-                            list.add(gson.fromJson(item.toString(), clazz));
+                            list.add(finalGson.fromJson(item.toString(), clazz));
                         }
 
                         cache.put(cacheKey, list);

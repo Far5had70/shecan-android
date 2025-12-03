@@ -30,10 +30,11 @@ public class ApiRepository {
             String url,
             HttpMethod method,
             boolean useCache,
+            boolean isPublicApi,
             ApiCallback<List<T>> callback,
             Class<T> clazz
     ) {
-        apiManager.requestList(cacheKey, payload, url, method, useCache, callback, clazz);
+        apiManager.requestList(cacheKey, payload, url, method, useCache, isPublicApi, callback, clazz);
     }
 
 }

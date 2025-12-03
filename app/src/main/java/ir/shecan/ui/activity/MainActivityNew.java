@@ -4,36 +4,31 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
-import static ir.shecan.core.util.AppUtils.applyNavigationBarMode;
-import static ir.shecan.core.util.AppUtils.applyStatusBarMode;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.List;
+import java.util.Stack;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
-import ir.shecan.ui.activity.mainActivityUtils.FragmentNavigator;
+import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.ui.activity.mainActivityUtils.LaunchHandler;
 import ir.shecan.ui.activity.mainActivityUtils.TabItem;
 import ir.shecan.ui.activity.mainActivityUtils.ThemeManager;
@@ -41,15 +36,13 @@ import ir.shecan.ui.activity.mainActivityUtils.VpnManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.core.constant.Constant;
-import ir.shecan.databinding.ActivityMainNewBinding;
-import ir.shecan.ui.fragment.ToolbarFragment;
-import ir.shecan.ui.fragment.refactor.HomeFragment;
-import ir.shecan.data.modelDto.AccountViewModel;
-import ir.shecan.data.modelDto.BannerViewModel;
-import ir.shecan.data.modelDto.IssuesViewModel;
-import ir.shecan.data.modelDto.VerifyApiViewModel;
-import ir.shecan.data.storage.AppStorage;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.data.modelDto.*;
+import ir.shecan.data.storage.AppStorage;
+import ir.shecan.ui.fragment.ToolbarFragment;
+import ir.shecan.ui.fragment.refactor.ConfigListFragment;
+import ir.shecan.ui.fragment.refactor.HomeFragment;
+import ir.shecan.ui.fragment.refactor.ProfileFragment;
 import ir.shecan.ui.widget.CustomBottomBar;
 
 public class MainActivityNew extends AppCompatActivity {
@@ -73,6 +66,7 @@ public class MainActivityNew extends AppCompatActivity {
     public static final String LAST_TAB = "LAST_TAB_KEY";
 
     private int currentTab = 1;
+    private final Stack<Integer> tabHistory = new Stack<>();
 
     private static MainActivityNew instance = null;
 
@@ -84,13 +78,10 @@ public class MainActivityNew extends AppCompatActivity {
     private ThemeManager themeManager;
     public List<BannerViewModel> bannerUrl;
 
-    public static MainActivityNew getInstance() {
-        return instance;
-    }
+    public static MainActivityNew getInstance() { return instance; }
 
-    public ToolbarFragment getCurrentFragment() {
-        return currentFragment;
-    }
+    public ToolbarFragment getCurrentFragment() { return currentFragment; }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -103,7 +94,6 @@ public class MainActivityNew extends AppCompatActivity {
 
         themeManager = new ThemeManager(this);
         themeManager.applyTheme();
-
         Shecan.getInstance().updateLocale();
 
         super.onCreate(savedInstanceState);
@@ -119,30 +109,24 @@ public class MainActivityNew extends AppCompatActivity {
 
         vpnManager = new VpnManager(this);
 
-//        binding.toolbar.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
-
         requestNotificationPermission();
 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
-//            String token = task.getResult();
-            FirebaseMessaging.getInstance()
-                    .subscribeToTopic("afterPushPoleScenarioTopic");
+            FirebaseMessaging.getInstance().subscribeToTopic("afterPushPoleScenarioTopic");
         });
 
         updateLoginInformation();
-
         updateConfigsIfSignedIn();
 
         setupCustomBottomBar();
 
         currentTab = selectedTab;
         updateFragment(selectedTab);
+        binding.customBar.select(selectedTab);
 
         LaunchHandler.handle(this, getIntent());
-
         onBackPressedHandler();
-
         vipClickHandler();
     }
 
@@ -151,19 +135,153 @@ public class MainActivityNew extends AppCompatActivity {
     }
 
     private void onBackPressedHandler() {
+
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (!(currentFragment instanceof HomeFragment)) {
-                    switchFragment(HomeFragment.class, true, false);
-                } else {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
+
+                if (!tabHistory.isEmpty()) {
+                    int previousTab = tabHistory.pop();
+                    currentTab = previousTab;
+
+                    binding.customBar.select(previousTab);
+                    updateFragment(previousTab);
+                    return;
                 }
+
+                finish();
             }
         };
 
         getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+
+    private void setupCustomBottomBar() {
+
+        String settingTitle = getString(R.string.setting);
+        AppStorage storage = new AppStorage(getApplicationContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+
+        if (token == null || token.getApiKey() == null)
+            settingTitle = getString(R.string.login);
+
+        CustomBottomBar bar = binding.customBar;
+        bar.removeItems();
+
+        bar.addItem(getString(R.string.connections), R.drawable.ic_connection_inactive, R.drawable.ic_config_active);
+        bar.addItem(getString(R.string.connect), R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_active);
+        bar.addItem(settingTitle, R.drawable.ic_setting_inactive, R.drawable.ic_profile_active);
+
+        // ⭐⭐ ذخیره تاریخچه تب‌ها ⭐⭐
+        bar.setOnItemSelected(index -> {
+
+            if (currentTab != index) {
+                tabHistory.push(currentTab);
+            }
+
+            currentTab = index;
+            updateFragment(index);
+
+            switch (index){
+                case 0:
+                    adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
+                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
+                    break;
+
+                case 1:
+                    adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
+                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightBack));
+                    break;
+
+                case 2:
+                    adjustUIForFragment(this, R.color.profileBackground, R.color.mainBack);
+                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.profileBackground));
+                    break;
+            }
+        });
+    }
+
+
+    public void switchFragment(Class fragmentClass, boolean addToBackStack) {
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        ToolbarFragment fragment =
+                (ToolbarFragment) fm.findFragmentByTag(fragmentClass.getName());
+
+        if (fragment == null) {
+            try { fragment = (ToolbarFragment) fragmentClass.newInstance(); }
+            catch (Exception e) { e.printStackTrace(); return; }
+        }
+
+        ft.replace(R.id.id_content, fragment, fragmentClass.getName());
+
+        if (addToBackStack) {
+            boolean exists = false;
+            for (int i = 0; i < fm.getBackStackEntryCount(); i++) {
+                if (fm.getBackStackEntryAt(i).getName().equals(fragmentClass.getName())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) ft.addToBackStack(fragmentClass.getName());
+        }
+
+        ft.commitAllowingStateLoss();
+
+        adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
+        currentFragment = fragment;
+    }
+
+
+    public void updateFragment(int index) {
+
+        TabItem tab = TabItem.fromIndex(index);
+
+        if (tab.getTitle() != null) {
+            binding.toolbar.toolbarLogo.setVisibility(GONE);
+            binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
+            binding.toolbar.toolbarTitle.setText(tab.getTitle());
+        } else {
+            binding.toolbar.toolbarLogo.setVisibility(VISIBLE);
+            binding.toolbar.toolbarTitle.setVisibility(GONE);
+        }
+
+        switchFragment(tab.getFragmentClass(), false);
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (themeManager != null && themeManager.handleOnResume()) recreate();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        LaunchHandler.handle(this, intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        instance = null;
+        currentFragment = null;
+        binding = null;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Shecan.getInstance().updateLocale();
+    }
+
+    @Override
+    protected void attachBaseContext(android.content.Context base) {
+        super.attachBaseContext(ir.shecan.core.util.server.LocaleHelper.onAttach(base));
     }
 
     public void updateLoginInformation() {
@@ -225,72 +343,6 @@ public class MainActivityNew extends AppCompatActivity {
         }
     }
 
-    private void setupCustomBottomBar() {
-
-        String settingTitle = getString(R.string.setting);
-        AppStorage storage = new AppStorage(getApplicationContext());
-        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
-        if (token == null || token.getApiKey() == null) {
-            settingTitle = getString(R.string.login);
-        }
-
-        CustomBottomBar bar = binding.customBar;
-        bar.removeItems();
-        bar.addItem(getString(R.string.connections), R.drawable.ic_connection_inactive, R.drawable.ic_config_active);
-        bar.addItem(getString(R.string.connect), R.drawable.ic_vpn_inactive, R.drawable.ic_vpn_active);
-        bar.addItem(settingTitle, R.drawable.ic_setting_inactive, R.drawable.ic_profile_active);
-
-        bar.setOnItemSelected(index -> {
-            currentTab = index;
-            updateFragment(index);
-            switch (index){
-                case 0:
-                    adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
-                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
-                    break;
-                case 1:
-                    adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
-                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightBack));
-                    break;
-                case 2:
-                    adjustUIForFragment(this, R.color.profileBackground, R.color.mainBack);
-                    binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.profileBackground));
-                    break;
-            }
-        });
-
-        updateFragment(1);
-        binding.customBar.select(1);
-    }
-
-    public void switchFragment(Class fragmentClass, boolean isHome, boolean isAdd) {
-        FragmentManager fm = getSupportFragmentManager();
-
-        try {
-            ToolbarFragment fragment = FragmentNavigator.switchFragment(
-                    fm,
-                    R.id.id_content,
-                    fragmentClass,
-                    isAdd
-            );
-
-            if (fragment == null) return;
-
-            if (isAdd && currentFragment != null) {
-                fm.beginTransaction().hide(currentFragment).commitAllowingStateLoss();
-            }
-
-            currentFragment = fragment;
-
-        } catch (ClassCastException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
-        binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightBack));
-    }
-
     public void activateService() {
         if (vpnManager != null) vpnManager.startVpnActivation();
     }
@@ -298,60 +350,4 @@ public class MainActivityNew extends AppCompatActivity {
     public void applyThemeForRecreate() {
         if (themeManager != null) themeManager.applyTheme();
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (themeManager != null && themeManager.handleOnResume()) {
-            recreate();
-        }
-        setupCustomBottomBar();
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        LaunchHandler.handle(this, intent);
-    }
-
-    @Override
-    public void onActivityResult(int request, int result, Intent data) {
-        super.onActivityResult(request, result, data);
-        if (vpnManager != null) vpnManager.handleActivityResult(result);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        instance = null;
-        currentFragment = null;
-        binding = null;
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Shecan.getInstance().updateLocale();
-    }
-
-    @Override
-    protected void attachBaseContext(android.content.Context base) {
-        super.attachBaseContext(ir.shecan.core.util.server.LocaleHelper.onAttach(base));
-    }
-
-    public void updateFragment(int index) {
-        TabItem tab = TabItem.fromIndex(index);
-
-        if (tab.getTitle() != null) {
-            binding.toolbar.toolbarLogo.setVisibility(GONE);
-            binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
-            binding.toolbar.toolbarTitle.setText(tab.getTitle());
-        } else {
-            binding.toolbar.toolbarLogo.setVisibility(VISIBLE);
-            binding.toolbar.toolbarTitle.setVisibility(GONE);
-        }
-
-        switchFragment(tab.getFragmentClass(), true, false);
-    }
-
 }

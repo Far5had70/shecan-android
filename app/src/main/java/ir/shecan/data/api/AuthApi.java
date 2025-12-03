@@ -94,6 +94,7 @@ public class AuthApi {
                 "https://my.shecan.ir/api/auth/verify",
                 HttpMethod.POST,
                 false,
+                false,
                 new ApiCallback<List<VerifyApiViewModel>>() {
                     @Override
                     public void onSuccess(List<VerifyApiViewModel> list, boolean fromCache) {
@@ -225,6 +226,7 @@ public class AuthApi {
                 "https://n8n.coolify.shcn.ir/webhook/banner?type=1",
                 HttpMethod.GET,
                 false,
+                true,
                 new ApiCallback<List<BannerViewModel>>() {
                     @Override
                     public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
@@ -260,6 +262,7 @@ public class AuthApi {
                 "https://n8n.coolify.shcn.ir/webhook/banner?type=1",
                 HttpMethod.GET,
                 false,
+                true,
                 new ApiCallback<List<BannerViewModel>>() {
                     @Override
                     public void onSuccess(List<BannerViewModel> list, boolean fromCache) {

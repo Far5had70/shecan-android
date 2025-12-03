@@ -77,23 +77,23 @@ public final class LaunchHandler {
 
         switch (fragment) {
             case MainActivityNew.FRAGMENT_ABOUT:
-                activity.switchFragment(AboutFragment.class, false, false);
+                activity.switchFragment(AboutFragment.class, true);
                 break;
 
             case MainActivityNew.FRAGMENT_DNS_TEST:
-                activity.switchFragment(DNSTestFragment.class, false, false);
+                activity.switchFragment(DNSTestFragment.class, true);
                 break;
 
             case MainActivityNew.FRAGMENT_HOME:
-                activity.switchFragment(HomeFragment.class, true, false);
+                activity.switchFragment(HomeFragment.class, true);
                 break;
 
             case MainActivityNew.FRAGMENT_SETTINGS:
-                activity.switchFragment(SettingsFragment.class, false, false);
+                activity.switchFragment(SettingsFragment.class, true);
                 break;
 
             case MainActivityNew.FRAGMENT_LOG:
-                activity.switchFragment(LogFragment.class, false, false);
+                activity.switchFragment(LogFragment.class, true);
                 break;
 
             case MainActivityNew.FRAGMENT_NONE:
@@ -103,7 +103,7 @@ public final class LaunchHandler {
 
         // Default fallback if for any reason no fragment is active
         if (activity.getCurrentFragment() == null) {
-            activity.switchFragment(HomeFragment.class, true, false);
+            activity.switchFragment(HomeFragment.class, true);
         }
     }
 }

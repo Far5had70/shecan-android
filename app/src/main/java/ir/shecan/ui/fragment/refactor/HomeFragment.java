@@ -225,7 +225,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void onError(String errorMessage) {
-
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.getVpnState().setValue(0);
     }
 
     @Override
@@ -237,7 +238,11 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void onOutOfRange() {
-        if (isAdded()) new ContactSupportDialog(requireActivity()).show();
+        if (isAdded()) {
+            new ContactSupportDialog(requireActivity()).show();
+            Shecan app = (Shecan) requireContext().getApplicationContext();
+            app.getVpnState().setValue(0);
+        }
     }
 
     @Override
@@ -313,7 +318,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         List<String> slideList = new ArrayList<>();
 
-        for (BannerViewModel banner:banners) {
+        for (BannerViewModel banner : banners) {
             if (banner.getType() == 1) {
                 slideList.add(banner.getImageURL());
             } else if (banner.getType() == 2) {
