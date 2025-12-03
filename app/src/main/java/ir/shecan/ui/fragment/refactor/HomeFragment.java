@@ -79,10 +79,12 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             app.getVpnState().setValue(1);
 
             if (isUpdateLinkMode(finalServiceItem)) {
+                Shecan.setProMode();
                 String updaterUrl = String.format("https://ddns.shecan.ir/update?password=%s", finalServiceItem.getUpdateLink());
                 Shecan.setUpdaterLink(updaterUrl);
                 ShecanVpnService.callCoreAPI(requireContext(), HomeFragment.this);
             } else {
+                Shecan.setFreeMode();
                 startActivity(new Intent(requireActivity(), MainActivityNew.class)
                         .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
             }
@@ -152,6 +154,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onResume() {
         super.onResume();
         fetchData();
+        ((MainActivityNew) getActivity()).binding.customBar.select(1);
     }
 
     private void setupDonatePadding() {

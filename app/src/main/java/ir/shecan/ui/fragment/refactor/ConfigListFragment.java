@@ -55,8 +55,55 @@ public class ConfigListFragment extends ToolbarFragment {
             binding.bannerSlider.setVisibility(GONE);
         }
 
+        binding.swipeRefresh.setOnRefreshListener(() -> {
+            refreshPage();
+        });
+
         return binding.getRoot();
     }
+
+    private void refreshPage() {
+        AppStorage storage = new AppStorage(getContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+
+        if (token != null && token.getApiKey() != null) {
+
+            AuthApi auth = new AuthApi(getContext());
+
+            auth.issues(
+                    token.getApiKey(),
+                    0, 1000,
+                    new ApiCallback<IssuesViewModel>() {
+                        @Override
+                        public void onSuccess(IssuesViewModel res, boolean fromCache) {
+                            // ذخیره دیتا
+                            storage.saveIssues(res);
+
+                            // ساخت لیست جدید
+                            List<ServiceItem> items = buildServiceItems(storage);
+                            setupRecyclerView(items, storage);
+
+                            // ریفرش بنر (در صورت نیاز)
+                            updateBanner();
+
+                            binding.swipeRefresh.setRefreshing(false);
+                        }
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                            binding.swipeRefresh.setRefreshing(false);
+                        }
+                    }
+            );
+
+        } else {
+            // کاربر لاگین نیست → فقط بنر را ریفرش کن
+            updateBanner();
+            binding.swipeRefresh.setRefreshing(false);
+        }
+    }
+
 
     private List<ServiceItem> buildServiceItems(AppStorage appStorage) {
         IssuesViewModel viewModel = appStorage.getIssue(IssuesViewModel.class);
@@ -126,6 +173,7 @@ public class ConfigListFragment extends ToolbarFragment {
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivityNew) getActivity()).binding.customBar.select(0);
     }
 
     public void updateBanner() {

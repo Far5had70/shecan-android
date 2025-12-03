@@ -157,7 +157,7 @@ public class MainActivityNew extends AppCompatActivity {
     }
 
 
-    private void setupCustomBottomBar() {
+    public void setupCustomBottomBar() {
 
         String settingTitle = getString(R.string.setting);
         AppStorage storage = new AppStorage(getApplicationContext());
@@ -274,6 +274,8 @@ public class MainActivityNew extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (themeManager != null && themeManager.handleOnResume()) recreate();
+
+        updateLoginInformation();
     }
 
     @Override
@@ -326,6 +328,7 @@ public class MainActivityNew extends AppCompatActivity {
                     }
             );
         }
+        setupCustomBottomBar();
         updateConfigsIfSignedIn();
     }
 

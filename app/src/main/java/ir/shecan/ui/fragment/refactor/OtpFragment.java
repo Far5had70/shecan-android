@@ -1,5 +1,6 @@
 package ir.shecan.ui.fragment.refactor;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,6 +53,11 @@ public class OtpFragment extends Fragment {
         binding = FragmentOtpBinding.inflate(inflater, container, false);
 
         binding.agreementView.setupText("https://shecan.ir/");
+
+        binding.otpLayout.otpBackground.setOnTouchListener((v, event) -> {
+            hideKeyboard();
+            return false;
+        });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getActivity().getWindow().setSharedElementEnterTransition(
@@ -119,32 +126,52 @@ public class OtpFragment extends Fragment {
 
             otpFields[i].addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
                 @Override
                 public void afterTextChanged(Editable s) {
 
-                    if (s.length() == 1 && index < otpFields.length - 1) {
-                        otpFields[index + 1].requestFocus();
+                    // اگر ۶ رقم یکجا پیست شد:
+                    if (s.length() == 6 && index == 0) {
+                        for (int j = 0; j < 6; j++) {
+                            otpFields[j].setText(String.valueOf(s.charAt(j)));
+                        }
+                        otpFields[5].requestFocus();
+                        return;
                     }
 
-                    if (s.length() > 1 && s.length() == 6) {
-                        for (int i = 0; i < 6; i++) {
-                            otpFields[i].setText(String.valueOf(s.charAt(i)));
-                        }
+                    // وقتی یک رقم زده شد → برو فیلد بعد
+                    if (s.length() == 1 && index < otpFields.length - 1) {
+                        otpFields[index + 1].requestFocus();
                     }
                 }
             });
 
+
             otpFields[i].setOnKeyListener((v, keyCode, event) -> {
-                if (keyCode == 67 && otpFields[index].getText().length() == 0) {
-                    if (index > 0) otpFields[index - 1].requestFocus();
+
+                if (event.getAction() != android.view.KeyEvent.ACTION_DOWN)
+                    return false;
+
+                if (keyCode == android.view.KeyEvent.KEYCODE_DEL) {
+
+                    if (otpFields[index].getText().length() == 0) {
+                        // اگر خالی بود → برو قبلی
+                        if (index > 0) {
+                            otpFields[index - 1].setText("");
+                            otpFields[index - 1].requestFocus();
+                        }
+                    } else {
+                        // اگر داخلش کاراکتر بود → خالی کن ولی فوکوس همینجا بماند
+                        otpFields[index].setText("");
+                    }
+
+                    return true;
                 }
+
                 return false;
             });
         }
@@ -247,6 +274,15 @@ public class OtpFragment extends Fragment {
             binding.otpLayout.btnVerify.setAlpha(1f);
             binding.progressVerify.setVisibility(View.GONE);
             binding.otpLayout.btnVerify.setText("تایید");
+        }
+    }
+
+    private void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) requireActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }

@@ -116,8 +116,8 @@
     <string name="selected_config">Selected Config</string>
     <string name="expire_date">تاریخ انقضا</string>
     <string name="serviceType">نوع سرویس</string>
-    <string name="orderNo">کد سفارش</string>
-    <string name="connections">سرویس ها</string>
+    <string name="orderNo">کد سرویس</string>
+    <string name="connections">سرویس‌ها</string>
     <string name="connect">اتصال</string>
     <string name="setting">تنظیمات</string>
     <string name="newConnection">جدید</string>

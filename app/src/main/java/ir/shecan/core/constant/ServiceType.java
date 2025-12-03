@@ -3,7 +3,7 @@ package ir.shecan.core.constant;
 public enum ServiceType {
     UNKNOWN(0, "رایگان"),
     SAL_E2(47, "برنزی"),
-    MAHE_6(48, "نقره ای"),
+    MAHE_6(48, "نقره‌ای"),
     MAHE_9(49, "طلایی");
 
     private final int id;

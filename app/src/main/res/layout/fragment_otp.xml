@@ -22,6 +22,7 @@
                     android:layout_height="100dp" />
 
                 <RelativeLayout
+                    android:id="@+id/optLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -42,9 +43,9 @@
 
                             <include
                                 android:id="@+id/otp_layout"
+                                layout="@layout/otp_frame"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                layout="@layout/otp_frame" />
+                                android:layout_height="wrap_content" />
 
 
                         </LinearLayout>
@@ -99,6 +100,7 @@
             android:background="@drawable/back_button_background"
             android:padding="12dp"
             android:src="@drawable/ic_back"
+            android:rotation="180"
             android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -86,7 +86,7 @@
                     android:orientation="vertical"
                     app:layout_constraintGuide_percent="0.70" />
 
-                <!-- ستون اول: کد سفارش -->
+                <!-- ستون اول: کد سرویس -->
                 <LinearLayout
                     android:id="@+id/colOrder"
                     android:layout_width="0dp"

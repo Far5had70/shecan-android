@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ir.shecan.R;
 import ir.shecan.ui.activity.AuthorizeActivity;
@@ -39,6 +40,7 @@ public class ProfileFragment extends ToolbarFragment {
 
         storage = new AppStorage(getContext());
 
+
         adjustUi();
 
         setupRecycler();
@@ -49,7 +51,10 @@ public class ProfileFragment extends ToolbarFragment {
     private void adjustUi() {
         binding.btnExit.setOnClickListener(view -> {
             storage.clearAll();
+
+            if (!isAdded()) return;
             updateUi();
+            ((MainActivityNew) requireActivity()).setupCustomBottomBar();
         });
     }
 
@@ -62,6 +67,7 @@ public class ProfileFragment extends ToolbarFragment {
         ((MainActivityNew) getActivity()).updateLoginInformation();
 //        ((MainActivityNew) getActivity()).binding.customBar.select(2);
         adjustUIForFragment(getActivity(), R.color.profileBackground, R.color.mainBack);
+        ((MainActivityNew) getActivity()).binding.customBar.select(2);
     }
 
     private void updateUi() {

@@ -115,7 +115,7 @@ public class PasswordFragment extends Fragment {
 
                 @Override
                 public void onError(int statusCode, String message) {
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+//                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                 }
             });
 
