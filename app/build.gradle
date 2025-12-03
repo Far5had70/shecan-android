@@ -15,7 +15,7 @@ android {
         applicationId "co.bonyan.shecan"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 10205
+        versionCode 10206
         versionName "1.2.0"
 
         buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
@@ -92,10 +92,11 @@ dependencies {
 }
 
 sentry {
-    autoUploadProguardMapping.set(true)
-    includeProguardMapping.set(true)
+    autoUploadProguardMapping.set(false)
+    includeProguardMapping.set(false)
     url.set("https://sentry.hamravesh.com/")
     org.set("shecan-dns")
     projectName.set("9149")
     authToken.set(System.getenv("SENTRY_AUTH_TOKEN")) //setx SENTRY_AUTH_TOKEN "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"
+    // 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
 }

@@ -249,6 +249,23 @@ public class MainActivityNew extends AppCompatActivity {
             binding.toolbar.toolbarTitle.setVisibility(GONE);
         }
 
+        switch (index){
+            case 0:
+                adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
+                binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
+                break;
+
+            case 1:
+                adjustUIForFragment(this, R.color.lightBack, R.color.mainBack);
+                binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightBack));
+                break;
+
+            case 2:
+                adjustUIForFragment(this, R.color.profileBackground, R.color.mainBack);
+                binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.profileBackground));
+                break;
+        }
+
         switchFragment(tab.getFragmentClass(), false);
     }
 

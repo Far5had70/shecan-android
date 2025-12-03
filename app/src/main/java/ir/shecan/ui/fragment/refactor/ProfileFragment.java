@@ -1,5 +1,7 @@
 package ir.shecan.ui.fragment.refactor;
 
+import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -58,7 +60,8 @@ public class ProfileFragment extends ToolbarFragment {
             updateUi();
         }
         ((MainActivityNew) getActivity()).updateLoginInformation();
-        ((MainActivityNew) getActivity()).binding.customBar.select(2);
+//        ((MainActivityNew) getActivity()).binding.customBar.select(2);
+        adjustUIForFragment(getActivity(), R.color.profileBackground, R.color.mainBack);
     }
 
     private void updateUi() {
@@ -69,6 +72,8 @@ public class ProfileFragment extends ToolbarFragment {
             binding.tvPhoneNumber.setText(String.format("%s", token.getLogin()));
         } else {
             getActivity().startActivity(new Intent(getActivity(), AuthorizeActivity.class));
+            ((MainActivityNew) getActivity()).binding.customBar.select(1);
+            ((MainActivityNew) getActivity()).updateFragment(1);
         }
     }
 

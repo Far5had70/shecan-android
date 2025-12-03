@@ -67,6 +67,9 @@ public class LoginFragment extends Fragment {
             );
         });
 
+        binding.iconBackImg.setOnClickListener(view -> {
+            getActivity().finish();
+        });
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 
