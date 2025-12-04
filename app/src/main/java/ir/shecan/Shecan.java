@@ -40,7 +40,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import io.sentry.Sentry;
 import io.sentry.android.core.SentryAndroid;
+import io.sentry.protocol.User;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
+import ir.shecan.data.storage.AppStorage;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
@@ -396,6 +400,15 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
             options.setEnableExternalConfiguration(true);
             options.setDebug(false);
         });
+
+        AppStorage storage = new AppStorage(this);
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+        if (token != null) {
+            User user = new User();
+            user.setUsername(token.getLogin());
+            user.setEmail(token.getMail());
+            Sentry.setUser(user);
+        }
 
 //        try {
 //            throw new Exception("Test crash for Sentry!");

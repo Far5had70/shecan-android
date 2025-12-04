@@ -1,6 +1,7 @@
 package ir.shecan.ui.fragment.refactor;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -21,9 +22,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.auth.api.phone.SmsRetriever;
+import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
+import com.google.android.gms.tasks.Task;
 import ir.shecan.R;
+import ir.shecan.core.receiver.OtpReceiver;
+import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentOtpBinding;
@@ -35,6 +42,9 @@ public class OtpFragment extends Fragment {
 
     private final String identifier;
     private final boolean isExist;
+
+    private OtpReceiver otpReceiver;
+
 
     public OtpFragment(String identifier, boolean isExist) {
         this.identifier = identifier;
@@ -54,9 +64,8 @@ public class OtpFragment extends Fragment {
 
         binding.agreementView.setupText("https://shecan.ir/");
 
-        binding.otpLayout.otpBackground.setOnTouchListener((v, event) -> {
-            hideKeyboard();
-            return false;
+        binding.otpLayout.otpBackground.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(getActivity());
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -69,6 +78,13 @@ public class OtpFragment extends Fragment {
                             .inflateTransition(R.transition.change_bounds)
             );
         }
+
+        startSmsListener();
+
+        otpReceiver = new OtpReceiver();
+        otpReceiver.setListener(otp -> {
+            autoFillOtp(otp);
+        });
 
         otpFields[0] = binding.otpLayout.otp1;
         otpFields[1] = binding.otpLayout.otp2;
@@ -126,10 +142,12 @@ public class OtpFragment extends Fragment {
 
             otpFields[i].addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
 
                 @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
 
                 @Override
                 public void afterTextChanged(Editable s) {
@@ -140,14 +158,24 @@ public class OtpFragment extends Fragment {
                             otpFields[j].setText(String.valueOf(s.charAt(j)));
                         }
                         otpFields[5].requestFocus();
+                        validateOtp(); // ← اتوماتیک بعد از paste هم
                         return;
                     }
 
                     // وقتی یک رقم زده شد → برو فیلد بعد
-                    if (s.length() == 1 && index < otpFields.length - 1) {
-                        otpFields[index + 1].requestFocus();
+                    if (s.length() == 1) {
+
+                        if (index < otpFields.length - 1) {
+                            otpFields[index + 1].requestFocus();
+                        }
+
+                        // اگر فیلد آخر پر شد → اتوماتیک verify
+                        if (index == otpFields.length - 1) {
+                            validateOtp();
+                        }
                     }
                 }
+
             });
 
 
@@ -175,6 +203,19 @@ public class OtpFragment extends Fragment {
                 return false;
             });
         }
+    }
+
+    private void startSmsListener() {
+        SmsRetrieverClient client = SmsRetriever.getClient(requireActivity());
+        Task<Void> task = client.startSmsRetriever();
+
+        task.addOnSuccessListener(aVoid -> {
+            // Listener successfully started
+        });
+
+        task.addOnFailureListener(e -> {
+            // Failed to start
+        });
     }
 
     private void startTimer() {
@@ -233,7 +274,7 @@ public class OtpFragment extends Fragment {
                         if (res != null) {
                             AppStorage storage = new AppStorage(getContext());
                             storage.saveToken(res);
-                            if (isExist) {
+                            if (isExist && !res.getMail().contains("shecan.fake")) {
                                 getActivity().finish();
                             } else {
                                 getActivity().getSupportFragmentManager()
@@ -243,12 +284,14 @@ public class OtpFragment extends Fragment {
                                         .commit();
                             }
                         } else {
+                            showLoading(false);
                             shakeError(getString(R.string.codeIsWrong));
                         }
                     }
 
                     @Override
                     public void onError(int statusCode, String message) {
+                        showLoading(false);
                         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                     }
                 }
@@ -277,12 +320,35 @@ public class OtpFragment extends Fragment {
         }
     }
 
-    private void hideKeyboard() {
-        View view = getActivity().getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) requireActivity()
-                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    private void autoFillOtp(String otp) {
+        for (int i = 0; i < otp.length(); i++) {
+            otpFields[i].setText(String.valueOf(otp.charAt(i)));
         }
+        otpFields[5].requestFocus();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireActivity().registerReceiver(
+                    otpReceiver,
+                    filter,
+                    Context.RECEIVER_EXPORTED
+            );
+        } else {
+            ContextCompat.registerReceiver(requireActivity(), otpReceiver, filter, ContextCompat.RECEIVER_EXPORTED);
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        requireActivity().unregisterReceiver(otpReceiver);
+
     }
 }

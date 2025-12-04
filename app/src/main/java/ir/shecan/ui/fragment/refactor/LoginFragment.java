@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentLoginBinding;
@@ -34,6 +35,10 @@ public class LoginFragment extends Fragment {
         binding = FragmentLoginBinding.inflate(inflater, container, false);
 
         binding.agreementView.setupText("https://shecan.ir/");
+
+        binding.bottomFrameLayout.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(getActivity());
+        });
 
         binding.btnContinue.setOnClickListener(v -> {
 

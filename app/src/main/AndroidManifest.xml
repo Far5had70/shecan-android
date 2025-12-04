@@ -126,6 +126,14 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/default_notification_channel_id" />
 
+        <receiver
+            android:name=".core.receiver.OtpReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Sentry configuration -->
         <meta-data
             android:name="io.sentry.dsn"

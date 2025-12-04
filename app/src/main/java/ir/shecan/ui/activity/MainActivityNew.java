@@ -3,6 +3,7 @@ package ir.shecan.ui.activity;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static java.security.AccessController.getContext;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.Manifest;
@@ -11,7 +12,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -23,11 +26,13 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.util.AppSignatureHelper;
 import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.ui.activity.mainActivityUtils.LaunchHandler;
 import ir.shecan.ui.activity.mainActivityUtils.TabItem;
@@ -128,6 +133,14 @@ public class MainActivityNew extends AppCompatActivity {
         LaunchHandler.handle(this, getIntent());
         onBackPressedHandler();
         vipClickHandler();
+
+//        AppSignatureHelper helper = new AppSignatureHelper(this);
+//        ArrayList<String> signatures = helper.getAppSignatures();
+//
+//        for (String signature : signatures) {
+//            Log.d("APP_HASH", signature);
+//            Toast.makeText(this, signature, Toast.LENGTH_LONG).show();
+//        }
     }
 
     private void vipClickHandler() {

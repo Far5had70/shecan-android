@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentPasswordBinding;
@@ -46,6 +47,10 @@ public class PasswordFragment extends Fragment {
 
         binding.iconBackImg.setOnClickListener(view -> {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        });
+
+        binding.bottomFrameLayout.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(getActivity());
         });
 
         binding.iconBackImg.setAlpha(0f);
@@ -92,7 +97,15 @@ public class PasswordFragment extends Fragment {
                             if (res != null) {
                                 AppStorage storage = new AppStorage(getContext());
                                 storage.saveToken(res);
-                                getActivity().finish();
+                                if (!res.getMail().contains("shecan.fake")) {
+                                    getActivity().finish();
+                                } else {
+                                    getActivity().getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.fragmentContainer, new SignUpFragment())
+                                            .addToBackStack(null)
+                                            .commit();
+                                }
                             }
                         }
 

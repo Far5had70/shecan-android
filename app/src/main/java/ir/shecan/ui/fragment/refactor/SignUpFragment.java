@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentSignUpBinding;
@@ -39,12 +40,17 @@ public class SignUpFragment extends Fragment {
         AppStorage storage = new AppStorage(getContext());
         VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
 
-        binding.edtPersianName.setText(token.getFirstname());
-        binding.edtPersianFamilyName.setText(token.getLastname());
-        binding.edtEmail.setText(token.getMail());
+        binding.isCompanyCB.setChecked(false);
+        binding.edtPersianName.setText("");
+        binding.edtPersianFamilyName.setText("");
+        binding.edtEmail.setText("");
 
         binding.iconBackImg.setOnClickListener(view -> {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        });
+
+        binding.bottomFrameLayout.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(getActivity());
         });
 
         binding.isCompanyCB.setOnCheckedChangeListener((compoundButton, isChecked) -> {
@@ -82,12 +88,27 @@ public class SignUpFragment extends Fragment {
         });
 
         binding.btnLogin.setOnClickListener(view -> {
+
+            String name = binding.edtPersianName.getText().toString().trim();
+            String family = binding.edtPersianFamilyName.getText().toString().trim();
+
+            if (name.isEmpty() || family.isEmpty()) {
+                Toast.makeText(getContext(), R.string.nameAndFamilyNameIsRequired, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!isPersianText(name) || !isPersianText(family)) {
+                Toast.makeText(getContext(), R.string.nameAndFamilyNameMustPersian, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             showLoading(true);
             AuthApi auth = new AuthApi(requireContext());
+
             auth.updateProfile(
                     token.getApiKey(),
-                    binding.edtPersianName.getText().toString(),
-                    binding.edtPersianFamilyName.getText().toString(),
+                    name,
+                    family,
                     binding.isCompanyCB.isChecked() ? binding.edtCompanyName.getText().toString() : null,
                     binding.edtEmail.getText().toString(),
                     null,
@@ -106,6 +127,7 @@ public class SignUpFragment extends Fragment {
                     }
             );
         });
+
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(() -> {
 
@@ -141,7 +163,11 @@ public class SignUpFragment extends Fragment {
             binding.btnLogin.setEnabled(true);
             binding.btnLogin.setAlpha(1f);
             binding.progress.setVisibility(GONE);
-            binding.btnLogin.setText(ContextCompat.getString(getContext(),R.string.login));
+            binding.btnLogin.setText(ContextCompat.getString(getContext(), R.string.login));
         }
+    }
+
+    private boolean isPersianText(String text) {
+        return text.matches("^[\\u0600-\\u06FF\\s]+$");
     }
 }

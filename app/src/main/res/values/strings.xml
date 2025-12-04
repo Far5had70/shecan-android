@@ -158,4 +158,6 @@
     <string name="name">نام</string>
     <string name="phoneNumber">تلفن همراه</string>
     <string name="exit">خروج از حساب</string>
+    <string name="nameAndFamilyNameIsRequired">نام و نام خانوادگی اجباری است</string>
+    <string name="nameAndFamilyNameMustPersian">نام و نام خانوادگی باید فقط حروف فارسی باشد</string>
 </resources>

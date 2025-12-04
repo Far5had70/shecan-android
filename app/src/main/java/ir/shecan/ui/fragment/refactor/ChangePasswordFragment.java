@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
+import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentChangePasswordBinding;
@@ -42,13 +43,17 @@ public class ChangePasswordFragment extends Fragment {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
 
+        binding.bottomFrameLayout.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(getActivity());
+        });
+
         setupTypingAnimation();
 
         AppStorage storage = new AppStorage(getContext());
         VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
 
         binding.btnContinue.setOnClickListener(view -> {
-            if(!binding.edtPassword.getText().toString().equals(binding.edtRepeatPassword.getText().toString())){
+            if (!binding.edtPassword.getText().toString().equals(binding.edtRepeatPassword.getText().toString())) {
                 Toast.makeText(getActivity(), R.string.passworsNotSame, Toast.LENGTH_LONG).show();
                 return;
             }
@@ -134,7 +139,7 @@ public class ChangePasswordFragment extends Fragment {
             binding.btnContinue.setEnabled(true);
             binding.btnContinue.setAlpha(1f);
             binding.progress.setVisibility(View.GONE);
-            binding.btnContinue.setText(ContextCompat.getString(getContext(),R.string.login));
+            binding.btnContinue.setText(ContextCompat.getString(getContext(), R.string.login));
         }
     }
 }

@@ -89,6 +89,14 @@ public class UpdateProfileActivity extends AppCompatActivity {
             handleTabChange(index);
         });
 
+        binding.profileTab.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(this);
+        });
+
+        binding.passwordTab.setOnClickListener(v -> {
+            AppUtils.hideKeyboard(this);
+        });
+
         binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
 
     }
