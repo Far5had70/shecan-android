@@ -84,6 +84,22 @@ public class AuthApi {
     // ---------------------------------------------------
     // 4) verify OTP
     // ---------------------------------------------------
+
+    public void verifyOtpObject(String identifier, String code, ApiCallback<VerifyApiViewModel> callback) {
+
+        VerifyApiInput input = new VerifyApiInput(code, identifier);
+
+        repo.request(
+                "otp_verify_Object_" + identifier,
+                input,
+                "https://my.shecan.ir/api/auth/verify",
+                HttpMethod.POST,
+                false,
+                callback,
+                VerifyApiViewModel.class
+        );
+    }
+
     public void verifyOtp(String identifier, String code, ApiCallback<VerifyApiViewModel> callback) {
 
         VerifyApiInput input = new VerifyApiInput(code, identifier);

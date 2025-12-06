@@ -263,39 +263,68 @@ public class OtpFragment extends Fragment {
         showLoading(true);
 
         AuthApi auth = new AuthApi(requireContext());
-        auth.verifyOtp(
-                identifier,
-                code.toString(),
-                new ApiCallback<VerifyApiViewModel>() {
-                    @Override
-                    public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
-                        showLoading(false);
 
-                        if (res != null) {
-                            AppStorage storage = new AppStorage(getContext());
-                            storage.saveToken(res);
-                            if (isExist && !res.getMail().contains("shecan.fake")) {
-                                getActivity().finish();
-                            } else {
-                                getActivity().getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.fragmentContainer, new SignUpFragment())
-                                        .addToBackStack(null)
-                                        .commit();
-                            }
-                        } else {
+        if(isExist){
+            auth.verifyOtp(
+                    identifier,
+                    code.toString(),
+                    new ApiCallback<VerifyApiViewModel>() {
+                        @Override
+                        public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
                             showLoading(false);
-                            shakeError(getString(R.string.codeIsWrong));
+
+                            if (res != null) {
+                                AppStorage storage = new AppStorage(getContext());
+                                storage.saveToken(res);
+                                if (!res.getMail().contains("shecan.fake")) {
+                                    getActivity().finish();
+                                } else {
+                                    getActivity().getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.fragmentContainer, new SignUpFragment())
+                                            .addToBackStack(null)
+                                            .commit();
+                                }
+                            } else {
+                                showLoading(false);
+                                shakeError(getString(R.string.codeIsWrong));
+                            }
+                        }
+
+                        @Override
+                        public void onError(int statusCode, String message) {
+                            showLoading(false);
+                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                         }
                     }
+            );
+        } else {
+            auth.verifyOtpObject(identifier, code.toString(), new ApiCallback<VerifyApiViewModel>() {
+                @Override
+                public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+                    showLoading(false);
 
-                    @Override
-                    public void onError(int statusCode, String message) {
+                    if (res != null) {
+                        AppStorage storage = new AppStorage(getContext());
+                        storage.saveToken(res);
+                        getActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragmentContainer, new SignUpFragment())
+                                .addToBackStack(null)
+                                .commit();
+                    } else {
                         showLoading(false);
-                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                        shakeError(getString(R.string.codeIsWrong));
                     }
                 }
-        );
+
+                @Override
+                public void onError(int statusCode, String message) {
+                    showLoading(false);
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     private void shakeError(String msg) {

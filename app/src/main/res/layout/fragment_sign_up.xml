@@ -78,6 +78,7 @@
                                 android:fontFamily="@font/iran_yekan_light"
                                 android:layout_gravity="center"
                                 android:checked="true"
+                                android:textColor="@color/greenPrimaryTextColor"
                                 android:text="@string/isLegal"/>
 
                             <EditText
