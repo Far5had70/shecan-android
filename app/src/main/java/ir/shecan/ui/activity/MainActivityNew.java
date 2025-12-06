@@ -70,7 +70,7 @@ public class MainActivityNew extends AppCompatActivity {
     public static final String LAUNCH_NEED_RECREATE = "ir.shecan.ui.activity.MainActivityNew.LAUNCH_NEED_RECREATE";
     public static final String LAST_TAB = "LAST_TAB_KEY";
 
-    private int currentTab = 1;
+    public int currentTab = 1;
     private final Stack<Integer> tabHistory = new Stack<>();
 
     private static MainActivityNew instance = null;

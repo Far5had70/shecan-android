@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import ir.shecan.BuildConfig;
 import ir.shecan.R;
 import ir.shecan.ui.activity.AuthorizeActivity;
 import ir.shecan.ui.activity.MainActivityNew;
@@ -56,6 +57,9 @@ public class ProfileFragment extends ToolbarFragment {
             updateUi();
             ((MainActivityNew) requireActivity()).setupCustomBottomBar();
         });
+
+        String version = "نسخه: v " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
+        binding.versionTv.setText(version);
     }
 
     @Override
@@ -80,6 +84,7 @@ public class ProfileFragment extends ToolbarFragment {
             getActivity().startActivity(new Intent(getActivity(), AuthorizeActivity.class));
             ((MainActivityNew) getActivity()).binding.customBar.select(1);
             ((MainActivityNew) getActivity()).updateFragment(1);
+            ((MainActivityNew) getActivity()).currentTab = 1;
         }
     }
 
@@ -90,7 +95,7 @@ public class ProfileFragment extends ToolbarFragment {
         list.add(new ProfileItem(R.drawable.ic_info, "تراکنش‌ها"));
         list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
         list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
-        list.add(new ProfileItem(R.drawable.ic_info, "درباره"));
+//        list.add(new ProfileItem(R.drawable.ic_info, "درباره"));
 
         ProfileAdapter adapter = new ProfileAdapter(list, (position, item) -> {
             switch (position) {

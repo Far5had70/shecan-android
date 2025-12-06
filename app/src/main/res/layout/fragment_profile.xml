@@ -82,6 +82,14 @@
             app:cb_primaryBackground="@color/exitButtonBackgroundColor"
             app:cb_textColor="@color/black" />
 
+        <TextView
+            android:id="@+id/versionTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/greenSecondaryTextColor"
+            android:textSize="12sp"
+            android:padding="8dp"/>
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="130dp" />
