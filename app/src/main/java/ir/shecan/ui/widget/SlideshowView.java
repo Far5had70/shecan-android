@@ -11,6 +11,9 @@ import android.widget.RelativeLayout;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +48,14 @@ public class SlideshowView extends RelativeLayout {
 
     private void init() {
         imageView = new ImageView(getContext());
-        imageView.setLayoutParams(
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        LayoutParams lp = new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
         );
+        lp.addRule(CENTER_IN_PARENT, TRUE);
+        imageView.setAdjustViewBounds(true); // اجازه بده ارتفاع درست حساب شود
+//        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imageView.setLayoutParams(lp);
 //        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         addView(imageView);
     }
@@ -61,17 +69,21 @@ public class SlideshowView extends RelativeLayout {
     }
 
     private void showSlide(String item) {
+        int radius = (int) (24 * getResources().getDisplayMetrics().density);
+
+        RequestOptions options = new RequestOptions().transform(new RoundedCorners(radius));
+
         if (item.startsWith("http")) {
-            // URL mode
             Glide.with(getContext())
                     .load(item)
+                    .apply(options)
                     .into(imageView);
         } else {
-            // Base64 mode
             byte[] bytes = Base64.decode(item, Base64.DEFAULT);
 
             Glide.with(getContext())
                     .load(bytes)
+                    .apply(options)
                     .into(imageView);
         }
     }
