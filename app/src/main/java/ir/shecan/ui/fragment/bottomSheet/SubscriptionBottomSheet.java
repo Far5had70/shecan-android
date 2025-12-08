@@ -149,7 +149,7 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         binding.ivChevron.setOnClickListener(v -> dismiss());
 
         binding.btnSupport.setOnClickListener(view -> {
-            AppUtils.openUrl(Constant.TicketUrl, getActivity());
+            AppUtils.openUrl(AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()), getActivity());
         });
 
         binding.btnRenew.setOnClickListener(view -> {

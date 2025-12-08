@@ -15,6 +15,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 
 import ir.shecan.R;
+import ir.shecan.core.constant.Constant;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
+import ir.shecan.data.storage.AppStorage;
 
 public class AppUtils {
 //    public static long getVersionCode(Context context) {
@@ -128,6 +131,14 @@ public class AppUtils {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public static String buildRedirect(String rawUrl, Context context) {
+        AppStorage storage = new AppStorage(context);
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+        if (token == null) return null;
+
+        return String.format(Constant.BaseAuthRedirect, token.getApiKey(), rawUrl);
     }
 
 }

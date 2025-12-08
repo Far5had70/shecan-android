@@ -69,7 +69,7 @@ public class SlideshowView extends RelativeLayout {
     }
 
     private void showSlide(String item) {
-        int radius = (int) (24 * getResources().getDisplayMetrics().density);
+        int radius = (int) (32 * getResources().getDisplayMetrics().density);
 
         RequestOptions options = new RequestOptions().transform(new RoundedCorners(radius));
 

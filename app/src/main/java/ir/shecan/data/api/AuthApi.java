@@ -15,6 +15,7 @@ import ir.shecan.data.modelDto.AccountViewModel;
 import ir.shecan.data.modelDto.BannerViewModel;
 import ir.shecan.data.modelDto.EmptyResponse;
 import ir.shecan.data.modelDto.ExistApiViewModel;
+import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.SendOtpApiViewModel;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
@@ -270,12 +271,12 @@ public class AuthApi {
         );
     }
 
-    public void bannerList(ApiCallback<List<BannerViewModel>> callback) {
+    public void bannerList(String url, ApiCallback<List<BannerViewModel>> callback) {
 
         repo.requestList(
                 "banner",
                 null,
-                "https://n8n.coolify.shcn.ir/webhook/banner?type=1",
+                url,
                 HttpMethod.GET,
                 false,
                 true,
@@ -300,4 +301,21 @@ public class AuthApi {
                 BannerViewModel.class
         );
     }
+
+    // ---------------------------------------------------
+    // 10) homePage
+    // ---------------------------------------------------
+    public void homePageApi(ApiCallback<HomePage> callback) {
+
+        repo.request(
+                "homePage",
+                null,
+                "https://shecan.ir/app/home-page/",
+                HttpMethod.GET,
+                false,
+                callback,
+                HomePage.class
+        );
+    }
+
 }

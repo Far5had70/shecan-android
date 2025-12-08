@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.data.modelDto.AccountViewModel;
+import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
@@ -296,19 +298,32 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void updateBanner() {
         AuthApi auth = new AuthApi(getContext());
 
-        auth.bannerList(
-                new ApiCallback<List<BannerViewModel>>() {
+        auth.homePageApi(
+                new ApiCallback<HomePage>() {
                     @Override
-                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
-                        if (!isAdded()) return;
-                        activity.bannerUrl = list;
-                        handleBannerImage(list);
+                    public void onSuccess(HomePage res, boolean fromCache) {
+                        auth.bannerList(
+                                res.getBannerService().getAndroid(),
+                                new ApiCallback<List<BannerViewModel>>() {
+                                    @Override
+                                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+                                        if (!isAdded()) return;
+                                        activity.bannerUrl = list;
+                                        handleBannerImage(list);
+                                    }
+
+                                    @Override
+                                    public void onError(int statusCode, String message) {
+                                        if (!isAdded()) return;
+                                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                        );
                     }
 
                     @Override
                     public void onError(int statusCode, String message) {
-                        if (!isAdded()) return;
-                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+
                     }
                 }
         );

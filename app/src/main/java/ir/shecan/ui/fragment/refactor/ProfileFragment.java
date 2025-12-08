@@ -109,17 +109,18 @@ public class ProfileFragment extends ToolbarFragment {
 
                 case 2:
                     // تراکنش‌ها
-                    AppUtils.openUrl(Constant.TransactionUrl, getActivity());
+                    AppUtils.openUrl(AppUtils.buildRedirect(Constant.TransactionUrlRaw, getContext()), getActivity());
+
                     break;
 
                 case 3:
                     // پشتیبانی دامنه‌ها
-                    AppUtils.openUrl(Constant.DomainUrl, getActivity());
+                    AppUtils.openUrl(AppUtils.buildRedirect(Constant.DomainUrlRaw, getContext()), getActivity());
                     break;
 
                 case 4:
                     // تیکت‌ها
-                    AppUtils.openUrl(Constant.TicketUrl, getActivity());
+                    AppUtils.openUrl(AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()), getActivity());
                     break;
 
                 case 5:
