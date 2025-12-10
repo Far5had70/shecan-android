@@ -57,6 +57,19 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         View root = binding.getRoot();
         activity = (MainActivityNew) getActivity();
 
+
+        root.addOnLayoutChangeListener((v, left, top, right, bottom,
+                                        oldLeft, oldTop, oldRight, oldBottom) -> {
+
+            int width = v.getWidth();
+            int height = v.getHeight();
+
+            boolean hide = height < width * 1.5f;
+
+            binding.bannerSlider.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+            binding.constraintLayout.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+        });
+
         setupDonatePadding();
 
         if (activity.bannerUrl == null) updateBanner();
