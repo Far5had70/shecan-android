@@ -66,8 +66,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
             boolean hide = height < width * 1.5f;
 
-            binding.bannerSlider.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
-            binding.constraintLayout.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+            binding.bannerSlider.setVisibility(hide ? View.GONE : View.VISIBLE);
+            binding.constraintLayout.setVisibility(hide ? View.GONE : View.VISIBLE);
         });
 
         setupDonatePadding();
