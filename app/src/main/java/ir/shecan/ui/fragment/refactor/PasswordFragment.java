@@ -1,10 +1,14 @@
 package ir.shecan.ui.fragment.refactor;
 
+import android.annotation.SuppressLint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -37,6 +41,7 @@ public class PasswordFragment extends Fragment {
     private final Handler typingHandler = new Handler(Looper.getMainLooper());
     private Runnable typingStoppedRunnable;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -137,6 +142,28 @@ public class PasswordFragment extends Fragment {
                     .replace(R.id.fragmentContainer, new OtpFragment(identifier, true))
                     .addToBackStack(null)
                     .commit();
+        });
+
+        binding.btnEye.setOnTouchListener((v, event) -> {
+
+            switch (event.getAction()) {
+
+                case MotionEvent.ACTION_DOWN:
+                    binding.edtPassword.setInputType(InputType.TYPE_CLASS_TEXT);
+                    binding.edtPassword.setSelection(binding.edtPassword.length());
+                    binding.btnEye.setImageResource(R.drawable.ic_eye_open);
+                    return true;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    binding.edtPassword.setInputType(
+                            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    );
+                    binding.edtPassword.setSelection(binding.edtPassword.length());
+                    binding.btnEye.setImageResource(R.drawable.ic_eye_close);
+                    return true;
+            }
+            return false;
         });
 
         return binding.getRoot();

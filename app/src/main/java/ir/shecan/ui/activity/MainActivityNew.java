@@ -71,6 +71,7 @@ public class MainActivityNew extends AppCompatActivity {
     public static final String LAST_TAB = "LAST_TAB_KEY";
 
     public int currentTab = 1;
+    public boolean configIsChange = false;
     private final Stack<Integer> tabHistory = new Stack<>();
 
     private static MainActivityNew instance = null;

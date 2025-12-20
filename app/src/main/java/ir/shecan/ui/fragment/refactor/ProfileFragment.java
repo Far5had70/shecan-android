@@ -41,6 +41,7 @@ public class ProfileFragment extends ToolbarFragment {
 
         storage = new AppStorage(getContext());
 
+        binding.vpnStatusView.setCheckUrl("https://check.shecan.ir/");
 
         adjustUi();
 

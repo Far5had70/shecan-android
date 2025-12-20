@@ -60,6 +60,15 @@
             android:layout_marginTop="16dp"
             android:background="@color/dividerColor" />
 
+        <ir.shecan.ui.widget.VpnStatusView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/vpnStatusView">
+
+
+
+        </ir.shecan.ui.widget.VpnStatusView>
+
         <!-- RecyclerView باید wrap_content باشد تا ScrollView اسکرول کند -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"

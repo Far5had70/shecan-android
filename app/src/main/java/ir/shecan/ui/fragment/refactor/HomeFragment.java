@@ -1,5 +1,6 @@
 package ir.shecan.ui.fragment.refactor;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,6 +49,9 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean isUpdateVersionCheck = false;
     private ScheduledExecutorService scheduler;
     MainActivityNew activity;
+    private boolean pendingReconnect = false;
+    private Handler vpnHandler = new Handler(Looper.getMainLooper());
+
     private static final String TAG = "HomeFragment";
 
     @Nullable
@@ -107,18 +111,18 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         Shecan app = (Shecan) requireContext().getApplicationContext();
         app.getVpnState().observe(getViewLifecycleOwner(), state -> {
-            if (state != null && binding != null) {
-                switch (state) {
-                    case 0:
-                        binding.vpnButton.showLoading(false);
-                        break;
-                    case 1:
-                        binding.vpnButton.showLoading(true);
-                        break;
-                    case 2:
-                        binding.vpnButton.setConnected(true);
-                        break;
-                }
+            if (state == null || binding == null) return;
+
+            switch (state) {
+                case 0:
+                    binding.vpnButton.showLoading(false);
+                    break;
+                case 1:
+                    binding.vpnButton.showLoading(true);
+                    break;
+                case 2:
+                    binding.vpnButton.setConnected(true);
+                    break;
             }
         });
 
@@ -170,7 +174,72 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         super.onResume();
         fetchData();
         ((MainActivityNew) getActivity()).binding.customBar.select(1);
+
+        if (activity.configIsChange) {
+            activity.configIsChange = false;
+            restartVpnIfNeeded();
+        }
     }
+
+    private void restartVpnIfNeeded() {
+        if (!isAdded() || getContext() == null) return;
+
+        if (ShecanVpnService.isActivated()) {
+            pendingReconnect = true;
+
+            Context context = getContext();
+            ShecanVpnService.cancelConnectionStatusAPI(context);
+            ShecanVpnService.cancelCoreAPI(context);
+            Shecan.deactivateService(context);
+
+            waitForDeactivateThenReconnect(); // 👈 کلیدی
+        } else {
+            connectVpn();
+        }
+    }
+
+
+    private void connectVpn() {
+        if (!isAdded() || getContext() == null) return;
+
+        Context context = getContext();
+        AppStorage appStorage = new AppStorage(context);
+        ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
+
+        Shecan app = (Shecan) context.getApplicationContext();
+        app.getVpnState().setValue(1);
+
+        if (isUpdateLinkMode(serviceItem)) {
+            Shecan.setProMode();
+            String updaterUrl = String.format(
+                    "https://ddns.shecan.ir/update?password=%s",
+                    serviceItem.getUpdateLink()
+            );
+            Shecan.setUpdaterLink(updaterUrl);
+            ShecanVpnService.callCoreAPI(context, this);
+        } else {
+            Shecan.setFreeMode();
+            startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                    .putExtra(MainActivityNew.LAUNCH_ACTION,
+                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+        }
+    }
+
+    private void waitForDeactivateThenReconnect() {
+        if (!pendingReconnect) return;
+        if (!isAdded() || getContext() == null) return;
+
+        if (!ShecanVpnService.isActivated()) {
+            pendingReconnect = false;
+            connectVpn();
+            return;
+        }
+
+        vpnHandler.postDelayed(this::waitForDeactivateThenReconnect, 300);
+    }
+
+
+
 
     private void setupDonatePadding() {
 //        final LinearLayout donate = binding.linearLayoutDonate;
@@ -243,14 +312,14 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void onError(String errorMessage) {
-        Shecan app = (Shecan) requireContext().getApplicationContext();
-        app.getVpnState().setValue(0);
+//        Shecan app = (Shecan) requireContext().getApplicationContext();
+//        app.getVpnState().setValue(0);
     }
 
     @Override
     public void onInvalid() {
-        Shecan app = (Shecan) requireContext().getApplicationContext();
-        app.getVpnState().setValue(0);
+//        Shecan app = (Shecan) requireContext().getApplicationContext();
+//        app.getVpnState().setValue(0);
         if (isAdded()) new RenewalDialog(requireActivity()).show();
     }
 
@@ -258,8 +327,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onOutOfRange() {
         if (isAdded()) {
             new ContactSupportDialog(requireActivity()).show();
-            Shecan app = (Shecan) requireContext().getApplicationContext();
-            app.getVpnState().setValue(0);
+//            Shecan app = (Shecan) requireContext().getApplicationContext();
+//            app.getVpnState().setValue(0);
         }
     }
 
@@ -300,6 +369,9 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        vpnHandler.removeCallbacksAndMessages(null);
+
         if (binding != null) binding.bannerSlider.stop();
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();

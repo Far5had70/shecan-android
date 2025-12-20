@@ -137,6 +137,14 @@ public class ConfigListFragment extends ToolbarFragment {
             }
         }
 
+        ServiceAdapter adapter = getServiceAdapter(items, appStorage, defaultSelected);
+
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
+    }
+
+    @NonNull
+    private ServiceAdapter getServiceAdapter(List<ServiceItem> items, AppStorage appStorage, int defaultSelected) {
         ServiceAdapter adapter = new ServiceAdapter(
                 getContext(),
                 items,
@@ -144,6 +152,11 @@ public class ConfigListFragment extends ToolbarFragment {
                     @Override
                     public void onBackgroundClicked(ServiceItem item) {
                         appStorage.saveServiceStatus(item);
+
+                        activity.configIsChange = true;
+
+                        ((MainActivityNew) getActivity()).updateFragment(1);
+                        ((MainActivityNew) getActivity()).currentTab = 1;
                     }
 
                     @Override
@@ -155,9 +168,7 @@ public class ConfigListFragment extends ToolbarFragment {
         );
 
         adapter.setSelectedPosition(defaultSelected);
-
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(adapter);
+        return adapter;
     }
 
     @Override
