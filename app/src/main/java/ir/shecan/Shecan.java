@@ -44,9 +44,6 @@ import java.util.concurrent.TimeUnit;
 import io.sentry.Sentry;
 import io.sentry.android.core.SentryAndroid;
 import io.sentry.protocol.User;
-import ir.shecan.data.modelDto.VerifyApiViewModel;
-import ir.shecan.data.storage.AppStorage;
-import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
 import ir.shecan.core.service.CoreApiResponseListener;
@@ -59,6 +56,10 @@ import ir.shecan.core.util.Rule;
 import ir.shecan.core.util.server.DNSServer;
 import ir.shecan.core.util.server.DNSServerHelper;
 import ir.shecan.core.util.server.LocaleHelper;
+import ir.shecan.data.modelDto.ServiceItem;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
+import ir.shecan.data.storage.AppStorage;
+import ir.shecan.ui.activity.MainActivityNew;
 
 /**
  * Shecan Project
@@ -74,7 +75,7 @@ import ir.shecan.core.util.server.LocaleHelper;
 public class Shecan extends Application implements ConnectionStatusApiListener {
 //    static {
 //        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-////                FirebaseCrashlytics.getInstance().recordException(e);
+    /// /                FirebaseCrashlytics.getInstance().recordException(e);
 //        });
 //    }
 
@@ -134,7 +135,41 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
         if (!ShecanVpnService.isActivated()) {
             pendingReconnect = false;
-            getVpnState().setValue(1);
+            connectVpn(context, null);
+            return;
+        }
+
+        vpnHandler.postDelayed(
+                () -> waitForDeactivateThenReconnect(context),
+                1000
+        );
+    }
+
+    public void connectVpn(Context context, CoreApiResponseListener listener) {
+
+        AppStorage storage = new AppStorage(context);
+        ServiceItem serviceItem = storage.getServiceStatus(ServiceItem.class);
+
+        getVpnState().postValue(1);
+
+        if (serviceItem != null &&
+                serviceItem.getUpdateLink() != null &&
+                !serviceItem.getUpdateLink().isEmpty()) {
+
+            // UpdateLink Mode
+            setProMode();
+
+            String updaterUrl = String.format(
+                    "https://ddns.shecan.ir/update?password=%s",
+                    serviceItem.getUpdateLink()
+            );
+            setUpdaterLink(updaterUrl);
+
+            ShecanVpnService.callCoreAPI(context, listener);
+
+        } else {
+            // Free mode
+            setFreeMode();
 
             Intent intent = new Intent(context, MainActivityNew.class);
             intent.putExtra(
@@ -143,14 +178,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
             );
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
-
-            return;
         }
-
-        vpnHandler.postDelayed(
-                () -> waitForDeactivateThenReconnect(context),
-                1000
-        );
     }
 
 

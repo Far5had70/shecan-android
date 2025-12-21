@@ -80,30 +80,18 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         AppStorage appStorage = new AppStorage(getContext());
         ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
 
-        ServiceItem finalServiceItem = serviceItem;
-        binding.vpnButton.setOnClickListener(view -> {
+//        ServiceItem finalServiceItem = serviceItem;
+
+        binding.vpnButton.setOnClickListener(v -> {
+            Shecan app = (Shecan) requireContext().getApplicationContext();
 
             if (ShecanVpnService.isActivated()) {
-                Shecan app = (Shecan) requireContext().getApplicationContext();
                 app.getVpnState().setValue(0);
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
                 Shecan.deactivateService(requireContext());
-                return;
-            }
-
-            Shecan app = (Shecan) requireContext().getApplicationContext();
-            app.getVpnState().setValue(1);
-
-            if (isUpdateLinkMode(finalServiceItem)) {
-                Shecan.setProMode();
-                String updaterUrl = String.format("https://ddns.shecan.ir/update?password=%s", finalServiceItem.getUpdateLink());
-                Shecan.setUpdaterLink(updaterUrl);
-                ShecanVpnService.callCoreAPI(requireContext(), HomeFragment.this);
             } else {
-                Shecan.setFreeMode();
-                startActivity(new Intent(requireActivity(), MainActivityNew.class)
-                        .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+                app.connectVpn(requireContext(), HomeFragment.this);
             }
         });
 
