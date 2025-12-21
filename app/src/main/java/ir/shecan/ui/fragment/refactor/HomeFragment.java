@@ -163,31 +163,41 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         if (activity.configIsChange) {
             activity.configIsChange = false;
-            restartVpnIfNeeded();
+
+            Shecan app = (Shecan) requireContext().getApplicationContext();
+
+            if (ShecanVpnService.isActivated()) {
+                app.pendingReconnect = true;
+                Shecan.deactivateService(requireContext());
+                app.waitForDeactivateThenReconnect(requireContext());
+            } else {
+                app.connectVpn(requireContext(), HomeFragment.this);
+            }
         }
+
     }
 
-    private void restartVpnIfNeeded() {
-        if (getContext() == null) return;
-
-        Context context = getContext();
-        Shecan app = (Shecan) context.getApplicationContext();
-
-        if (ShecanVpnService.isActivated()) {
-            app.pendingReconnect = true;
-
-            ShecanVpnService.cancelConnectionStatusAPI(context);
-            ShecanVpnService.cancelCoreAPI(context);
-            Shecan.deactivateService(context);
-
-            app.waitForDeactivateThenReconnect(context);
-        } else {
-            app.getVpnState().setValue(1);
-            startActivity(new Intent(requireActivity(), MainActivityNew.class)
-                    .putExtra(MainActivityNew.LAUNCH_ACTION,
-                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
-        }
-    }
+//    private void restartVpnIfNeeded() {
+//        if (getContext() == null) return;
+//
+//        Context context = getContext();
+//        Shecan app = (Shecan) context.getApplicationContext();
+//
+//        if (ShecanVpnService.isActivated()) {
+//            app.pendingReconnect = true;
+//
+//            ShecanVpnService.cancelConnectionStatusAPI(context);
+//            ShecanVpnService.cancelCoreAPI(context);
+//            Shecan.deactivateService(context);
+//
+//            app.waitForDeactivateThenReconnect(context);
+//        } else {
+//            app.getVpnState().setValue(1);
+//            startActivity(new Intent(requireActivity(), MainActivityNew.class)
+//                    .putExtra(MainActivityNew.LAUNCH_ACTION,
+//                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+//        }
+//    }
 
 
 
@@ -289,14 +299,14 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void onError(String errorMessage) {
-//        Shecan app = (Shecan) requireContext().getApplicationContext();
-//        app.getVpnState().setValue(0);
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.getVpnState().setValue(0);
     }
 
     @Override
     public void onInvalid() {
-//        Shecan app = (Shecan) requireContext().getApplicationContext();
-//        app.getVpnState().setValue(0);
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.getVpnState().setValue(0);
         if (isAdded()) new RenewalDialog(requireActivity()).show();
     }
 
@@ -304,8 +314,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onOutOfRange() {
         if (isAdded()) {
             new ContactSupportDialog(requireActivity()).show();
-//            Shecan app = (Shecan) requireContext().getApplicationContext();
-//            app.getVpnState().setValue(0);
+            Shecan app = (Shecan) requireContext().getApplicationContext();
+            app.getVpnState().setValue(0);
         }
     }
 
