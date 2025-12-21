@@ -7,10 +7,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -40,6 +42,7 @@ public class PasswordFragment extends Fragment {
 
     private final Handler typingHandler = new Handler(Looper.getMainLooper());
     private Runnable typingStoppedRunnable;
+    boolean isEyePressed = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -149,24 +152,44 @@ public class PasswordFragment extends Fragment {
             switch (event.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
-                    binding.edtPassword.setInputType(InputType.TYPE_CLASS_TEXT);
-                    binding.edtPassword.setSelection(binding.edtPassword.length());
+                    isEyePressed = true;
+                    onSensitiveAction();
+
+                    binding.edtPassword.setTransformationMethod(
+                            android.text.method.HideReturnsTransformationMethod.getInstance()
+                    );
+                    forceLtr(binding.edtPassword);
                     binding.btnEye.setImageResource(R.drawable.ic_eye_open);
+                    binding.edtPassword.setSelection(binding.edtPassword.length());
                     return true;
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    binding.edtPassword.setInputType(
-                            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    isEyePressed = false;
+                    binding.edtPassword.setTransformationMethod(
+                            android.text.method.PasswordTransformationMethod.getInstance()
                     );
-                    binding.edtPassword.setSelection(binding.edtPassword.length());
+                    forceLtr(binding.edtPassword);
                     binding.btnEye.setImageResource(R.drawable.ic_eye_close);
+
+                    // ⏱ بعد از رها کردن، برگرده نرمال
+                    typingHandler.postDelayed(typingStoppedRunnable, 300);
+                    binding.edtPassword.setSelection(binding.edtPassword.length());
                     return true;
             }
             return false;
         });
 
+
+
         return binding.getRoot();
+    }
+
+    private void forceLtr(EditText editText) {
+        editText.setTextDirection(View.TEXT_DIRECTION_LTR);
+        editText.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        editText.setGravity(Gravity.START);
+        editText.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
     }
 
     private void setupTypingAnimation() {
@@ -175,22 +198,34 @@ public class PasswordFragment extends Fragment {
             binding.mascot.setImageResource(R.drawable.ic_shecan_normal);
         };
 
-        View.OnFocusChangeListener focusListener = (v, hasFocus) -> {
+        binding.edtPassword.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 binding.mascot.setImageResource(R.drawable.ic_shecan_normal);
             }
-        };
+        });
 
-        View.OnKeyListener typingListener = (v, keyCode, event) -> {
-            binding.mascot.setImageResource(R.drawable.ic_shecan_hide_eye);
-            typingHandler.removeCallbacks(typingStoppedRunnable);
-            typingHandler.postDelayed(typingStoppedRunnable, 500);
+        binding.edtPassword.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-            return false;
-        };
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (isEyePressed) return;
+                onSensitiveAction();
+            }
 
-        binding.edtPassword.setOnKeyListener(typingListener);
-        binding.edtPassword.setOnFocusChangeListener(focusListener);
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                if (isEyePressed) return;
+                typingHandler.postDelayed(typingStoppedRunnable, 500);
+            }
+        });
+    }
+
+    private void onSensitiveAction() {
+        binding.mascot.setImageResource(R.drawable.ic_shecan_hide_eye);
+        typingHandler.removeCallbacks(typingStoppedRunnable);
     }
 
     private void showLoading(boolean loading) {

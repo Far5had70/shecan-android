@@ -49,8 +49,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean isUpdateVersionCheck = false;
     private ScheduledExecutorService scheduler;
     MainActivityNew activity;
-    private boolean pendingReconnect = false;
-    private Handler vpnHandler = new Handler(Looper.getMainLooper());
 
     private static final String TAG = "HomeFragment";
 
@@ -182,21 +180,27 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void restartVpnIfNeeded() {
-        if (!isAdded() || getContext() == null) return;
+        if (getContext() == null) return;
+
+        Context context = getContext();
+        Shecan app = (Shecan) context.getApplicationContext();
 
         if (ShecanVpnService.isActivated()) {
-            pendingReconnect = true;
+            app.pendingReconnect = true;
 
-            Context context = getContext();
             ShecanVpnService.cancelConnectionStatusAPI(context);
             ShecanVpnService.cancelCoreAPI(context);
             Shecan.deactivateService(context);
 
-            waitForDeactivateThenReconnect(); // 👈 کلیدی
+            app.waitForDeactivateThenReconnect(context);
         } else {
-            connectVpn();
+            app.getVpnState().setValue(1);
+            startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                    .putExtra(MainActivityNew.LAUNCH_ACTION,
+                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
         }
     }
+
 
 
     private void connectVpn() {
@@ -224,21 +228,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                             MainActivityNew.LAUNCH_ACTION_ACTIVATE));
         }
     }
-
-    private void waitForDeactivateThenReconnect() {
-        if (!pendingReconnect) return;
-        if (!isAdded() || getContext() == null) return;
-
-        if (!ShecanVpnService.isActivated()) {
-            pendingReconnect = false;
-            connectVpn();
-            return;
-        }
-
-        vpnHandler.postDelayed(this::waitForDeactivateThenReconnect, 300);
-    }
-
-
 
 
     private void setupDonatePadding() {
@@ -369,8 +358,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        vpnHandler.removeCallbacksAndMessages(null);
 
         if (binding != null) binding.bannerSlider.stop();
         if (scheduler != null && !scheduler.isShutdown()) {

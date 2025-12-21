@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -108,6 +109,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
     private final MutableLiveData<Integer> vpnState = new MutableLiveData<>();
 
+    private Handler vpnHandler = new Handler(Looper.getMainLooper());
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -124,6 +127,32 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
         updateLocale();
     }
+
+    public void waitForDeactivateThenReconnect(Context context) {
+
+        if (!pendingReconnect) return;
+
+        if (!ShecanVpnService.isActivated()) {
+            pendingReconnect = false;
+            getVpnState().setValue(1);
+
+            Intent intent = new Intent(context, MainActivityNew.class);
+            intent.putExtra(
+                    MainActivityNew.LAUNCH_ACTION,
+                    MainActivityNew.LAUNCH_ACTION_ACTIVATE
+            );
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+
+            return;
+        }
+
+        vpnHandler.postDelayed(
+                () -> waitForDeactivateThenReconnect(context),
+                1000
+        );
+    }
+
 
     private void initCheckIP() {
         handler.postDelayed(new Runnable() {
@@ -470,6 +499,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     public MutableLiveData<Integer> getVpnState() {
         return vpnState;
     }
+
+    public boolean pendingReconnect;
 
     public static class ShecanInfo {
 
