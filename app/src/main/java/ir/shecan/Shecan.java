@@ -110,6 +110,16 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
     private final MutableLiveData<Integer> vpnState = new MutableLiveData<>();
 
+    public MutableLiveData<Integer> getVpnState() {
+        return vpnState;
+    }
+
+    private final MutableLiveData<Boolean> proActivatedEvent = new MutableLiveData<>();
+
+    public MutableLiveData<Boolean> getProActivatedEvent() {
+        return proActivatedEvent;
+    }
+
     private Handler vpnHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -152,9 +162,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
         getVpnState().postValue(1);
 
-        if (serviceItem != null &&
-                serviceItem.getUpdateLink() != null &&
-                !serviceItem.getUpdateLink().isEmpty()) {
+        if (serviceItem != null && serviceItem.getUpdateLink() != null && !serviceItem.getUpdateLink().isEmpty()) {
 
             // UpdateLink Mode
             setProMode();
@@ -165,7 +173,9 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
             );
             setUpdaterLink(updaterUrl);
 
-            ShecanVpnService.callCoreAPI(context, listener);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                ShecanVpnService.callCoreAPI(context, listener);
+            }, 1000);
 
         } else {
             // Free mode
@@ -177,7 +187,10 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                     MainActivityNew.LAUNCH_ACTION_ACTIVATE
             );
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                context.startActivity(intent);
+            }, 1000);
         }
     }
 
@@ -522,10 +535,6 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                     ShecanVpnService.callConnectionStatusAPI(Shecan.this, Shecan.this, null);
             }
         }, 20, TimeUnit.SECONDS);
-    }
-
-    public MutableLiveData<Integer> getVpnState() {
-        return vpnState;
     }
 
     public boolean pendingReconnect;

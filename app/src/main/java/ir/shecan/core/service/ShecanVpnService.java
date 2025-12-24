@@ -547,20 +547,25 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     String result = (response != null) ? response.trim() : "";
                     switch (result) {
                         case "invalid":
-                            listener.onInvalid();
+                            if (listener != null) listener.onInvalid();
                             break;
+
                         case "in the range":
-                            listener.onInTheRange();
+                            if (listener != null) listener.onInTheRange();
                             break;
+
                         case "out of the range":
-                            listener.onOutOfRange();
+                            if (listener != null) listener.onOutOfRange();
                             break;
+
                         default:
-                            listener.onSuccess(result);
                             Shecan.setDynamicIP(result.trim());
+                            ((Shecan) context.getApplicationContext())
+                                    .getProActivatedEvent()
+                                    .postValue(true);
+
                             break;
                     }
-
                 },
                 error -> {
                     if (listener != null) {

@@ -112,6 +112,17 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             }
         });
 
+        app.getProActivatedEvent().observe(getViewLifecycleOwner(), activated -> {
+            if (activated == null || !activated) return;
+
+            startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                    .putExtra(MainActivityNew.LAUNCH_ACTION,
+                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+
+            // consume event
+            app.getProActivatedEvent().setValue(false);
+        });
+
 
         binding.chooseConfig.setOnClickListener(v -> {
             activity.updateFragment(0);
@@ -176,57 +187,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         }
 
     }
-
-//    private void restartVpnIfNeeded() {
-//        if (getContext() == null) return;
-//
-//        Context context = getContext();
-//        Shecan app = (Shecan) context.getApplicationContext();
-//
-//        if (ShecanVpnService.isActivated()) {
-//            app.pendingReconnect = true;
-//
-//            ShecanVpnService.cancelConnectionStatusAPI(context);
-//            ShecanVpnService.cancelCoreAPI(context);
-//            Shecan.deactivateService(context);
-//
-//            app.waitForDeactivateThenReconnect(context);
-//        } else {
-//            app.getVpnState().setValue(1);
-//            startActivity(new Intent(requireActivity(), MainActivityNew.class)
-//                    .putExtra(MainActivityNew.LAUNCH_ACTION,
-//                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
-//        }
-//    }
-
-
-
-    private void connectVpn() {
-        if (!isAdded() || getContext() == null) return;
-
-        Context context = getContext();
-        AppStorage appStorage = new AppStorage(context);
-        ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
-
-        Shecan app = (Shecan) context.getApplicationContext();
-        app.getVpnState().setValue(1);
-
-        if (isUpdateLinkMode(serviceItem)) {
-            Shecan.setProMode();
-            String updaterUrl = String.format(
-                    "https://ddns.shecan.ir/update?password=%s",
-                    serviceItem.getUpdateLink()
-            );
-            Shecan.setUpdaterLink(updaterUrl);
-            ShecanVpnService.callCoreAPI(context, this);
-        } else {
-            Shecan.setFreeMode();
-            startActivity(new Intent(requireActivity(), MainActivityNew.class)
-                    .putExtra(MainActivityNew.LAUNCH_ACTION,
-                            MainActivityNew.LAUNCH_ACTION_ACTIVATE));
-        }
-    }
-
 
     private void setupDonatePadding() {
 //        final LinearLayout donate = binding.linearLayoutDonate;
