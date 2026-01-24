@@ -8,5 +8,5 @@ public class Constant {
     public static String TicketUrlRaw = "https://my.shecan.ir/panel/support";
     public static String DomainUrlRaw = "https://my.shecan.ir/panel/domains";
     public static String OrderWebPageUrlRaw = "https://my.shecan.ir/panel/orders";
-    public static String PlanUrl = "https://my.shecan.ir/panel";
+    public static String PlanUrl = "https://shecan.ir/";
 }

@@ -52,6 +52,20 @@
                 app:layout_constraintEnd_toEndOf="@+id/vpnButton"
                 app:layout_constraintStart_toStartOf="@+id/vpnButton" />
 
+            <TextView
+                android:id="@+id/statusTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:padding="8dp"
+                android:text="@string/connected"
+                android:textColor="@color/connectionIsActiveColor"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/vpnButton"
+                app:layout_constraintEnd_toEndOf="@+id/vpnButton"
+                app:layout_constraintStart_toStartOf="@+id/vpnButton" />
+
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"

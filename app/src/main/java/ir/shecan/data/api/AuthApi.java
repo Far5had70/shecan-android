@@ -176,7 +176,7 @@ public class AuthApi {
 
         payload.put("mail", mail);
 
-        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+        repo.apiManager.setApiKey(apiKey);
 
         repo.request(
                 "update_profile",
@@ -194,7 +194,7 @@ public class AuthApi {
     // ---------------------------------------------------
     public void me(String apiKey, ApiCallback<AccountViewModel> callback) {
 
-        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+        repo.apiManager.setApiKey(apiKey);
 
         repo.request(
                 "my_account",
@@ -212,7 +212,7 @@ public class AuthApi {
     // ---------------------------------------------------
     public void issues(String apiKey, int offset, int limit, ApiCallback<IssuesViewModel> callback) {
 
-        repo.apiManager.setOptionalHeader("x-redmine-api-key", apiKey);
+        repo.apiManager.setApiKey(apiKey);
 
         String url =
                 "https://my.shecan.ir/issues.json?offset=" + offset +

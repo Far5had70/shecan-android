@@ -1,5 +1,8 @@
 package ir.shecan.ui.fragment.refactor;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -68,8 +71,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
             boolean hide = height < width * 1.5f;
 
-            binding.bannerSlider.setVisibility(hide ? View.GONE : View.VISIBLE);
-            binding.constraintLayout.setVisibility(hide ? View.GONE : View.VISIBLE);
+            binding.bannerSlider.setVisibility(hide ? GONE : VISIBLE);
+            binding.constraintLayout.setVisibility(hide ? GONE : VISIBLE);
         });
 
         setupDonatePadding();
@@ -102,12 +105,15 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             switch (state) {
                 case 0:
                     binding.vpnButton.showLoading(false);
+                    binding.statusTv.setVisibility(GONE);
                     break;
                 case 1:
                     binding.vpnButton.showLoading(true);
+                    binding.statusTv.setVisibility(GONE);
                     break;
                 case 2:
                     binding.vpnButton.setConnected(true);
+                    binding.statusTv.setVisibility(VISIBLE);
                     break;
             }
         });

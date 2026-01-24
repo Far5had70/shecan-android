@@ -92,7 +92,13 @@ public class ConfigListFragment extends ToolbarFragment {
 
                         @Override
                         public void onError(int statusCode, String message) {
-                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                            if (isAdded() && message != null && !message.isEmpty()) {
+                                Toast.makeText(
+                                        requireContext(),
+                                        message,
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                             binding.swipeRefresh.setRefreshing(false);
                         }
                     }

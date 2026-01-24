@@ -2,6 +2,7 @@ package ir.shecan.data.api;
 
 import android.content.Context;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -14,7 +15,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -31,7 +31,10 @@ public class APIManager {
     private final RequestQueue requestQueue;
 
     private final Map<String, Object> cache = new HashMap<>();
-    private final Map<String, String> optionalHeaders = new HashMap<>();
+
+    private String cookie = "";
+    private String authToken = "";
+    private String apiKey = "";
 
     private APIManager(Context context) {
         requestQueue = Volley.newRequestQueue(context.getApplicationContext());
@@ -43,38 +46,41 @@ public class APIManager {
     }
 
     // -------------------------------------
-    //     مدیریت هدرهای اختیاری
+    // Headers
     // -------------------------------------
 
-    public void setOptionalHeader(String key, String value) {
-        optionalHeaders.put(key, value);
+    public void setCookie(String cookie) {
+        this.cookie = cookie;
     }
 
-    public void setOptionalHeaders(Map<String, String> headers) {
-        optionalHeaders.putAll(headers);
+    public void setAuthToken(String token) {
+        this.authToken = token;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     private Map<String, String> buildHeaders() {
         Map<String, String> headers = new HashMap<>();
 
-        // هدر اختصاصی شما
-        String apiKey = optionalHeaders.containsKey("x-redmine-api-key")
-                ? optionalHeaders.get("x-redmine-api-key")
-                : "";
-
-        headers.put("x-redmine-api-key", apiKey);
-
-        // سایر هدرهای دلخواه
-        for (String key : optionalHeaders.keySet()) {
-            if (!key.equals("x-redmine-api-key")) {
-                headers.put(key, optionalHeaders.get(key));
-            }
+        if (!authToken.isEmpty()) {
+            headers.put("Authorization", "Bearer " + authToken);
         }
+
+        if (!cookie.isEmpty()) {
+            headers.put("Cookie", cookie);
+        }
+
+        if (!apiKey.isEmpty()) {
+            headers.put("x-redmine-api-key", apiKey);
+        }
+
         return headers;
     }
 
     // -------------------------------------
-    //      Single Object Request
+    // Object Request
     // -------------------------------------
 
     public <T, P> void requestObject(
@@ -86,9 +92,56 @@ public class APIManager {
             ApiCallback<T> callback,
             Class<T> clazz
     ) {
+
+        requestObjectInternal(
+                cacheKey,
+                payloadModel,
+                url,
+                method,
+                useCache,
+                callback,
+                clazz,
+                false // 👈 retry نشده
+        );
+    }
+
+    public <T, P> void requestList(
+            String cacheKey,
+            P payloadModel,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            boolean isPublicApi,
+            ApiCallback<List<T>> callback,
+            Class<T> clazz
+    ) {
+
+        requestListInternal(
+                cacheKey,
+                payloadModel,
+                url,
+                method,
+                useCache,
+                isPublicApi,
+                callback,
+                clazz,
+                false // 👈 هنوز retry نشده
+        );
+    }
+
+    private <T, P> void requestObjectInternal(
+            String cacheKey,
+            P payloadModel,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            ApiCallback<T> callback,
+            Class<T> clazz,
+            boolean retried
+    ) {
+
         try {
 
-            // === Cache Check ===
             if (useCache && cache.containsKey(cacheKey)) {
                 callback.onSuccess((T) cache.get(cacheKey), true);
                 return;
@@ -109,102 +162,57 @@ public class APIManager {
                     response -> {
                         try {
 
-                            // --------------- Handling null responses safely ----------------------
-
                             if (response == null || response.toString().equals("null")) {
-
-                                // اگر مدل EmptyResponse بود → بدون JSON استفاده شود
                                 if (clazz.equals(EmptyResponse.class)) {
                                     T model = clazz.getDeclaredConstructor().newInstance();
                                     callback.onSuccess(model, false);
                                     return;
                                 }
-
-                                // در غیر اینصورت یک JSONObject خالی
                                 response = new JSONObject();
                             }
-
-                            // ---------------- Parse "data" or fallback to root ------------------
 
                             JSONObject data = response.optJSONObject("data");
                             if (data == null) data = response;
 
                             T model = gson.fromJson(data.toString(), clazz);
-
                             cache.put(cacheKey, model);
                             callback.onSuccess(model, false);
 
-                        } catch (Exception ex) {
-                            callback.onError(-2, ex.getMessage());
+                        } catch (Exception e) {
+                            callback.onError(-2, e.getMessage());
                         }
                     },
                     error -> {
-                        int code = 0;
-                        String message = "Unknown error";
 
-                        try {
-                            if (error.networkResponse != null) {
-                                code = error.networkResponse.statusCode;
+                        NetworkResponse nr = error.networkResponse;
 
-                                String body = new String(
-                                        error.networkResponse.data,
-                                        StandardCharsets.UTF_8
-                                ).trim();
+                        // 🔥 HANDLE 307 HERE
+                        if (nr != null && nr.statusCode == 307 && !retried) {
 
-                                if (body.isEmpty()) {
-                                    message = "Empty error response";
-                                } else {
-                                    try {
-                                        JSONObject obj = new JSONObject(body);
-
-                                        if (obj.has("error")) {
-                                            message = obj.getString("error");
-                                        } else if (obj.has("message")) {
-                                            message = obj.getString("message");
-                                        } else {
-                                            message = body;
-                                        }
-
-                                    } catch (JSONException je) {
-                                        message = body;
-                                    }
-                                }
+                            if (nr.headers != null && nr.headers.containsKey("Set-Cookie")) {
+                                cookie = mergeCookies(cookie, nr.headers.get("Set-Cookie"));
                             }
-                        } catch (Exception e2) {
-                            message = e2.getMessage();
+
+                            // 🔁 retry once
+                            requestObjectInternal(
+                                    cacheKey,
+                                    payloadModel,
+                                    url,
+                                    method,
+                                    useCache,
+                                    callback,
+                                    clazz,
+                                    true
+                            );
+                            return;
                         }
 
-                        callback.onError(code, message);
+                        callback.onError(
+                                nr != null ? nr.statusCode : -1,
+                                error.getMessage()
+                        );
                     }
             ) {
-
-                // ---------------- Force accept empty/null server responses ------------------
-                @Override
-                protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-                    try {
-                        String jsonString = new String(
-                                response.data,
-                                HttpHeaderParser.parseCharset(response.headers, "utf-8")
-                        ).trim();
-
-                        // Handle null / empty / 204
-                        if (jsonString.isEmpty() ||
-                                jsonString.equals("null") ||
-                                response.statusCode == 204) {
-
-                            return Response.success(
-                                    new JSONObject(), // return empty object
-                                    HttpHeaderParser.parseCacheHeaders(response)
-                            );
-                        }
-
-                        return super.parseNetworkResponse(response);
-
-                    } catch (Exception e) {
-                        return Response.error(new ParseError(e));
-                    }
-                }
-
                 @Override
                 public Map<String, String> getHeaders() {
                     return buildHeaders();
@@ -218,12 +226,7 @@ public class APIManager {
         }
     }
 
-
-    // -------------------------------------
-    //      List Request
-    // -------------------------------------
-
-    public <T, P> void requestList(
+    private <T, P> void requestListInternal(
             String cacheKey,
             P payloadModel,
             String url,
@@ -231,8 +234,10 @@ public class APIManager {
             boolean useCache,
             boolean isPublicApi,
             ApiCallback<List<T>> callback,
-            Class<T> clazz
+            Class<T> clazz,
+            boolean retried
     ) {
+
         try {
 
             if (useCache && cache.containsKey(cacheKey)) {
@@ -240,17 +245,16 @@ public class APIManager {
                 return;
             }
 
-            Gson gson = new GsonBuilder()
+            Gson gson = isPublicApi
+                    ? new GsonBuilder().create()
+                    : new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
 
-            if(isPublicApi){
-                gson = new GsonBuilder().create();
-            }
+            JSONObject payload = payloadModel != null
+                    ? new JSONObject(gson.toJson(payloadModel))
+                    : null;
 
-            JSONObject payload = payloadModel != null ? new JSONObject(gson.toJson(payloadModel)) : null;
-
-            Gson finalGson = gson;
             CustomJsonArrayRequest request = new CustomJsonArrayRequest(
                     convertMethod(method),
                     url,
@@ -262,7 +266,9 @@ public class APIManager {
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject item = jsonArray.optJSONObject(i);
-                            list.add(finalGson.fromJson(item.toString(), clazz));
+                            if (item != null) {
+                                list.add(gson.fromJson(item.toString(), clazz));
+                            }
                         }
 
                         cache.put(cacheKey, list);
@@ -270,15 +276,34 @@ public class APIManager {
                     },
                     error -> {
 
-                        int code = 0;
-                        String msg = "Unknown error";
+                        NetworkResponse nr = error.networkResponse;
 
-                        if (error.networkResponse != null) {
-                            code = error.networkResponse.statusCode;
-                            msg = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+                        // 🔥 HANDLE 307 HERE
+                        if (nr != null && nr.statusCode == 307 && !retried) {
+
+                            if (nr.headers != null && nr.headers.containsKey("Set-Cookie")) {
+                                cookie = mergeCookies(cookie, nr.headers.get("Set-Cookie"));
+                            }
+
+                            // 🔁 retry once with new cookie
+                            requestListInternal(
+                                    cacheKey,
+                                    payloadModel,
+                                    url,
+                                    method,
+                                    useCache,
+                                    isPublicApi,
+                                    callback,
+                                    clazz,
+                                    true
+                            );
+                            return;
                         }
 
-                        callback.onError(code, msg);
+                        callback.onError(
+                                nr != null ? nr.statusCode : -1,
+                                error.getMessage()
+                        );
                     }
             );
 
@@ -289,6 +314,25 @@ public class APIManager {
         }
     }
 
+
+
+    // -------------------------------------
+    // Utils
+    // -------------------------------------
+
+    private String mergeCookies(String oldCookie, String setCookieHeader) {
+
+        StringBuilder result = new StringBuilder(oldCookie == null ? "" : oldCookie);
+
+        String[] cookies = setCookieHeader.split(",");
+        for (String cookie : cookies) {
+            String clean = cookie.split(";", 2)[0].trim();
+            if (result.length() > 0) result.append("; ");
+            result.append(clean);
+        }
+
+        return result.toString();
+    }
 
     private int convertMethod(HttpMethod method) {
         switch (method) {

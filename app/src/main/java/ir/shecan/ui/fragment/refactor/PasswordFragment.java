@@ -120,7 +120,13 @@ public class PasswordFragment extends Fragment {
                         @Override
                         public void onError(int statusCode, String message) {
                             showLoading(false);
-                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                            if (isAdded() && message != null && !message.isEmpty()) {
+                                Toast.makeText(
+                                        requireContext(),
+                                        message,
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         }
                     }
             );
