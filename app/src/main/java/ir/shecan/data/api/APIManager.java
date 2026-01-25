@@ -9,6 +9,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.FieldNamingPolicy;
@@ -17,6 +18,9 @@ import com.google.gson.GsonBuilder;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +41,17 @@ public class APIManager {
     private String apiKey = "";
 
     private APIManager(Context context) {
-        requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+        requestQueue = Volley.newRequestQueue(
+                context,
+                new HurlStack() {
+                    @Override
+                    protected HttpURLConnection createConnection(URL url) throws IOException {
+                        HttpURLConnection conn = super.createConnection(url);
+                        conn.setInstanceFollowRedirects(false); // 👈 KEY LINE
+                        return conn;
+                    }
+                }
+        );
     }
 
     public static synchronized APIManager getInstance(Context context) {

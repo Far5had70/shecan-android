@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -359,7 +360,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
                     @Override
                     public void onError(int statusCode, String message) {
-
+                        Log.e(TAG, "onError: " );
                     }
                 }
         );
