@@ -2,8 +2,6 @@ package ir.shecan.ui.activity;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-
-import static java.security.AccessController.getContext;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.Manifest;
@@ -12,42 +10,36 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
-import ir.shecan.core.util.AppSignatureHelper;
+import ir.shecan.core.constant.Constant;
+import ir.shecan.core.util.AppUtils;
+import ir.shecan.data.api.ApiCallback;
+import ir.shecan.data.api.AuthApi;
+import ir.shecan.data.modelDto.AccountViewModel;
+import ir.shecan.data.modelDto.BannerViewModel;
+import ir.shecan.data.modelDto.IssuesViewModel;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
+import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.ActivityMainNewBinding;
 import ir.shecan.ui.activity.mainActivityUtils.LaunchHandler;
 import ir.shecan.ui.activity.mainActivityUtils.TabItem;
 import ir.shecan.ui.activity.mainActivityUtils.ThemeManager;
 import ir.shecan.ui.activity.mainActivityUtils.VpnManager;
-import ir.shecan.data.api.ApiCallback;
-import ir.shecan.data.api.AuthApi;
-import ir.shecan.core.constant.Constant;
-import ir.shecan.core.util.AppUtils;
-import ir.shecan.data.modelDto.*;
-import ir.shecan.data.storage.AppStorage;
 import ir.shecan.ui.fragment.ToolbarFragment;
-import ir.shecan.ui.fragment.refactor.ConfigListFragment;
-import ir.shecan.ui.fragment.refactor.HomeFragment;
-import ir.shecan.ui.fragment.refactor.ProfileFragment;
 import ir.shecan.ui.widget.CustomBottomBar;
 
 public class MainActivityNew extends AppCompatActivity {
@@ -84,9 +76,13 @@ public class MainActivityNew extends AppCompatActivity {
     private ThemeManager themeManager;
     public List<BannerViewModel> bannerUrl;
 
-    public static MainActivityNew getInstance() { return instance; }
+    public static MainActivityNew getInstance() {
+        return instance;
+    }
 
-    public ToolbarFragment getCurrentFragment() { return currentFragment; }
+    public ToolbarFragment getCurrentFragment() {
+        return currentFragment;
+    }
 
 
     @Override
@@ -144,7 +140,17 @@ public class MainActivityNew extends AppCompatActivity {
 //        }
     }
 
+    private void checkUserIsLogin() {
+        AppStorage storage = new AppStorage(getApplicationContext());
+        VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
+        if (token == null) {
+            startActivity(new Intent(this, AuthorizeActivity.class));
+//            finish();
+        }
+    }
+
     private void vipClickHandler() {
+        binding.toolbar.vip.setVisibility(Constant.IsMyketMode ? GONE : VISIBLE);
         binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
     }
 
@@ -197,7 +203,7 @@ public class MainActivityNew extends AppCompatActivity {
             currentTab = index;
             updateFragment(index);
 
-            switch (index){
+            switch (index) {
                 case 0:
                     adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
                     binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
@@ -226,8 +232,12 @@ public class MainActivityNew extends AppCompatActivity {
                 (ToolbarFragment) fm.findFragmentByTag(fragmentClass.getName());
 
         if (fragment == null) {
-            try { fragment = (ToolbarFragment) fragmentClass.newInstance(); }
-            catch (Exception e) { e.printStackTrace(); return; }
+            try {
+                fragment = (ToolbarFragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
         }
 
         ft.replace(R.id.id_content, fragment, fragmentClass.getName());
@@ -263,7 +273,7 @@ public class MainActivityNew extends AppCompatActivity {
             binding.toolbar.toolbarTitle.setVisibility(GONE);
         }
 
-        switch (index){
+        switch (index) {
             case 0:
                 adjustUIForFragment(this, R.color.mainBack, R.color.mainBack);
                 binding.toolbar.appBarLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainBack));
@@ -288,8 +298,9 @@ public class MainActivityNew extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (themeManager != null && themeManager.handleOnResume()) recreate();
-
+        checkUserIsLogin();
         updateLoginInformation();
+
     }
 
     @Override

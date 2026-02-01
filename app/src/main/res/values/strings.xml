@@ -161,4 +161,5 @@
     <string name="nameAndFamilyNameIsRequired">نام و نام خانوادگی اجباری است</string>
     <string name="nameAndFamilyNameMustPersian">نام و نام خانوادگی باید فقط حروف فارسی باشد</string>
     <string name="connected">متصل شد</string>
+    <string name="seeFromShecanPanel">لطفاً برای مشاهده این بخش، وارد پنل کاربری شکن شوید.</string>
 </resources>

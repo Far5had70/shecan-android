@@ -97,6 +97,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
             AppUtils.hideKeyboard(this);
         });
 
+        binding.toolbar.vip.setVisibility(Constant.IsMyketMode ? GONE : VISIBLE);
         binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
 
     }

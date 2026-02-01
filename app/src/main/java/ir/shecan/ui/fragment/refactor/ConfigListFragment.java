@@ -20,16 +20,16 @@ import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.BannerViewModel;
 import ir.shecan.data.modelDto.HomePage;
-import ir.shecan.data.modelDto.VerifyApiViewModel;
-import ir.shecan.ui.activity.MainActivityNew;
-import ir.shecan.ui.adapter.ServiceAdapter;
-import ir.shecan.databinding.FragmentConfigListBinding;
-import ir.shecan.ui.fragment.ToolbarFragment;
-import ir.shecan.ui.fragment.bottomSheet.SubscriptionBottomSheet;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.ServiceItem;
 import ir.shecan.data.modelDto.ServiceItemMapper;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
+import ir.shecan.databinding.FragmentConfigListBinding;
+import ir.shecan.ui.activity.MainActivityNew;
+import ir.shecan.ui.adapter.ServiceAdapter;
+import ir.shecan.ui.fragment.ToolbarFragment;
+import ir.shecan.ui.fragment.bottomSheet.SubscriptionBottomSheet;
 
 public class ConfigListFragment extends ToolbarFragment {
 
@@ -39,96 +39,96 @@ public class ConfigListFragment extends ToolbarFragment {
     @SuppressLint({"JavascriptInterface", "SetJavaScriptEnabled", "addJavascriptInterface"})
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         binding = FragmentConfigListBinding.inflate(inflater, container, false);
         activity = (MainActivityNew) getActivity();
 
+        startLoading();
+
         AppStorage appStorage = new AppStorage(getContext());
-        List<ServiceItem> serviceItems = buildServiceItems(appStorage);
+        reloadServices(appStorage);
 
-        setupRecyclerView(serviceItems, appStorage);
+        refreshPage();
 
-        VerifyApiViewModel token = appStorage.getToken(VerifyApiViewModel.class);
-        if (token == null || token.getApiKey() == null) {
-            binding.dividerHeader.setVisibility(GONE);
-            if (activity.bannerUrl == null) updateBanner();
-            else handleBannerImage(activity.bannerUrl);
-        }else {
-            binding.bannerSlider.setVisibility(GONE);
-        }
-
-        binding.swipeRefresh.setOnRefreshListener(() -> {
-            refreshPage();
-        });
+        binding.swipeRefresh.setOnRefreshListener(this::refreshPage);
 
         return binding.getRoot();
     }
 
+
     private void refreshPage() {
+
         AppStorage storage = new AppStorage(getContext());
         VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
 
-        if (token != null && token.getApiKey() != null) {
-
-            AuthApi auth = new AuthApi(getContext());
-
-            auth.issues(
-                    token.getApiKey(),
-                    0, 1000,
-                    new ApiCallback<IssuesViewModel>() {
-                        @Override
-                        public void onSuccess(IssuesViewModel res, boolean fromCache) {
-                            // ذخیره دیتا
-                            storage.saveIssues(res);
-
-                            // ساخت لیست جدید
-                            List<ServiceItem> items = buildServiceItems(storage);
-                            setupRecyclerView(items, storage);
-
-                            // ریفرش بنر (در صورت نیاز)
-                            updateBanner();
-
-                            binding.swipeRefresh.setRefreshing(false);
-                        }
-
-                        @Override
-                        public void onError(int statusCode, String message) {
-                            if (isAdded() && message != null && !message.isEmpty()) {
-                                Toast.makeText(
-                                        requireContext(),
-                                        message,
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                            }
-                            binding.swipeRefresh.setRefreshing(false);
-                        }
-                    }
-            );
-
-        } else {
-            // کاربر لاگین نیست → فقط بنر را ریفرش کن
+        if (token == null || token.getApiKey() == null) {
             updateBanner();
-            binding.swipeRefresh.setRefreshing(false);
+            reloadServices(storage);
+            stopLoading();
+            return;
         }
+
+        new AuthApi(getContext()).issues(
+                token.getApiKey(),
+                0,
+                1000,
+                new ApiCallback<IssuesViewModel>() {
+
+                    @Override
+                    public void onSuccess(IssuesViewModel res, boolean fromCache) {
+                        storage.saveIssues(res);
+                        reloadServices(storage);
+                        updateBanner();
+                        stopLoading();
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        showSilentWarning(
+                                message != null ? message : "خطا در دریافت سرویس‌ها"
+                        );
+                        reloadServices(storage);
+                        stopLoading();
+                    }
+                }
+        );
     }
 
+    private void reloadServices(AppStorage storage) {
+        setupRecyclerView(buildServiceItems(storage), storage);
+    }
 
     private List<ServiceItem> buildServiceItems(AppStorage appStorage) {
-        IssuesViewModel viewModel = appStorage.getIssue(IssuesViewModel.class);
-
-        List<IssuesViewModel.IssuesDTO> issues = (viewModel != null && viewModel.getIssues() != null)
-                ? new ArrayList<>(viewModel.getIssues())
-                : new ArrayList<>();
-
-        // آیتم پیش‌فرض free
-        issues.add(IssuesViewModel.IssuesDTO.createDefault());
 
         List<ServiceItem> items = new ArrayList<>();
-        for (IssuesViewModel.IssuesDTO issue : issues) {
+
+        // free همیشه هست
+        items.add(
+                ServiceItemMapper.map(
+                        getContext(),
+                        IssuesViewModel.IssuesDTO.createDefault()
+                )
+        );
+
+        IssuesViewModel viewModel = appStorage.getIssue(IssuesViewModel.class);
+
+        if (viewModel == null || viewModel.getIssues() == null || viewModel.getIssues().isEmpty()) {
+            showSilentWarning("اطلاعات سرویس‌ها کامل بارگذاری نشد");
+            return items;
+        }
+
+        for (IssuesViewModel.IssuesDTO issue : viewModel.getIssues()) {
             items.add(ServiceItemMapper.map(getContext(), issue));
         }
 
         return items;
     }
+
+    private void showSilentWarning(String message) {
+        if (!isAdded()) return;
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
 
     private void setupRecyclerView(List<ServiceItem> items, AppStorage appStorage) {
         ServiceItem savedItem = appStorage.getServiceStatus(ServiceItem.class);
@@ -252,5 +252,17 @@ public class ConfigListFragment extends ToolbarFragment {
                 AppUtils.openUrl(banner.getUrl(), getActivity());
             }
         });
+    }
+
+    private void startLoading() {
+        if (binding == null) return;
+        binding.swipeRefresh.post(() ->
+                binding.swipeRefresh.setRefreshing(true)
+        );
+    }
+
+    private void stopLoading() {
+        if (binding == null) return;
+        binding.swipeRefresh.setRefreshing(false);
     }
 }

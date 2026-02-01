@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -110,18 +111,31 @@ public class ProfileFragment extends ToolbarFragment {
 
                 case 2:
                     // تراکنش‌ها
+                    if(Constant.IsMyketMode){
+                        Toast.makeText(getContext(), R.string.seeFromShecanPanel, Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     AppUtils.openUrl(AppUtils.buildRedirect(Constant.TransactionUrlRaw, getContext()), getActivity());
 
                     break;
 
                 case 3:
                     // پشتیبانی دامنه‌ها
+                    if(Constant.IsMyketMode){
+                        Toast.makeText(getContext(), R.string.seeFromShecanPanel, Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     AppUtils.openUrl(AppUtils.buildRedirect(Constant.DomainUrlRaw, getContext()), getActivity());
                     break;
 
                 case 4:
                     // تیکت‌ها
+                    if(Constant.IsMyketMode){
+                        Toast.makeText(getContext(), R.string.seeFromShecanPanel, Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     AppUtils.openUrl(AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()), getActivity());
+
                     break;
 
                 case 5:
