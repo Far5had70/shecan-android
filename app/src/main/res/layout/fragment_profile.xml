@@ -69,6 +69,65 @@
 
         </ir.shecan.ui.widget.VpnStatusView>
 
+        <LinearLayout
+            android:id="@+id/myketInfoView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_info_box">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_info"
+                app:tint="@color/white"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/tvMyketInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:text="@string/seeFromShecanPanelMyket"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cafeBazaarInfoView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_info_box">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_info"
+                app:tint="@color/white"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/tvCafeBazaarInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:text="@string/seeFromShecanPanelCafeBazaar"/>
+
+        </LinearLayout>
+
+
         <!-- RecyclerView باید wrap_content باشد تا ScrollView اسکرول کند -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"

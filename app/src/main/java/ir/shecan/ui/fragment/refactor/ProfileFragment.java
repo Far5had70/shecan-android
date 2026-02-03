@@ -7,29 +7,27 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import ir.shecan.BuildConfig;
 import ir.shecan.R;
+import ir.shecan.core.constant.Constant;
+import ir.shecan.core.util.AppUtils;
+import ir.shecan.data.modelDto.ProfileItem;
+import ir.shecan.data.modelDto.VerifyApiViewModel;
+import ir.shecan.data.storage.AppStorage;
+import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.ui.activity.AuthorizeActivity;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.activity.ThemeActivity;
 import ir.shecan.ui.activity.UpdateProfileActivity;
 import ir.shecan.ui.adapter.ProfileAdapter;
-import ir.shecan.core.constant.Constant;
-import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.ui.fragment.ToolbarFragment;
-import ir.shecan.data.modelDto.ProfileItem;
-import ir.shecan.data.modelDto.VerifyApiViewModel;
-import ir.shecan.data.storage.AppStorage;
-import ir.shecan.core.util.AppUtils;
 
 public class ProfileFragment extends ToolbarFragment {
 
@@ -92,62 +90,64 @@ public class ProfileFragment extends ToolbarFragment {
 
     private void setupRecycler() {
         List<ProfileItem> list = new ArrayList<>();
+
         list.add(new ProfileItem(R.drawable.ic_info, "حساب کاربری"));
         list.add(new ProfileItem(R.drawable.ic_info, "ظاهر برنامه"));
-        list.add(new ProfileItem(R.drawable.ic_info, "تراکنش‌ها"));
-        list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
-        list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
-//        list.add(new ProfileItem(R.drawable.ic_info, "درباره"));
+
+        if (Constant.IsMyketMode) {
+            binding.myketInfoView.setVisibility(View.VISIBLE);
+            list.add(new ProfileItem(R.drawable.ic_info, "تراکنش‌ها"));
+            list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
+            list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
+        }
+
+        if (Constant.IsCafeBazaarMode) {
+            binding.myketInfoView.setVisibility(View.VISIBLE);
+            list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
+            list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
+        }
 
         ProfileAdapter adapter = new ProfileAdapter(list, (position, item) -> {
-            switch (position) {
-                case 0:
-//                    openFragment(AccountFragment.class);
-                    getActivity().startActivity(new Intent(getActivity(), UpdateProfileActivity.class));
-                    break;
-                case 1:
-                    getActivity().startActivity(new Intent(getActivity(), ThemeActivity.class));
-                    break;
-
-                case 2:
-                    // تراکنش‌ها
-                    if(Constant.IsMyketMode){
-                        Toast.makeText(getContext(), R.string.seeFromShecanPanel, Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    AppUtils.openUrl(AppUtils.buildRedirect(Constant.TransactionUrlRaw, getContext()), getActivity());
-
-                    break;
-
-                case 3:
-                    // پشتیبانی دامنه‌ها
-                    if(Constant.IsMyketMode){
-                        Toast.makeText(getContext(), R.string.seeFromShecanPanel, Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    AppUtils.openUrl(AppUtils.buildRedirect(Constant.DomainUrlRaw, getContext()), getActivity());
-                    break;
-
-                case 4:
-                    // تیکت‌ها
-                    if(Constant.IsMyketMode){
-                        Toast.makeText(getContext(), R.string.seeFromShecanPanel, Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    AppUtils.openUrl(AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()), getActivity());
-
-                    break;
-
-                case 5:
-                    // درباره ما
-                    AppUtils.openUrl("https://shecan.ir", getActivity());
-                    break;
-            }
+            handleItemClick(position);
         });
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerView.setAdapter(adapter);
     }
+
+    private void handleItemClick(int position) {
+        switch (position) {
+            case 0:
+                startActivity(new Intent(getActivity(), UpdateProfileActivity.class));
+                break;
+
+            case 1:
+                startActivity(new Intent(getActivity(), ThemeActivity.class));
+                break;
+
+            case 2:
+                AppUtils.openUrl(
+                        AppUtils.buildRedirect(Constant.TransactionUrlRaw, getContext()),
+                        getActivity()
+                );
+                break;
+
+            case 3:
+                AppUtils.openUrl(
+                        AppUtils.buildRedirect(Constant.DomainUrlRaw, getContext()),
+                        getActivity()
+                );
+                break;
+
+            case 4:
+                AppUtils.openUrl(
+                        AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()),
+                        getActivity()
+                );
+                break;
+        }
+    }
+
 
     private void openFragment(Class fragmentClass) {
         if (getActivity() instanceof MainActivityNew) {

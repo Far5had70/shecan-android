@@ -161,5 +161,6 @@
     <string name="nameAndFamilyNameIsRequired">نام و نام خانوادگی اجباری است</string>
     <string name="nameAndFamilyNameMustPersian">نام و نام خانوادگی باید فقط حروف فارسی باشد</string>
     <string name="connected">متصل شد</string>
-    <string name="seeFromShecanPanel">لطفاً برای مشاهده این بخش، وارد پنل کاربری شکن شوید.</string>
+    <string name="seeFromShecanPanelMyket"> مشاهده تراکنش‌ها، تیکت‌ها و پشتیبانی دامنه‌ها از طریق پنل کاربری شکن امکان‌پذیر است.</string>
+    <string name="seeFromShecanPanelCafeBazaar"> مشاهده تراکنش‌ها از طریق پنل کاربری شکن امکان‌پذیر است.</string>
 </resources>

@@ -150,7 +150,7 @@ public class MainActivityNew extends AppCompatActivity {
     }
 
     private void vipClickHandler() {
-        binding.toolbar.vip.setVisibility(Constant.IsMyketMode ? GONE : VISIBLE);
+        binding.toolbar.vip.setVisibility(GONE);
         binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
     }
 

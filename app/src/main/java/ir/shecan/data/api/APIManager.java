@@ -7,8 +7,6 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -223,7 +221,7 @@ public class APIManager {
 
                         callback.onError(
                                 nr != null ? nr.statusCode : -1,
-                                error.getMessage()
+                                parseVolleyError(nr, error)
                         );
                     }
             ) {
@@ -316,7 +314,7 @@ public class APIManager {
 
                         callback.onError(
                                 nr != null ? nr.statusCode : -1,
-                                error.getMessage()
+                                parseVolleyError(nr, error)
                         );
                     }
             );
@@ -327,7 +325,6 @@ public class APIManager {
             callback.onError(-1, e.getMessage());
         }
     }
-
 
 
     // -------------------------------------
@@ -360,4 +357,42 @@ public class APIManager {
                 return Request.Method.GET;
         }
     }
+
+    private String parseVolleyError(NetworkResponse response, Throwable error) {
+
+        if (response != null && response.data != null) {
+
+            try {
+                String json = new String(response.data, StandardCharsets.UTF_8);
+
+                JSONObject obj = new JSONObject(json);
+
+                if (obj.has("message"))
+                    return obj.getString("message");
+
+                if (obj.has("error"))
+                    return obj.getString("error");
+
+                if (obj.has("detail"))
+                    return obj.getString("detail");
+
+                return json;
+
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Network errors
+        if (error instanceof AuthFailureError)
+            return "خطا در احراز هویت";
+
+        if (error instanceof ParseError)
+            return "خطا در پردازش پاسخ سرور";
+
+        if (error instanceof com.android.volley.TimeoutError)
+            return "ارتباط با سرور برقرار نشد";
+
+        return "خطایی رخ داده است";
+    }
+
 }
