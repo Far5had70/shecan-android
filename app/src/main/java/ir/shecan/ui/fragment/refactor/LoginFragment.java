@@ -1,5 +1,7 @@
 package ir.shecan.ui.fragment.refactor;
 
+import static android.view.View.GONE;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.transition.TransitionInflater;
@@ -19,8 +21,10 @@ import ir.shecan.R;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
+import ir.shecan.databinding.ActivityAuthorizeBinding;
 import ir.shecan.databinding.FragmentLoginBinding;
 import ir.shecan.data.modelDto.ExistApiViewModel;
+import ir.shecan.ui.activity.AuthorizeActivity;
 
 public class LoginFragment extends Fragment {
 
@@ -77,6 +81,11 @@ public class LoginFragment extends Fragment {
                     }
             );
         });
+
+        AuthorizeActivity activity = (AuthorizeActivity) getActivity();
+        if(activity != null && !activity.isShowBackButton){
+            binding.iconBackImg.setVisibility(GONE);
+        }
 
         binding.iconBackImg.setOnClickListener(view -> {
             getActivity().finish();
@@ -146,7 +155,7 @@ public class LoginFragment extends Fragment {
         } else {
             binding.btnContinue.setEnabled(true);
             binding.btnContinue.setAlpha(1f);
-            binding.progress.setVisibility(View.GONE);
+            binding.progress.setVisibility(GONE);
             binding.btnContinue.setText(ContextCompat.getString(getContext(), R.string.continuee));
         }
     }

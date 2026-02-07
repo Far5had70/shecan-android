@@ -144,7 +144,9 @@ public class MainActivityNew extends AppCompatActivity {
         AppStorage storage = new AppStorage(getApplicationContext());
         VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
         if (token == null) {
-            startActivity(new Intent(this, AuthorizeActivity.class));
+            startActivity(new Intent(this, AuthorizeActivity.class)
+                    .putExtra("isShowBackButton", false));
+
 //            finish();
         }
     }

@@ -1,5 +1,6 @@
 package ir.shecan.ui.activity;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
@@ -15,9 +16,21 @@ public class AuthorizeActivity extends AppCompatActivity {
 
     private ActivityAuthorizeBinding binding;
 
+    public boolean isShowBackButton = true;
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Bundle bundle = intent.getExtras();
+        if(bundle != null){
+            isShowBackButton = bundle.getBoolean("isShowBackButton" , true);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onNewIntent(getIntent());
 
         Window window = getWindow();
         window.getDecorView().setSystemUiVisibility(0);
