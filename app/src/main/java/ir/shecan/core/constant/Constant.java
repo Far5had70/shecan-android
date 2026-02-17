@@ -4,6 +4,7 @@ import ir.shecan.BuildConfig;
 
 public class Constant {
 
+    public static final String Site = "Site";
     public static final String CafeBazaar = "CafeBazaar";
     public static final String Myket = "Myket";
 
@@ -11,6 +12,7 @@ public class Constant {
 
     public static final boolean IsMyketMode = Store.equals(Myket);
     public static final boolean IsCafeBazaarMode = Store.equals(CafeBazaar);
+    public static final boolean IsSiteMode = Store.equals(Site);
     public static String BaseAuthRedirect = "https://my.shecan.ir/panel/auth?token=%s&url=%s";
 
     public static String TransactionUrlRaw = "https://my.shecan.ir/panel/transactions";

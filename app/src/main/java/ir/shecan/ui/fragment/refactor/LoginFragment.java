@@ -44,6 +44,14 @@ public class LoginFragment extends Fragment {
             AppUtils.hideKeyboard(getActivity());
         });
 
+        binding.edtPhoneNumber.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                binding.btnContinue.performClick();
+                return true;
+            }
+            return false;
+        });
+
         binding.btnContinue.setOnClickListener(v -> {
 
             showLoading(true);

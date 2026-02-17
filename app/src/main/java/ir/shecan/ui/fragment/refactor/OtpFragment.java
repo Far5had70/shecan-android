@@ -45,6 +45,10 @@ public class OtpFragment extends Fragment {
 
     private OtpReceiver otpReceiver;
 
+    private boolean isSendingOtp = false;
+    private boolean isVerifyingOtp = false;
+
+
 
     public OtpFragment(String identifier, boolean isExist) {
         this.identifier = identifier;
@@ -220,22 +224,19 @@ public class OtpFragment extends Fragment {
 
     private void startTimer() {
 
+        if (isSendingOtp) return;
+        isSendingOtp = true;
+
         AuthApi auth = new AuthApi(requireContext());
         auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
             @Override
             public void onSuccess(SendOtpApiViewModel data, boolean fromCache) {
-
+                isSendingOtp = false;
             }
 
             @Override
             public void onError(int statusCode, String message) {
-                if (isAdded() && message != null && !message.isEmpty()) {
-                    Toast.makeText(
-                            requireContext(),
-                            message,
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
+                isSendingOtp = false;
             }
         });
 
@@ -255,6 +256,9 @@ public class OtpFragment extends Fragment {
     }
 
     private void validateOtp() {
+
+        if (isVerifyingOtp) return;
+        isVerifyingOtp = true;
 
         StringBuilder code = new StringBuilder();
 
@@ -277,6 +281,7 @@ public class OtpFragment extends Fragment {
                     new ApiCallback<VerifyApiViewModel>() {
                         @Override
                         public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+                            isVerifyingOtp = false;
                             showLoading(false);
 
                             if (res != null) {
@@ -299,6 +304,7 @@ public class OtpFragment extends Fragment {
 
                         @Override
                         public void onError(int statusCode, String message) {
+                            isVerifyingOtp = false;
                             showLoading(false);
                             if (isAdded() && message != null && !message.isEmpty()) {
                                 Toast.makeText(
@@ -314,6 +320,7 @@ public class OtpFragment extends Fragment {
             auth.verifyOtpObject(identifier, code.toString(), new ApiCallback<VerifyApiViewModel>() {
                 @Override
                 public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+                    isVerifyingOtp = false;
                     showLoading(false);
 
                     if (res != null) {
@@ -332,6 +339,7 @@ public class OtpFragment extends Fragment {
 
                 @Override
                 public void onError(int statusCode, String message) {
+                    isVerifyingOtp = false;
                     showLoading(false);
                     if (isAdded() && message != null && !message.isEmpty()) {
                         Toast.makeText(

@@ -94,15 +94,23 @@ public class ProfileFragment extends ToolbarFragment {
         list.add(new ProfileItem(R.drawable.ic_info, "حساب کاربری"));
         list.add(new ProfileItem(R.drawable.ic_info, "ظاهر برنامه"));
 
-        if (Constant.IsMyketMode) {
-            binding.myketInfoView.setVisibility(View.VISIBLE);
+        if (Constant.IsSiteMode) {
+            binding.myketInfoView.setVisibility(View.GONE);
+            binding.cafeBazaarInfoView.setVisibility(View.GONE);
             list.add(new ProfileItem(R.drawable.ic_info, "تراکنش‌ها"));
             list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
             list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
         }
 
-        if (Constant.IsCafeBazaarMode) {
+        if (Constant.IsMyketMode) {
             binding.myketInfoView.setVisibility(View.VISIBLE);
+//            list.add(new ProfileItem(R.drawable.ic_info, "تراکنش‌ها"));
+//            list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
+//            list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
+        }
+
+        if (Constant.IsCafeBazaarMode) {
+            binding.cafeBazaarInfoView.setVisibility(View.VISIBLE);
             list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
             list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
         }

@@ -77,7 +77,9 @@
                                 android:fontFamily="@font/iran_yekan_light"
                                 android:textColor="@color/greenPrimaryTextColor"
                                 android:textColorHint="@color/greenPrimaryTextColor"
-                                android:textSize="14sp" />
+                                android:textSize="14sp"
+                                android:imeOptions="actionDone"
+                                android:inputType="text" />
 
 
                             <!-- Divider -->

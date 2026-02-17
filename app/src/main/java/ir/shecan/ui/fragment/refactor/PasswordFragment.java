@@ -133,18 +133,18 @@ public class PasswordFragment extends Fragment {
         });
 
         binding.btnContinueWithOtpCode.setOnClickListener(view -> {
-            AuthApi auth = new AuthApi(requireContext());
-            auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
-                @Override
-                public void onSuccess(SendOtpApiViewModel data, boolean fromCache) {
-
-                }
-
-                @Override
-                public void onError(int statusCode, String message) {
-//                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-                }
-            });
+//            AuthApi auth = new AuthApi(requireContext());
+//            auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
+//                @Override
+//                public void onSuccess(SendOtpApiViewModel data, boolean fromCache) {
+//
+//                }
+//
+//                @Override
+//                public void onError(int statusCode, String message) {
+////                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+//                }
+//            });
 
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
