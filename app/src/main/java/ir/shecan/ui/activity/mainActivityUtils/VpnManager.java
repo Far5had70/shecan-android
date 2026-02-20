@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 
 import ir.shecan.Shecan;
 import ir.shecan.core.service.ShecanVpnService;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.core.util.server.DNSServerHelper;
 
 /**
@@ -49,7 +50,7 @@ public class VpnManager {
             if (intent.resolveActivity(activity.getPackageManager()) != null) {
                 vpnPermissionLauncher.launch(intent);
             } else {
-                Toast.makeText(activity, "دستگاه شما از VPN داخلی پشتیبانی نمی‌کند.", Toast.LENGTH_LONG).show();
+                ToastManager.show(activity, "دستگاه شما از VPN داخلی پشتیبانی نمی‌کند.");
             }
         } else {
             onVpnPermissionGranted();

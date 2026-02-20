@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentPasswordBinding;
@@ -121,11 +122,7 @@ public class PasswordFragment extends Fragment {
                         public void onError(int statusCode, String message) {
                             showLoading(false);
                             if (isAdded() && message != null && !message.isEmpty()) {
-                                Toast.makeText(
-                                        requireContext(),
-                                        message,
-                                        Toast.LENGTH_SHORT
-                                ).show();
+                                ToastManager.show(getContext(), message);
                             }
                         }
                     }

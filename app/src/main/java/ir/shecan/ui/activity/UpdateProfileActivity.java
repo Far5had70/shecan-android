@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import ir.shecan.R;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.core.constant.Constant;
@@ -114,7 +115,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         String repeat = binding.edtPasswordNewRepeat.getText().toString();
 
         if (!newPass.equals(repeat)) {
-            Toast.makeText(this, R.string.passworsNotSame, Toast.LENGTH_LONG).show();
+            ToastManager.show(this, getString(R.string.passworsNotSame));
             return;
         }
 
@@ -133,7 +134,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     @Override
                     public void onError(int statusCode, String message) {
                         showLoading(false);
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                        ToastManager.show(getApplicationContext(), message);
                     }
                 }
         );
@@ -160,7 +161,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     @Override
                     public void onError(int statusCode, String message) {
                         showLoading(false);
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                        ToastManager.show(getApplicationContext(), message);
                     }
                 }
         );
@@ -194,7 +195,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     @Override
                     public void onError(int statusCode, String message) {
                         showLoading(false);
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                        ToastManager.show(getApplicationContext(), message);
                     }
                 }
         );

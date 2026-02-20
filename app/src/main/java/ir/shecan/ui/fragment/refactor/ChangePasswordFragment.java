@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 
 import ir.shecan.R;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentChangePasswordBinding;
@@ -54,7 +55,7 @@ public class ChangePasswordFragment extends Fragment {
 
         binding.btnContinue.setOnClickListener(view -> {
             if (!binding.edtPassword.getText().toString().equals(binding.edtRepeatPassword.getText().toString())) {
-                Toast.makeText(getActivity(), R.string.passworsNotSame, Toast.LENGTH_LONG).show();
+                ToastManager.show(getContext(), getString(R.string.passworsNotSame));
                 return;
             }
             showLoading(true);
@@ -72,7 +73,8 @@ public class ChangePasswordFragment extends Fragment {
                         @Override
                         public void onError(int statusCode, String message) {
                             showLoading(false);
-                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                            ToastManager.show(getContext(), message);
+
                         }
                     }
             );

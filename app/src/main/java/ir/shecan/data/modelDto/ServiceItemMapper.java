@@ -102,13 +102,19 @@ public class ServiceItemMapper {
     }
 
     private static String getStatusTitle(Context context, RequestStatus status) {
-        switch (status) {
-            case READY_TO_CONNECT: return context.getString(R.string.readyToConnect);
-            case ACTIVE: return context.getString(R.string.active);
-            case EXPIRING: return context.getString(R.string.expiring);
-            case WAITING_FOR_ACTIVATION: return context.getString(R.string.waitingForActivate);
-            case NEW: return context.getString(R.string.newConnection);
-            default: return "نامشخص";
+        if (context == null) return "نامشخص";
+
+        try {
+            switch (status) {
+                case READY_TO_CONNECT: return context.getString(R.string.readyToConnect);
+                case ACTIVE: return context.getString(R.string.active);
+                case EXPIRING: return context.getString(R.string.expiring);
+                case WAITING_FOR_ACTIVATION: return context.getString(R.string.waitingForActivate);
+                case NEW: return context.getString(R.string.newConnection);
+                default: return "نامشخص";
+            }
+        } catch (Exception e) {
+            return "نامشخص";
         }
     }
 

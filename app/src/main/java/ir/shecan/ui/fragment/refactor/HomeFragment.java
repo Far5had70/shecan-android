@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.modelDto.AccountViewModel;
 import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.ui.activity.MainActivityNew;
@@ -351,8 +352,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
                                     @Override
                                     public void onError(int statusCode, String message) {
-                                        if (!isAdded()) return;
-                                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                                        ToastManager.show(getContext(), message);
                                     }
                                 }
                         );

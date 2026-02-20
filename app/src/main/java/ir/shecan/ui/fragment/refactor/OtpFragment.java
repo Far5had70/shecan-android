@@ -31,6 +31,7 @@ import com.google.android.gms.tasks.Task;
 import ir.shecan.R;
 import ir.shecan.core.receiver.OtpReceiver;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentOtpBinding;
@@ -307,11 +308,7 @@ public class OtpFragment extends Fragment {
                             isVerifyingOtp = false;
                             showLoading(false);
                             if (isAdded() && message != null && !message.isEmpty()) {
-                                Toast.makeText(
-                                        requireContext(),
-                                        message,
-                                        Toast.LENGTH_SHORT
-                                ).show();
+                                ToastManager.show(getContext(), message);
                             }
                         }
                     }
@@ -342,11 +339,7 @@ public class OtpFragment extends Fragment {
                     isVerifyingOtp = false;
                     showLoading(false);
                     if (isAdded() && message != null && !message.isEmpty()) {
-                        Toast.makeText(
-                                requireContext(),
-                                message,
-                                Toast.LENGTH_SHORT
-                        ).show();
+                        ToastManager.show(getContext(), message);
                     }
                 }
             });

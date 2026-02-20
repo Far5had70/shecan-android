@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.BannerViewModel;
@@ -126,9 +127,8 @@ public class ConfigListFragment extends ToolbarFragment {
 
     private void showSilentWarning(String message) {
         if (!isAdded()) return;
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        ToastManager.show(getContext(), message);
     }
-
 
     private void setupRecyclerView(List<ServiceItem> items, AppStorage appStorage) {
         ServiceItem savedItem = appStorage.getServiceStatus(ServiceItem.class);
