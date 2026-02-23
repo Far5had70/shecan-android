@@ -259,91 +259,144 @@ public class OtpFragment extends Fragment {
     private void validateOtp() {
 
         if (isVerifyingOtp) return;
-        isVerifyingOtp = true;
 
-        StringBuilder code = new StringBuilder();
+        StringBuilder codeBuilder = new StringBuilder();
 
         for (EditText otpField : otpFields) {
             if (otpField.getText().length() == 0) {
                 shakeError(getString(R.string.codeIsUnCompleted));
                 return;
             }
-            code.append(otpField.getText());
+            codeBuilder.append(otpField.getText());
         }
 
+        isVerifyingOtp = true;
         showLoading(true);
 
+        String code = codeBuilder.toString();
         AuthApi auth = new AuthApi(requireContext());
 
-        if(isExist){
-            auth.verifyOtp(
-                    identifier,
-                    code.toString(),
-                    new ApiCallback<VerifyApiViewModel>() {
-                        @Override
-                        public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
-                            isVerifyingOtp = false;
-                            showLoading(false);
-
-                            if (res != null) {
-                                AppStorage storage = new AppStorage(getContext());
-                                storage.saveToken(res);
-                                if (!res.getMail().contains("shecan.fake")) {
-                                    getActivity().finish();
-                                } else {
-                                    getActivity().getSupportFragmentManager()
-                                            .beginTransaction()
-                                            .replace(R.id.fragmentContainer, new SignUpFragment())
-                                            .addToBackStack(null)
-                                            .commit();
-                                }
-                            } else {
-                                showLoading(false);
-                                shakeError(getString(R.string.codeIsWrong));
-                            }
-                        }
-
-                        @Override
-                        public void onError(int statusCode, String message) {
-                            isVerifyingOtp = false;
-                            showLoading(false);
-                            if (isAdded() && message != null && !message.isEmpty()) {
-                                ToastManager.show(getContext(), message);
-                            }
-                        }
-                    }
-            );
+        if (isExist) {
+            verifyNormal(auth, code);
         } else {
-            auth.verifyOtpObject(identifier, code.toString(), new ApiCallback<VerifyApiViewModel>() {
-                @Override
-                public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
-                    isVerifyingOtp = false;
-                    showLoading(false);
+            verifyObjectWithFallback(auth, code);
+        }
+    }
 
-                    if (res != null) {
-                        AppStorage storage = new AppStorage(getContext());
-                        storage.saveToken(res);
+    private void verifyObjectWithFallback(AuthApi auth, String code) {
+
+        auth.verifyOtpObject(identifier, code, new ApiCallback<VerifyApiViewModel>() {
+
+            @Override
+            public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+
+                if (res != null) {
+                    handleVerifySuccess(res, false);
+                } else {
+                    verifyNormal(auth, code); // fallback
+                }
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                verifyNormal(auth, code); // fallback
+            }
+        });
+    }
+
+    private void verifyNormal(AuthApi auth, String code) {
+
+        auth.verifyOtp(identifier, code, new ApiCallback<VerifyApiViewModel>() {
+
+            @Override
+            public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+
+                if (res != null) {
+                    handleVerifySuccess(res, true);
+                } else {
+                    handleVerifyError(getString(R.string.codeIsWrong));
+                }
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                handleVerifyError(message);
+            }
+        });
+    }
+
+    private void handleVerifySuccess(VerifyApiViewModel res, boolean isNormal) {
+
+        isVerifyingOtp = false;
+        showLoading(false);
+
+        AppStorage storage = new AppStorage(getContext());
+        storage.saveToken(res);
+
+        if (isNormal) {
+
+            if (!res.getMail().contains("shecan.fake")) {
+                requireActivity().finish();
+                return;
+            }
+        }
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, new SignUpFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    private void handleVerifyError(String message) {
+
+        isVerifyingOtp = false;
+        showLoading(false);
+
+        if (message == null || message.isEmpty()) {
+            shakeError(getString(R.string.codeIsWrong));
+        } else if (isAdded()) {
+            ToastManager.show(getContext(), message);
+        }
+    }
+
+    private void callNormalVerify(AuthApi auth, String code) {
+
+        auth.verifyOtp(identifier, code, new ApiCallback<VerifyApiViewModel>() {
+
+            @Override
+            public void onSuccess(VerifyApiViewModel res, boolean fromCache) {
+                isVerifyingOtp = false;
+                showLoading(false);
+
+                if (res != null) {
+                    AppStorage storage = new AppStorage(getContext());
+                    storage.saveToken(res);
+
+                    if (!res.getMail().contains("shecan.fake")) {
+                        getActivity().finish();
+                    } else {
                         getActivity().getSupportFragmentManager()
                                 .beginTransaction()
                                 .replace(R.id.fragmentContainer, new SignUpFragment())
                                 .addToBackStack(null)
                                 .commit();
-                    } else {
-                        showLoading(false);
-                        shakeError(getString(R.string.codeIsWrong));
                     }
+                } else {
+                    shakeError(getString(R.string.codeIsWrong));
                 }
+            }
 
-                @Override
-                public void onError(int statusCode, String message) {
-                    isVerifyingOtp = false;
-                    showLoading(false);
-                    if (isAdded() && message != null && !message.isEmpty()) {
-                        ToastManager.show(getContext(), message);
-                    }
+            @Override
+            public void onError(int statusCode, String message) {
+                isVerifyingOtp = false;
+                showLoading(false);
+
+                if (isAdded() && message != null && !message.isEmpty()) {
+                    ToastManager.show(getContext(), message);
                 }
-            });
-        }
+            }
+        });
     }
 
     private void shakeError(String msg) {

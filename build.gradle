@@ -6,8 +6,8 @@ buildscript {
         kotlin_version = '1.8.22'
     }
     repositories {
-        jcenter()
         google()
+        jcenter()
         maven { url "https://jitpack.io" }
         mavenCentral()
     }

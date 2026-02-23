@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
+import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -361,10 +363,8 @@ public class APIManager {
     private String parseVolleyError(NetworkResponse response, Throwable error) {
 
         if (response != null && response.data != null) {
-
             try {
                 String json = new String(response.data, StandardCharsets.UTF_8);
-
                 JSONObject obj = new JSONObject(json);
 
                 if (obj.has("message"))
@@ -391,6 +391,21 @@ public class APIManager {
 
         if (error instanceof com.android.volley.TimeoutError)
             return "ارتباط با سرور برقرار نشد";
+
+        if (error instanceof java.net.UnknownHostException)
+            return "اتصال به اینترنت برقرار نیست یا سرور در دسترس نیست";
+
+        if (error instanceof java.net.ConnectException)
+            return "عدم دسترسی به سرور";
+
+        if (error instanceof java.net.SocketTimeoutException)
+            return "زمان اتصال به سرور به پایان رسید";
+
+        if (error instanceof NoConnectionError)
+            return "اتصال به اینترنت برقرار نیست";
+
+        if (error.getCause() instanceof UnknownHostException)
+            return "سرور یافت نشد (مشکل DNS)";
 
         return "خطایی رخ داده است";
     }
