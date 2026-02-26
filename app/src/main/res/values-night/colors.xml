@@ -54,7 +54,10 @@
     <color name="tabButtonGrayNotSelectedColor">#1A2F28</color>
     <color name="tabButtonGraySelectedColor">#1AFFFFFF</color>
     <color name="exitButtonBackgroundColor">#13231D</color>
-
+    <color name="exitItemBackgroundColor">#1E1E1E</color>
+    <color name="exitItemTouchedBackgroundColor">#2A2A2A</color>
+    <color name="exitItemExitBackgroundColor">#2B1B1B</color>
+    <color name="exitItemExitTouchedBackgroundColor">#3A2323</color>
 
 
 </resources>

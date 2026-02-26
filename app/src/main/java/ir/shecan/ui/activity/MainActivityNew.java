@@ -5,11 +5,21 @@ import static android.view.View.VISIBLE;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -152,7 +162,7 @@ public class MainActivityNew extends AppCompatActivity {
     }
 
     private void vipClickHandler() {
-        binding.toolbar.vip.setVisibility(Constant.IsSiteMode? VISIBLE : GONE);
+        binding.toolbar.vip.setVisibility(Constant.IsSiteMode ? VISIBLE : GONE);
         binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
     }
 
@@ -171,7 +181,7 @@ public class MainActivityNew extends AppCompatActivity {
                     return;
                 }
 
-                finish();
+                showExitBottomSheet();
             }
         };
 
@@ -396,5 +406,88 @@ public class MainActivityNew extends AppCompatActivity {
 
     public void applyThemeForRecreate() {
         if (themeManager != null) themeManager.applyTheme();
+    }
+
+    private void showExitBottomSheet() {
+
+        if (!Constant.IsMyketMode && !Constant.IsCafeBazaarMode) {
+            finish();
+        }
+
+        Dialog dialog = new Dialog(this, R.style.BottomDialogTheme);
+        dialog.setContentView(R.layout.bottom_sheet_exit);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            window.setGravity(Gravity.BOTTOM);
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        dialog.findViewById(R.id.root).setOnTouchListener(new View.OnTouchListener() {
+            float downY;
+
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                switch (event.getAction()) {
+
+                    case MotionEvent.ACTION_DOWN:
+                        downY = event.getRawY();
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        float deltaY = event.getRawY() - downY;
+                        if (deltaY > 200) { // threshold
+                            dialog.dismiss();
+                        }
+                        return true;
+                }
+                return false;
+            }
+
+
+        });
+
+        dialog.findViewById(R.id.btnExit).setOnClickListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+
+        dialog.findViewById(R.id.btnRate).setOnClickListener(v -> {
+            dialog.dismiss();
+            openMarketForRating();
+        });
+
+        dialog.show();
+    }
+
+    private void openMarketForRating() {
+
+        String packageName = getPackageName();
+
+        if (Constant.IsCafeBazaarMode) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setData(Uri.parse("bazaar://details?id=" + packageName));
+                intent.setPackage("com.farsitel.bazaar");
+                startActivity(intent);
+            } catch (Exception e) {
+                finish();
+            }
+        }
+
+        if (Constant.IsMyketMode) {
+            try {
+                String url = "myket://comment?id=" + packageName;
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
+            } catch (Exception e) {
+                finish();
+            }
+        }
     }
 }
