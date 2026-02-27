@@ -82,6 +82,8 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
     public HashMap<String, Pair<String, Integer>> dnsServers;
 
+    private long sessionStartTime = 0L;
+
     private static boolean activated = false;
 
     public static boolean isActivated() {
@@ -247,6 +249,21 @@ public class ShecanVpnService extends VpnService implements Runnable {
     private void stopThread() {
         Log.d(TAG, "stopThread");
         activated = false;
+
+        // ===== SAVE SESSION DURATION =====
+        if (sessionStartTime > 0) {
+            long duration = System.currentTimeMillis() - sessionStartTime;
+
+            // save to SharedPreferences
+            long current = Shecan.getPrefs().getLong("weekly_connection_time", 0L);
+            Shecan.getPrefs().edit()
+                    .putLong("weekly_connection_time", current + duration)
+                    .apply();
+
+            sessionStartTime = 0L;
+        }
+        // ===== END SAVE =====
+
         boolean shouldRefresh = false;
         try {
             // Take a snapshot to avoid races (mThread might change concurrently)
@@ -453,6 +470,10 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
             Logger.info("shecan service is started");
             ((Shecan) getApplicationContext()).getVpnState().postValue(2);
+
+            // ===== START SESSION TRACKING =====
+            sessionStartTime = System.currentTimeMillis();
+            // ===== END SESSION TRACKING =====
 
             if (Shecan.getPrefs().getBoolean("settings_dns_over_tcp", false)) {
                 provider = new TcpProvider(descriptor, this);

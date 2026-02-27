@@ -39,6 +39,7 @@ public class APIManager {
     private String cookie = "";
     private String authToken = "";
     private String apiKey = "";
+    private String secretKey = "";
 
     private APIManager(Context context) {
         requestQueue = Volley.newRequestQueue(
@@ -75,6 +76,10 @@ public class APIManager {
         this.apiKey = apiKey;
     }
 
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
     private Map<String, String> buildHeaders() {
         Map<String, String> headers = new HashMap<>();
 
@@ -88,6 +93,10 @@ public class APIManager {
 
         if (!apiKey.isEmpty()) {
             headers.put("x-redmine-api-key", apiKey);
+        }
+
+        if (!secretKey.isEmpty()) {
+            headers.put("x-api-secret", secretKey);
         }
 
         return headers;

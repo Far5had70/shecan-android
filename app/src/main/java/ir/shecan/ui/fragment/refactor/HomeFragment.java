@@ -3,7 +3,6 @@ package ir.shecan.ui.fragment.refactor;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,26 +25,27 @@ import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
-import ir.shecan.core.util.ToastManager;
-import ir.shecan.data.modelDto.AccountViewModel;
-import ir.shecan.data.modelDto.HomePage;
-import ir.shecan.ui.activity.MainActivityNew;
-import ir.shecan.data.api.ApiCallback;
-import ir.shecan.data.api.AuthApi;
-import ir.shecan.databinding.FragmentHomeBinding;
-import ir.shecan.ui.dialog.ContactSupportDialog;
-import ir.shecan.ui.dialog.RenewalDialog;
-import ir.shecan.ui.dialog.UpdateDialog;
-import ir.shecan.ui.fragment.ToolbarFragment;
-import ir.shecan.data.modelDto.BannerViewModel;
-import ir.shecan.data.modelDto.IssuesViewModel;
-import ir.shecan.data.modelDto.ServiceItem;
 import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
 import ir.shecan.core.service.CoreApiResponseListener;
 import ir.shecan.core.service.ShecanVpnService;
-import ir.shecan.data.storage.AppStorage;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.ToastManager;
+import ir.shecan.data.api.ApiCallback;
+import ir.shecan.data.api.AuthApi;
+import ir.shecan.data.modelDto.BannerViewModel;
+import ir.shecan.data.modelDto.HomePage;
+import ir.shecan.data.modelDto.IssuesViewModel;
+import ir.shecan.data.modelDto.ServiceItem;
+import ir.shecan.data.storage.AppStorage;
+import ir.shecan.databinding.FragmentHomeBinding;
+import ir.shecan.ui.activity.MainActivityNew;
+import ir.shecan.ui.dialog.ContactSupportDialog;
+import ir.shecan.ui.dialog.RenewalDialog;
+import ir.shecan.ui.dialog.UpdateDialog;
+import ir.shecan.ui.fragment.ToolbarFragment;
+import ir.shecan.ui.widget.rateHelper.RatingDialog;
+import ir.shecan.ui.widget.rateHelper.RatingManager;
 
 public class HomeFragment extends ToolbarFragment implements CoreApiResponseListener, ConnectionStatusApiListener {
 
@@ -340,32 +339,45 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 new ApiCallback<HomePage>() {
                     @Override
                     public void onSuccess(HomePage res, boolean fromCache) {
-                        auth.bannerList(
-                                res.getBannerService().getAndroid(),
-                                new ApiCallback<List<BannerViewModel>>() {
-                                    @Override
-                                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
-                                        if (!isAdded()) return;
-                                        activity.bannerUrl = list;
-                                        handleBannerImage(list);
-                                    }
-
-                                    @Override
-                                    public void onError(int statusCode, String message) {
-                                        ToastManager.show(getContext(), message);
-                                    }
-                                }
-                        );
+                        showBanner(auth, res, fromCache);
+                        checkRatingRule(res.getAppStoreRate().getAndroid());
                     }
 
                     @Override
                     public void onError(int statusCode, String message) {
-                        Log.e(TAG, "onError: " );
+                        Log.e(TAG, "onError: ");
                     }
                 }
         );
     }
 
+    private void showBanner(AuthApi auth, HomePage res, boolean fromCache) {
+        auth.bannerList(
+                res.getBannerService().getAndroid(),
+                new ApiCallback<List<BannerViewModel>>() {
+                    @Override
+                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+                        if (!isAdded()) return;
+                        activity.bannerUrl = list;
+                        handleBannerImage(list);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        ToastManager.show(getContext(), message);
+                    }
+                }
+        );
+    }
+
+    private void checkRatingRule(String url) {
+        RatingManager ratingManager = new RatingManager(getContext());
+        ratingManager.initFirstOpenIfNeeded();
+
+        if (ratingManager.shouldShowRatingDialog()) {
+            new RatingDialog(getContext(), url).show();
+        }
+    }
 
     private void handleBannerImage(List<BannerViewModel> banners) {
 

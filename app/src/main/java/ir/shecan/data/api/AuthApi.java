@@ -2,9 +2,12 @@ package ir.shecan.data.api;
 
 import android.content.Context;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import ir.shecan.data.modelDio.ExistApiInput;
@@ -18,6 +21,7 @@ import ir.shecan.data.modelDto.ExistApiViewModel;
 import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.SendOtpApiViewModel;
+import ir.shecan.data.modelDto.UserRating;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 
 public class AuthApi {
@@ -231,7 +235,6 @@ public class AuthApi {
     }
 
 
-
     // ---------------------------------------------------
     // 9) banner
     // ---------------------------------------------------
@@ -315,6 +318,65 @@ public class AuthApi {
                 false,
                 callback,
                 HomePage.class
+        );
+    }
+
+    // ---------------------------------------------------
+    // 11) SendRating
+    // ---------------------------------------------------
+    public void sendRatingApi(
+            String url,
+            String mobile,
+            long weeklyConnectionTime,
+            String appVersion,
+            String storeName,
+            int rating,
+            boolean isProUser,
+            ApiCallback<Void> callback) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+        String createdDate = sdf.format(new Date());
+//
+//        Map<String, String> payload = new HashMap<>();
+//        payload.put("mobile_number", mobile);
+//        payload.put("weekly_connection_time", String.valueOf(weeklyConnectionTime));
+//        payload.put("app_version", appVersion);
+//        payload.put("store_name", storeName);
+//        payload.put("rating", String.valueOf(rating));
+//        payload.put("is_pro_user", String.valueOf(isProUser));
+//        payload.put("create_date", createdDate);
+
+        UserRating payload = new UserRating(
+                mobile,
+                weeklyConnectionTime,
+                appVersion,
+                storeName,
+                rating,
+                isProUser,
+                createdDate
+        );
+
+        repo.apiManager.setSecretKey("ksdasdjcu*@ndshW@1503SdD");
+
+        repo.requestList(
+                "appStoreRate",
+                payload,
+                url,
+                HttpMethod.POST,
+                false,
+                false,
+                new ApiCallback<List<UserRating>>() {
+                    @Override
+                    public void onSuccess(List<UserRating> list, boolean fromCache) {
+                        callback.onSuccess(null, false);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        callback.onError(statusCode, message);
+                    }
+                },
+                UserRating.class
         );
     }
 

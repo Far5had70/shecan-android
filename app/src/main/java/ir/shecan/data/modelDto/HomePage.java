@@ -10,6 +10,7 @@ public class HomePage {
     private String updateLink;
     private String bannerImageUrl;
     private String bannerLink;
+    private AppStoreRateDTO appStoreRate;
     private BannerServiceDTO bannerService;
     private String dynamicIpGuideLink;
     private String ticketingLink;
@@ -76,6 +77,14 @@ public class HomePage {
 
     public void setBannerService(BannerServiceDTO bannerService) {
         this.bannerService = bannerService;
+    }
+
+    public AppStoreRateDTO getAppStoreRate() {
+        return appStoreRate;
+    }
+
+    public void setAppStoreRate(AppStoreRateDTO appStoreRate) {
+        this.appStoreRate = appStoreRate;
     }
 
     public String getDynamicIpGuideLink() {
@@ -328,6 +337,17 @@ public class HomePage {
         public void setWindows(String windows) {
             this.windows = windows;
         }
+
+        public String getAndroid() {
+            return android;
+        }
+
+        public void setAndroid(String android) {
+            this.android = android;
+        }
+    }
+    public static class AppStoreRateDTO {
+        private String android;
 
         public String getAndroid() {
             return android;

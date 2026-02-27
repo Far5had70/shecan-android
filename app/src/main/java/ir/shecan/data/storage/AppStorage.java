@@ -8,6 +8,8 @@ public class AppStorage {
     private static final String App_Config_KEY = "APP_CONFIG_MODEL";
     private static final String Issue_KEY = "Issue_MODEL";
     private static final String SERVICE_STATUS_KEY = "SERVICE_STATUS_MODEL1";
+    private static final String RATING_STATE_KEY = "RATING_STATE_MODEL100";
+
 
     private final GenericPreferenceManager pref;
 
@@ -52,6 +54,19 @@ public class AppStorage {
 
     public void removeIssue() {
         pref.remove(Issue_KEY);
+    }
+
+    // ---------------- Rating State ----------------
+    public <T> void saveRatingState(T issue) {
+        pref.saveModel(RATING_STATE_KEY, issue);
+    }
+
+    public <T> T getRatingState(Class<T> clazz) {
+        return pref.getModel(RATING_STATE_KEY, clazz);
+    }
+
+    public void removeRatingState() {
+        pref.remove(RATING_STATE_KEY);
     }
 
     // ---------------- Configs ----------------
