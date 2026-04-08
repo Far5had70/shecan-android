@@ -3,6 +3,7 @@ package ir.shecan.ui.fragment.refactor;
 import static android.view.View.GONE;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,6 +132,10 @@ public class ConfigListFragment extends ToolbarFragment {
     }
 
     private void setupRecyclerView(List<ServiceItem> items, AppStorage appStorage) {
+        Context context = getContext();
+        if(context == null){
+            return;
+        }
         ServiceItem savedItem = appStorage.getServiceStatus(ServiceItem.class);
 
         int defaultSelected = -1;
@@ -145,7 +150,7 @@ public class ConfigListFragment extends ToolbarFragment {
 
         ServiceAdapter adapter = getServiceAdapter(items, appStorage, defaultSelected);
 
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(context));
         binding.recyclerView.setAdapter(adapter);
     }
 

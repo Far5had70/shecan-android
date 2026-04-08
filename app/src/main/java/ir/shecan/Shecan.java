@@ -109,9 +109,13 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
     private ScheduledExecutorService scheduler;
 
     private final MutableLiveData<Integer> vpnState = new MutableLiveData<>();
+    private final MutableLiveData<String> vpnStatus = new MutableLiveData<>();
 
     public MutableLiveData<Integer> getVpnState() {
         return vpnState;
+    }
+    public MutableLiveData<String> getVpnStatus() {
+        return vpnStatus;
     }
 
     private final MutableLiveData<Boolean> proActivatedEvent = new MutableLiveData<>();

@@ -390,6 +390,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
             if (resolvedDNS.isEmpty()) {
                 Log.d(TAG, "No DNS server is reachable.");
+                ((Shecan) getApplicationContext()).getVpnStatus().postValue("اتصال ناموفق بود، مجددا تلاش کنید.");
                 stopThread();
                 return;
             }

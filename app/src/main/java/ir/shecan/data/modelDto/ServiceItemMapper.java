@@ -129,6 +129,7 @@ public class ServiceItemMapper {
     }
 
     private static int getStatusColor(Context context, RequestStatus status) {
+        if (context == null) return 0;
         switch (status) {
             case ACTIVE: return ContextCompat.getColor(context, R.color.connectionIsActiveColor);
             case EXPIRING: return ContextCompat.getColor(context, R.color.colorAccent);

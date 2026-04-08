@@ -14,11 +14,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ir.shecan.BuildConfig;
 import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.core.constant.Constant;
 import ir.shecan.core.service.ShecanVpnService;
+import ir.shecan.data.modelDto.IssuesViewModel;
+import ir.shecan.data.modelDto.ServiceItem;
+import ir.shecan.data.modelDto.ServiceItemMapper;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.ui.activity.MainActivityNew;
@@ -99,10 +105,21 @@ public class RatingDialog extends Dialog {
                 long weeklyTime = Shecan.getPrefs()
                         .getLong("weekly_connection_time", 0L);
 
+                AppStorage appStorage = new AppStorage(getContext());
+                IssuesViewModel viewModel = appStorage.getIssue(IssuesViewModel.class);
+                boolean isHaveProItemInList = false;
+                for (IssuesViewModel.IssuesDTO issue : viewModel.getIssues()) {
+                    ServiceItem item = ServiceItemMapper.map(getContext(), issue);
+                    boolean isFreeMode = item.getOrderCode().equals("0");
+                    if(!isFreeMode){
+                        isHaveProItemInList = true;
+                    }
+                }
+
                 ratingManager.onUserRated(
                         url,
                         (int) rating,
-                        ShecanVpnService.isProMode(),
+                        ShecanVpnService.isProMode() || isHaveProItemInList,
                         token.getLogin(),
                         weeklyTime,
                         BuildConfig.VERSION_NAME,

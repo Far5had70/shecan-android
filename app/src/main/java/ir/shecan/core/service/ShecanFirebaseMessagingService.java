@@ -63,14 +63,18 @@ public class ShecanFirebaseMessagingService extends FirebaseMessagingService {
 
         sendTokenToServer(token);
 
-        FirebaseMessaging.getInstance().subscribeToTopic("afterPushPoleScenarioTopic")
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "Subscribed to topic: afterPushPoleScenarioTopic");
-                    } else {
-                        Log.w(TAG, "Failed to subscribe to topic", task.getException());
-                    }
-                });
+        try {
+            FirebaseMessaging.getInstance().subscribeToTopic("afterPushPoleScenarioTopic")
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Subscribed to topic: afterPushPoleScenarioTopic");
+                        } else {
+                            Log.w(TAG, "Failed to subscribe to topic", task.getException());
+                        }
+                    });
+        } catch (Exception ignored) {
+
+        }
     }
 
     private void sendTokenToServer(String token) {

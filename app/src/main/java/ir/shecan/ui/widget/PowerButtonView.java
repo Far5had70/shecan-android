@@ -61,9 +61,9 @@ public class PowerButtonView extends ConstraintLayout {
         // هندل کردن لمس
         setOnTouchListener((v, event) -> {
 
-            if (currentState == State.LOADING) {
-                return true; // بلاک کامل
-            }
+//            if (currentState == State.LOADING) {
+//                return true; // بلاک کامل
+//            }
 
             if (currentState == State.CONNECTED) {
                 return false; // کلیک عبور کند → بدون انیمیشن
@@ -88,7 +88,7 @@ public class PowerButtonView extends ConstraintLayout {
         super.setOnClickListener(v -> {
             if (externalClickListener == null) return;
 
-            if (currentState == State.LOADING) return;
+            //if (currentState == State.LOADING) return;
 
             // NORMAL و CONNECTED هر دو اجازه کلیک دارند
             externalClickListener.onClick(v);
@@ -124,8 +124,8 @@ public class PowerButtonView extends ConstraintLayout {
                 break;
 
             case LOADING:
-                setEnabled(false);
-                setClickable(false);
+                setEnabled(true);
+                setClickable(true);
 
                 scaleUp();
 

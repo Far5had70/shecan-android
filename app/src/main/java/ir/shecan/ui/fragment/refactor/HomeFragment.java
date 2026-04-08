@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +95,11 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
                 Shecan.deactivateService(requireContext());
+            } else if (binding.vpnButton.isLoading()) {
+                app.getVpnState().setValue(0);
+                ShecanVpnService.cancelConnectionStatusAPI(requireContext());
+                ShecanVpnService.cancelCoreAPI(requireContext());
+                Shecan.deactivateService(requireContext());
             } else {
                 app.connectVpn(requireContext(), HomeFragment.this);
             }
@@ -107,6 +113,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 case 0:
                     binding.vpnButton.showLoading(false);
                     binding.statusTv.setVisibility(GONE);
+                    if (app.getVpnStatus().getValue() != null && !app.getVpnStatus().getValue().isEmpty()) {
+                        ToastManager.show(getContext(), app.getVpnStatus().getValue());
+                        app.getVpnStatus().setValue("");
+                    }
                     break;
                 case 1:
                     binding.vpnButton.showLoading(true);

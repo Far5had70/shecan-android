@@ -41,7 +41,7 @@ public class RatingManager {
         long now = System.currentTimeMillis();
 
         // ⛔ اگر ۲ روز از آخرین dismiss گذشته
-        if (state.lastRatingValue == 0 && now - state.lastPromptDismissTime >= TWO_DAYS)
+        if (state.lastRatingValue == 0 && state.lastPromptDismissTime > 0 && now - state.lastPromptDismissTime >= TWO_DAYS)
             return true;
 
         // ✅ شرط اول: ۳ ساعت گذشته و هنوز امتیاز نداده

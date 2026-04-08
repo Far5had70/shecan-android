@@ -57,7 +57,8 @@ public class LoginFragment extends Fragment {
 
             showLoading(true);
 
-            String identifier = binding.edtPhoneNumber.getText().toString();
+            String inputNumber = binding.edtPhoneNumber.getText().toString();
+            String identifier = formatPhoneNumber(inputNumber);
             AuthApi auth = new AuthApi(requireContext());
             auth.exists(
                     identifier,
@@ -121,12 +122,18 @@ public class LoginFragment extends Fragment {
     }
 
     private void goToLoginWithOtpFragment() {
-        OtpFragment otpFragment = new OtpFragment(binding.edtPhoneNumber.getText().toString(), false);
+        String inputNumber = binding.edtPhoneNumber.getText().toString();
+        String identifier = formatPhoneNumber(inputNumber);
+
+        OtpFragment otpFragment = new OtpFragment(identifier, false);
         route(otpFragment);
     }
 
     private void goToLoginWithPasswordFragment() {
-        PasswordFragment otpFragment = new PasswordFragment(binding.edtPhoneNumber.getText().toString());
+        String inputNumber = binding.edtPhoneNumber.getText().toString();
+        String identifier = formatPhoneNumber(inputNumber);
+
+        PasswordFragment otpFragment = new PasswordFragment(identifier);
         route(otpFragment);
     }
 
@@ -163,5 +170,12 @@ public class LoginFragment extends Fragment {
             binding.progress.setVisibility(GONE);
             binding.btnContinue.setText(ContextCompat.getString(getContext(), R.string.continuee));
         }
+    }
+
+    public String formatPhoneNumber(String phoneNumber) {
+        if (phoneNumber != null && phoneNumber.matches("\\d{10}")) {
+            return "0" + phoneNumber;
+        }
+        return phoneNumber;
     }
 }
