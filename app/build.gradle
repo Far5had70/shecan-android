@@ -7,6 +7,12 @@ plugins {
 }
 
 def gitCommit = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def buildConfigString = { value ->
+    def escaped = (value ?: "").toString()
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+    return "\"${escaped}\""
+}
 
 android {
     namespace "ir.shecan"
@@ -15,8 +21,8 @@ android {
         applicationId "co.bonyan.shecan"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 10243
-        versionName "2.2.0"
+        versionCode 10246
+        versionName "2.2.3"
 
         buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
@@ -56,16 +62,34 @@ android {
         cafeBazaar {
             dimension "store"
             buildConfigField "String", "STORE", "\"CafeBazaar\""
+            def marketApplicationId = "com.farsitel.bazaar"
+            def marketBindAddress = "ir.cafebazaar.pardakht.InAppBillingService.BIND"
+            manifestPlaceholders = [marketApplicationId: "${marketApplicationId}",
+                                    marketBindAddress  : "${marketBindAddress}",
+                                    marketPermission   : "${marketApplicationId}.permission.PAY_THROUGH_BAZAAR"]
+            buildConfigField "String", "IAB_PUBLIC_KEY", buildConfigString(project.findProperty("BAZAAR_IAB_PUBLIC_KEY"))
         }
 
         myket {
             dimension "store"
             buildConfigField "String", "STORE", "\"Myket\""
+            def marketApplicationId = "ir.mservices.market"
+            def marketBindAddress = "ir.mservices.market.InAppBillingService.BIND"
+            manifestPlaceholders = [marketApplicationId: "${marketApplicationId}",
+                                    marketBindAddress  : "${marketBindAddress}",
+                                    marketPermission   : "${marketApplicationId}.BILLING"]
+            buildConfigField "String", "IAB_PUBLIC_KEY", buildConfigString(project.findProperty("MYKET_IAB_PUBLIC_KEY"))
         }
 
         site {
             dimension "store"
             buildConfigField "String", "STORE", "\"Site\""
+            def marketApplicationId = "co.bonyan.shecan"
+            def marketBindAddress = "co.bonyan.shecan.billing.BIND"
+            manifestPlaceholders = [marketApplicationId: "${marketApplicationId}",
+                                    marketBindAddress  : "${marketBindAddress}",
+                                    marketPermission   : "${marketApplicationId}.BILLING"]
+            buildConfigField "String", "IAB_PUBLIC_KEY", "\"\""
         }
     }
 }
@@ -111,6 +135,10 @@ dependencies {
     implementation "com.google.firebase:firebase-iid:21.1.0"
 
     implementation 'com.android.volley:volley:1.2.1'
+    compileOnly 'com.github.myketstore:myket-billing-client:1.6'
+    compileOnly 'com.github.cafebazaar.Poolakey:poolakey:2.2.0'
+    myketImplementation 'com.github.myketstore:myket-billing-client:1.6'
+    cafeBazaarImplementation 'com.github.cafebazaar.Poolakey:poolakey:2.2.0'
 
 //    implementation 'com.push-pole.android:pushpolesdk:2.0.1'
 
@@ -121,6 +149,7 @@ dependencies {
 }
 
 sentry {
+    telemetry.set(false)
     autoUploadProguardMapping.set(true)
     includeProguardMapping.set(true)
     url.set("https://sentry.hamravesh.com/")

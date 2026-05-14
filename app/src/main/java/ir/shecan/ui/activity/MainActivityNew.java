@@ -15,6 +15,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +36,10 @@ import java.util.Stack;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.billing.CafeBazaarBillingManager;
+import ir.shecan.core.billing.CafeBazaarBillingProducts;
+import ir.shecan.core.billing.MyketBillingManager;
+import ir.shecan.core.billing.MyketBillingProducts;
 import ir.shecan.core.constant.Constant;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
@@ -86,6 +91,8 @@ public class MainActivityNew extends AppCompatActivity {
 
     private VpnManager vpnManager;
     private ThemeManager themeManager;
+    private MyketBillingManager myketBillingManager;
+    private CafeBazaarBillingManager cafeBazaarBillingManager;
     public List<BannerViewModel> bannerUrl;
 
     public static MainActivityNew getInstance() {
@@ -142,6 +149,8 @@ public class MainActivityNew extends AppCompatActivity {
         LaunchHandler.handle(this, getIntent());
         onBackPressedHandler();
         vipClickHandler();
+        setupMyketBilling();
+        setupCafeBazaarBilling();
 
 //        AppSignatureHelper helper = new AppSignatureHelper(this);
 //        ArrayList<String> signatures = helper.getAppSignatures();
@@ -166,6 +175,150 @@ public class MainActivityNew extends AppCompatActivity {
     private void vipClickHandler() {
         binding.toolbar.vip.setVisibility(Constant.IsSiteMode ? VISIBLE : GONE);
         binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
+    }
+
+    private void setupMyketBilling() {
+        if (!Constant.IsMyketMode || !MyketBillingProducts.hasAnySku()) return;
+
+        myketBillingManager = new MyketBillingManager(this);
+        myketBillingManager.startSetup(
+                MyketBillingProducts.consumableSkus(),
+                MyketBillingProducts.nonConsumableSkus(),
+                new MyketBillingManager.Listener() {
+                    @Override
+                    public void onBillingReady() {
+                        Log.d("MyketBilling", "Myket billing is ready.");
+                    }
+
+                    @Override
+                    public void onBillingUnavailable(String message) {
+                        Log.w("MyketBilling", message);
+                    }
+
+                    @Override
+                    public void onSkuDetailsLoaded(List<?> skuDetails) {
+                        Log.d("MyketBilling", "Loaded Myket sku details: " + skuDetails.size());
+                    }
+
+                    @Override
+                    public void onConsumablePurchaseReady(Object purchase, boolean restoredFromInventory) {
+                        Log.d("MyketBilling", "Consumable purchase is ready: " + purchase);
+                        // Deliver on your backend first if needed, then call consumeMyketPurchase(purchase).
+                    }
+
+                    @Override
+                    public void onNonConsumablePurchaseReady(Object purchase, boolean restoredFromInventory) {
+                        Log.d("MyketBilling", "Non-consumable purchase is ready: " + purchase);
+                    }
+
+                    @Override
+                    public void onPurchaseConsumed(Object purchase) {
+                        Log.d("MyketBilling", "Purchase consumed: " + purchase);
+                    }
+
+                    @Override
+                    public void onBillingError(String message) {
+                        Log.e("MyketBilling", message);
+                    }
+                }
+        );
+    }
+
+    private void setupCafeBazaarBilling() {
+        if (!Constant.IsCafeBazaarMode || !CafeBazaarBillingProducts.hasAnySku()) return;
+
+        cafeBazaarBillingManager = new CafeBazaarBillingManager(this);
+        cafeBazaarBillingManager.startSetup(
+                CafeBazaarBillingProducts.consumableSkus(),
+                CafeBazaarBillingProducts.subscriptionSkus(),
+                new CafeBazaarBillingManager.Listener() {
+                    @Override
+                    public void onBillingReady() {
+                        Log.d("CafeBazaarBilling", "Cafe Bazaar billing is ready.");
+                    }
+
+                    @Override
+                    public void onBillingUnavailable(@NonNull String message) {
+                        Log.w("CafeBazaarBilling", message);
+                    }
+
+                    @Override
+                    public void onBillingDisconnected() {
+                        Log.d("CafeBazaarBilling", "Cafe Bazaar billing disconnected.");
+                    }
+
+                    @Override
+                    public void onInAppSkuDetailsLoaded(@NonNull List<?> skuDetails) {
+                        Log.d("CafeBazaarBilling", "Loaded Cafe Bazaar in-app sku details: " + skuDetails.size());
+                    }
+
+                    @Override
+                    public void onSubscriptionSkuDetailsLoaded(@NonNull List<?> skuDetails) {
+                        Log.d("CafeBazaarBilling", "Loaded Cafe Bazaar subscription sku details: " + skuDetails.size());
+                    }
+
+                    @Override
+                    public void onPurchaseFlowBegan(@NonNull String sku) {
+                        Log.d("CafeBazaarBilling", "Purchase flow began: " + sku);
+                    }
+
+                    @Override
+                    public void onConsumablePurchaseReady(@NonNull Object purchaseInfo, boolean restoredFromInventory) {
+                        Log.d("CafeBazaarBilling", "Consumable purchase is ready: " + purchaseInfo);
+                        // Deliver on your backend first if needed, then call consumeCafeBazaarPurchase(token).
+                    }
+
+                    @Override
+                    public void onSubscriptionPurchaseReady(@NonNull Object purchaseInfo, boolean restoredFromInventory) {
+                        Log.d("CafeBazaarBilling", "Subscription purchase is ready: " + purchaseInfo);
+                    }
+
+                    @Override
+                    public void onPurchaseCanceled(@NonNull String sku) {
+                        Log.d("CafeBazaarBilling", "Purchase canceled: " + sku);
+                    }
+
+                    @Override
+                    public void onPurchaseConsumed(@NonNull String purchaseToken) {
+                        Log.d("CafeBazaarBilling", "Purchase consumed: " + purchaseToken);
+                    }
+
+                    @Override
+                    public void onBillingError(@NonNull String message) {
+                        Log.e("CafeBazaarBilling", message);
+                    }
+                }
+        );
+    }
+
+    public void launchMyketPurchase(String sku) {
+        if (myketBillingManager != null) {
+            myketBillingManager.launchPurchaseFlow(this, sku);
+        }
+    }
+
+    public void consumeMyketPurchase(Object purchase) {
+        if (myketBillingManager != null) {
+            myketBillingManager.consumePurchase(purchase);
+        }
+    }
+
+    public void launchCafeBazaarPurchase(String sku) {
+        if (cafeBazaarBillingManager != null) {
+            cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku);
+        }
+    }
+
+    public void launchCafeBazaarSubscription(String sku) {
+        if (cafeBazaarBillingManager != null) {
+            cafeBazaarBillingManager.launchSubscriptionFlow(getActivityResultRegistry(), sku);
+        }
+    }
+
+    public void consumeCafeBazaarPurchase(String purchaseToken) {
+        if (cafeBazaarBillingManager != null) {
+            cafeBazaarBillingManager.consumePurchase(purchaseToken);
+        }
     }
 
     private void onBackPressedHandler() {
@@ -326,6 +479,14 @@ public class MainActivityNew extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (myketBillingManager != null) {
+            myketBillingManager.dispose();
+            myketBillingManager = null;
+        }
+        if (cafeBazaarBillingManager != null) {
+            cafeBazaarBillingManager.dispose();
+            cafeBazaarBillingManager = null;
+        }
         instance = null;
         currentFragment = null;
         binding = null;

@@ -59,5 +59,9 @@
 # Keep MiniDNS classes
 -keep class de.measite.minidns.** { *; }
 
+# Keep Myket billing callbacks, receiver, proxy activity, and purchase models.
+-keep class ir.myket.billingclient.** { *; }
+-keep class com.android.vending.billing.** { *; }
+
 # Suppress warning about missing SLF4J binding
 -dontwarn org.slf4j.impl.StaticLoggerBinder
