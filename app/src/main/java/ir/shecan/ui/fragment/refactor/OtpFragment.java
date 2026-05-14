@@ -67,7 +67,7 @@ public class OtpFragment extends Fragment {
 
         binding = FragmentOtpBinding.inflate(inflater, container, false);
 
-        binding.agreementView.setupText("https://shecan.ir/");
+        binding.agreementView.setupText("https://shecan.ir/terms/");
 
         binding.otpLayout.otpBackground.setOnClickListener(v -> {
             AppUtils.hideKeyboard(getActivity());

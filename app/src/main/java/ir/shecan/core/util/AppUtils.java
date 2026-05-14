@@ -45,6 +45,16 @@ public class AppUtils {
         }
     }
 
+    public static int getVersionCode(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public static int compareVersionNames(String version1, String version2) {
         String[] v1Parts = version1.split("\\.");
         String[] v2Parts = version2.split("\\.");

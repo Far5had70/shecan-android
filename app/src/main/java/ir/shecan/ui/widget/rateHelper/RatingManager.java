@@ -44,10 +44,10 @@ public class RatingManager {
         if (state.lastRatingValue == 0 && state.lastPromptDismissTime > 0 && now - state.lastPromptDismissTime >= TWO_DAYS)
             return true;
 
-        // ✅ شرط اول: ۳ ساعت گذشته و هنوز امتیاز نداده
-        if (now - state.firstOpenTime >= THREE_HOURS) {
-            return true;
-        }
+//        // ✅ شرط اول: ۳ ساعت گذشته و هنوز امتیاز نداده
+//        if (state.lastRatingValue == 0 && now - state.firstOpenTime >= THREE_HOURS) {
+//            return true;
+//        }
 
         // ✅ شرط دوم: امتیاز کمتر از ۴ داده و ۱ ماه گذشته
         if (state.lastRatingValue >= 1 && state.lastRatingValue <= 3 && now - state.lastRatingTime >= ONE_MONTH) {
