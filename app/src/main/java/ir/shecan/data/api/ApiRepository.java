@@ -3,6 +3,7 @@ package ir.shecan.data.api;
 import android.content.Context;
 
 import java.util.List;
+import java.util.Map;
 
 public class ApiRepository {
 
@@ -35,6 +36,51 @@ public class ApiRepository {
             Class<T> clazz
     ) {
         apiManager.requestList(cacheKey, payload, url, method, useCache, isPublicApi, callback, clazz);
+    }
+
+    public <T> void requestForm(
+            String cacheKey,
+            Map<String, String> payload,
+            String url,
+            boolean useCache,
+            ApiCallback<T> callback,
+            Class<T> clazz
+    ) {
+        apiManager.requestFormObject(cacheKey, payload, url, useCache, callback, clazz);
+    }
+
+    public <T> void requestForm(
+            String cacheKey,
+            Map<String, String> payload,
+            Map<String, String> headers,
+            String url,
+            boolean useCache,
+            ApiCallback<T> callback,
+            Class<T> clazz
+    ) {
+        apiManager.requestFormObject(cacheKey, payload, headers, url, useCache, callback, clazz);
+    }
+
+    public <T> void requestRawForm(
+            String cacheKey,
+            String rawBody,
+            Map<String, String> headers,
+            String url,
+            boolean useCache,
+            ApiCallback<T> callback,
+            Class<T> clazz
+    ) {
+        apiManager.requestRawFormObject(cacheKey, rawBody, headers, url, useCache, callback, clazz);
+    }
+
+    public void requestText(
+            String cacheKey,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            ApiCallback<String> callback
+    ) {
+        apiManager.requestText(cacheKey, url, method, useCache, callback);
     }
 
 }

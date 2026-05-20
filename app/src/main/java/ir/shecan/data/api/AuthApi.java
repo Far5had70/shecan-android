@@ -2,25 +2,35 @@ package ir.shecan.data.api;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import ir.shecan.data.modelDio.ExistApiInput;
+import ir.shecan.data.modelDio.DiscountApiInput;
 import ir.shecan.data.modelDio.LoginApiInput;
+import ir.shecan.data.modelDio.PriceApiInput;
 import ir.shecan.data.modelDio.SendOtpApiInput;
 import ir.shecan.data.modelDio.VerifyApiInput;
 import ir.shecan.data.modelDto.AccountViewModel;
 import ir.shecan.data.modelDto.BannerViewModel;
+import ir.shecan.data.modelDto.DiscountViewModel;
 import ir.shecan.data.modelDto.EmptyResponse;
 import ir.shecan.data.modelDto.ExistApiViewModel;
 import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
+import ir.shecan.data.modelDto.IapVerifyViewModel;
+import ir.shecan.data.modelDto.PriceViewModel;
 import ir.shecan.data.modelDto.SendOtpApiViewModel;
+import ir.shecan.data.modelDto.SitePaymentViewModel;
 import ir.shecan.data.modelDto.UserRating;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 
@@ -319,6 +329,364 @@ public class AuthApi {
                 callback,
                 HomePage.class
         );
+    }
+
+    public void price(String sla, String period, int discount, ApiCallback<PriceViewModel> callback) {
+        PriceApiInput input = new PriceApiInput(sla, period, discount);
+
+        repo.request(
+                "price_" + sla + "_" + period + "_" + discount,
+                input,
+                "https://my.shecan.ir/api/price",
+                HttpMethod.POST,
+                false,
+                callback,
+                PriceViewModel.class
+        );
+    }
+
+    public void discount(
+            String apiKey,
+            long planPrice,
+            int planId,
+            String phone,
+            String code,
+            int durationId,
+            ApiCallback<DiscountViewModel> callback
+    ) {
+        Map<String, Object> input = new HashMap<>();
+        input.put("api_key", apiKey);
+        input.put("plan_price", planPrice);
+        input.put("plan_id", planId);
+        input.put("code", code);
+        input.put("duration_id", durationId);
+
+        repo.request(
+                "discount_" + planId + "_" + durationId + "_" + code,
+                input,
+                "https://my.shecan.ir/api/discount",
+                HttpMethod.POST,
+                false,
+                callback,
+                DiscountViewModel.class
+        );
+    }
+
+    public void sitePayment(
+            String apiKey,
+            long amount,
+            String sla,
+            String period,
+            long discount,
+            String discountCode,
+            VerifyApiViewModel user,
+            ApiCallback<SitePaymentViewModel> callback
+    ) {
+        repo.apiManager.setApiKey("");
+        repo.apiManager.setCookie("");
+
+        Gson gson = new GsonBuilder()
+                .disableHtmlEscaping()
+                .create();
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sla", sla);
+        payload.put("period", period);
+        payload.put("discount", discount);
+
+        String rawBody = "api_key=" + apiKey
+                + "&amount=" + amount
+                + "&sla=" + sla
+                + "&period=" + period
+                + "&discount=" + discount
+                + "&payload=" + gson.toJson(payload)
+                + "&user=" + gson.toJson(createWebPaymentUserPayload(apiKey, user));
+
+        repo.requestRawForm(
+                "site_payment_" + sla + "_" + period + "_" + amount + "_" + discount,
+                rawBody,
+                createWebPaymentHeaders(),
+                "https://my.shecan.ir/api/payment",
+                false,
+                callback,
+                SitePaymentViewModel.class
+        );
+    }
+
+    public void verifyIap(
+            String apiKey,
+            String market,
+            long issueId,
+            String packageName,
+            String productId,
+            String purchaseToken,
+            long amount,
+            String storeOrderId,
+            ApiCallback<IapVerifyViewModel> callback
+    ) {
+        repo.apiManager.setApiKey(apiKey);
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("api_key", apiKey);
+        payload.put("market", market);
+        payload.put("issue_id", issueId);
+        payload.put("package_name", packageName);
+        payload.put("product_id", productId);
+        payload.put("purchase_token", purchaseToken);
+        payload.put("amount", amount);
+        if (storeOrderId != null && !storeOrderId.trim().isEmpty()) {
+            payload.put("store_order_id", storeOrderId);
+        }
+
+        repo.request(
+                "iap_verify_" + market + "_" + productId + "_" + purchaseToken,
+                payload,
+                "https://my.shecan.ir/api/iap/verify",
+                HttpMethod.POST,
+                false,
+                callback,
+                IapVerifyViewModel.class
+        );
+    }
+
+    private String getSitePaymentSubject(String sla, String period, VerifyApiViewModel user) {
+        String name = getPaymentCompanyName(user);
+        return sla + " " + period + " service - " + name;
+    }
+
+    private Map<String, Object> createWebPaymentUserPayload(String apiKey, VerifyApiViewModel user) {
+        Map<String, Object> userPayload = new LinkedHashMap<>();
+
+        if (user == null) {
+            userPayload.put("id", 0);
+            userPayload.put("login", "");
+            userPayload.put("api_key", apiKey);
+            userPayload.put("firstname", "");
+            userPayload.put("lastname", "");
+            userPayload.put("mail", "");
+            userPayload.put("created_on", "");
+            userPayload.put("last_login_on", "");
+            userPayload.put("admin", false);
+            userPayload.put("status", 1);
+            userPayload.put("groups", new ArrayList<>());
+            userPayload.put("memberships", createWebPaymentMemberships());
+            userPayload.put("welcome_text", createWebPaymentWelcomeText());
+            return userPayload;
+        }
+
+        String normalizedPhone = normalizeIranMobile(user.getLogin());
+        String normalizedPhoneWithoutZero = removeLeadingZero(normalizedPhone);
+        userPayload.put("id", user.getId());
+        userPayload.put("login", safeString(normalizedPhoneWithoutZero != null ? normalizedPhoneWithoutZero : user.getLogin()));
+        userPayload.put("api_key", apiKey);
+        userPayload.put("firstname", safeString(user.getFirstname()));
+        userPayload.put("lastname", safeString(user.getLastname()));
+        userPayload.put("mail", safeString(user.getMail()));
+        userPayload.put("created_on", safeString(user.getCreatedOn()));
+        userPayload.put("last_login_on", safeString(user.getLastLoginOn()));
+        userPayload.put("admin", user.getAdmin() != null ? user.getAdmin() : false);
+        userPayload.put("status", user.getStatus());
+        userPayload.put("groups", new ArrayList<>());
+        userPayload.put("memberships", createWebPaymentMemberships());
+        userPayload.put("welcome_text", createWebPaymentWelcomeText());
+
+        return userPayload;
+    }
+
+    private String createWebPaymentWelcomeText() {
+        return "<blockquote data-end=\"664\" data-start=\"597\">\r\n"
+                + "<p dir=\"rtl\" style=\"text-align: center;\"><span style=\"font-size:22px;\">🚀 پنل جدید شکن در دسترس قرار گرفت.</span></p>\r\n"
+                + "\r\n"
+                + "<p style=\"text-align: center;\">&nbsp;</p>\r\n"
+                + "\r\n"
+                + "<p dir=\"rtl\" style=\"text-align: center;\"><span style=\"font-size:22px;\">از حالا می&zwnj;تونید از طریق آدرس زیر وارد نسخه&zwnj;ی تازه بشید و تجربه&zwnj;ای روان&zwnj;تر و حرفه&zwnj;ای&zwnj;تر داشته باشید:</span></p>\r\n"
+                + "\r\n"
+                + "<p style=\"text-align: center;\">&nbsp;</p>\r\n"
+                + "\r\n"
+                + "<p style=\"text-align: center;\"><span style=\"font-size:24px;\"><a href=\"https://my.shecan.ir/panel\">&nbsp;my.shecan.ir/panel</a></span></p>\r\n"
+                + "\r\n"
+                + "<p dir=\"rtl\" style=\"text-align: center;\"><span style=\"font-size:22px;\">در جریان استفاده، هر فیدبکی دارید با ما در میون بگذارید تا نسخه&zwnj;ی بعدی رو دقیق&zwnj;تر و بهتر بسازیم.</span></p>\r\n"
+                + "\r\n"
+                + "<p dir=\"rtl\" style=\"text-align: center;\">&nbsp;</p>\r\n"
+                + "\r\n"
+                + "<p dir=\"rtl\" style=\"text-align: center;\"><span style=\"font-size:22px;\">به دنیای تازه&zwnj;ی شکن خوش اومدین💚</span></p>\r\n"
+                + "</blockquote>\r\n";
+    }
+
+    private String safeString(String value) {
+        return value != null ? value : "";
+    }
+
+    private List<Map<String, Object>> createWebPaymentMemberships() {
+        List<Map<String, Object>> memberships = new ArrayList<>();
+        Map<String, Object> membership = new LinkedHashMap<>();
+        Map<String, Object> project = new LinkedHashMap<>();
+        project.put("id", 7);
+        project.put("name", "شکن");
+        project.put("identifier", "shecan");
+        membership.put("project", project);
+
+        List<Map<String, Object>> roles = new ArrayList<>();
+        Map<String, Object> role = new LinkedHashMap<>();
+        role.put("id", 6);
+        role.put("name", "پشتیبان");
+        roles.add(role);
+        membership.put("roles", roles);
+        memberships.add(membership);
+        return memberships;
+    }
+
+    private Map<String, String> createWebPaymentHeaders() {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("accept", "*/*");
+        headers.put("accept-language", "en-US,en;q=0.9");
+        headers.put("cache-control", "no-cache");
+        headers.put("content-type", "application/x-www-form-urlencoded");
+        headers.put("origin", "https://my.shecan.ir");
+        headers.put("pragma", "no-cache");
+        headers.put("priority", "u=1, i");
+        headers.put("referer", "https://my.shecan.ir/panel/order");
+        headers.put("sec-ch-ua", "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"");
+        headers.put("sec-ch-ua-mobile", "?0");
+        headers.put("sec-ch-ua-platform", "\"Windows\"");
+        headers.put("sec-fetch-dest", "empty");
+        headers.put("sec-fetch-mode", "cors");
+        headers.put("sec-fetch-site", "same-origin");
+        headers.put("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
+        return headers;
+    }
+
+    private Map<String, Object> createPaymentUserPayload(String apiKey, VerifyApiViewModel user) {
+        Map<String, Object> userPayload = new HashMap<>();
+        userPayload.put("api_key", apiKey);
+        if (user == null) return userPayload;
+
+        userPayload.put("id", user.getId());
+        userPayload.put("firstname", user.getFirstname());
+        userPayload.put("lastname", user.getLastname());
+        userPayload.put("mail", user.getMail());
+        String normalizedPhone = normalizeIranMobile(user.getLogin());
+        String normalizedPhoneWithoutZero = removeLeadingZero(normalizedPhone);
+        userPayload.put("login", normalizedPhone);
+        addPhoneAliases(userPayload, normalizedPhone, normalizedPhoneWithoutZero);
+        userPayload.put("admin", user.getAdmin());
+
+        List<Map<String, Object>> customFields = new ArrayList<>();
+        if (user.getCustomFields() != null) {
+            for (VerifyApiViewModel.CustomFieldsDTO field : user.getCustomFields()) {
+                if (field == null) continue;
+                Map<String, Object> item = new HashMap<>();
+                item.put("id", field.getId());
+                item.put("name", field.getName());
+                item.put("value", field.getValue());
+                customFields.add(item);
+            }
+        }
+        addUserPhoneCustomFields(customFields, normalizedPhone);
+        userPayload.put("custom_fields", customFields);
+
+        return userPayload;
+    }
+
+    private String getPaymentCompanyName(VerifyApiViewModel user) {
+        String companyName = getCompanyName(user);
+        if (companyName != null && !companyName.trim().isEmpty()) {
+            return companyName.trim();
+        }
+        if (user != null) {
+            String fullName = ((user.getFirstname() != null ? user.getFirstname() : "") + " " +
+                    (user.getLastname() != null ? user.getLastname() : "")).trim();
+            if (!fullName.isEmpty()) return fullName;
+            if (user.getLogin() != null && !user.getLogin().trim().isEmpty()) return user.getLogin().trim();
+            if (user.getMail() != null && !user.getMail().trim().isEmpty()) return user.getMail().trim();
+        }
+        return "Shecan";
+    }
+
+    private String getCompanyName(VerifyApiViewModel user) {
+        if (user == null || user.getCustomFields() == null) return null;
+        for (VerifyApiViewModel.CustomFieldsDTO field : user.getCustomFields()) {
+            if (field != null && field.getId() == 104) {
+                return field.getValue();
+            }
+        }
+        return null;
+    }
+
+    private String normalizeIranMobile(String value) {
+        if (value == null) return null;
+        String normalized = value.trim()
+                .replace("Old", "")
+                .replace("old", "")
+                .replace(" ", "")
+                .replace("-", "")
+                .replace("(", "")
+                .replace(")", "");
+
+        normalized = toEnglishDigits(normalized);
+        if (normalized.startsWith("+98")) {
+            normalized = "0" + normalized.substring(3);
+        } else if (normalized.startsWith("0098")) {
+            normalized = "0" + normalized.substring(4);
+        } else if (normalized.startsWith("98") && normalized.length() == 12) {
+            normalized = "0" + normalized.substring(2);
+        } else if (normalized.startsWith("9") && normalized.length() == 10) {
+            normalized = "0" + normalized;
+        }
+
+        return normalized;
+    }
+
+    private String removeLeadingZero(String value) {
+        if (value != null && value.startsWith("0") && value.length() == 11) {
+            return value.substring(1);
+        }
+        return value;
+    }
+
+    private void addPhoneAliases(Map<String, ?> target, String phoneWithZero, String phoneWithoutZero) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) target;
+        map.put("phone", phoneWithoutZero);
+        map.put("mobile", phoneWithZero);
+        map.put("mobile_number", phoneWithZero);
+        map.put("phone_number", phoneWithZero);
+        map.put("phoneNumber", phoneWithZero);
+    }
+
+    private void addUserPhoneCustomFields(List<Map<String, Object>> customFields, String normalizedPhone) {
+        if (normalizedPhone == null || normalizedPhone.trim().isEmpty()) return;
+        addCustomFieldIfMissing(customFields, 1, "تلفن همراه", normalizedPhone);
+        addCustomFieldIfMissing(customFields, 2, "شماره موبایل", normalizedPhone);
+        addCustomFieldIfMissing(customFields, 3, "موبایل", normalizedPhone);
+        addCustomFieldIfMissing(customFields, 4, "mobile", normalizedPhone);
+        addCustomFieldIfMissing(customFields, 5, "phone", normalizedPhone);
+    }
+
+    private void addCustomFieldIfMissing(List<Map<String, Object>> customFields, int id, String name, String value) {
+        for (Map<String, Object> field : customFields) {
+            Object existingId = field.get("id");
+            if (existingId instanceof Number && ((Number) existingId).intValue() == id) return;
+        }
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", id);
+        item.put("name", name);
+        item.put("value", value);
+        customFields.add(item);
+    }
+
+    private String toEnglishDigits(String value) {
+        StringBuilder builder = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c >= '۰' && c <= '۹') {
+                builder.append((char) ('0' + (c - '۰')));
+            } else if (c >= '٠' && c <= '٩') {
+                builder.append((char) ('0' + (c - '٠')));
+            } else {
+                builder.append(c);
+            }
+        }
+        return builder.toString();
     }
 
     // ---------------------------------------------------
