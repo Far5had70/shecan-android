@@ -23,6 +23,7 @@ import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.ui.activity.AuthorizeActivity;
+import ir.shecan.ui.activity.BillingPlansActivity;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.activity.ThemeActivity;
 import ir.shecan.ui.activity.UpdateProfileActivity;
@@ -58,7 +59,7 @@ public class ProfileFragment extends ToolbarFragment {
             ((MainActivityNew) requireActivity()).setupCustomBottomBar();
         });
 
-        String version = "نسخه: v " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
+        String version = getString(R.string.profile_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
         binding.versionTv.setText(version);
     }
 
@@ -91,28 +92,26 @@ public class ProfileFragment extends ToolbarFragment {
     private void setupRecycler() {
         List<ProfileItem> list = new ArrayList<>();
 
-        list.add(new ProfileItem(0, R.drawable.ic_info, "حساب کاربری"));
-        list.add(new ProfileItem(1, R.drawable.ic_info, "ظاهر برنامه"));
+        list.add(new ProfileItem(0, R.drawable.ic_info, getString(R.string.profile_account)));
+        list.add(new ProfileItem(1, R.drawable.ic_info, getString(R.string.profile_appearance)));
+        list.add(new ProfileItem(5, R.drawable.ic_vip, getString(R.string.title_billing_plans)));
 
         if (Constant.IsSiteMode) {
             binding.myketInfoView.setVisibility(View.GONE);
             binding.cafeBazaarInfoView.setVisibility(View.GONE);
-            list.add(new ProfileItem(2, R.drawable.ic_info, "تراکنش‌ها"));
-            list.add(new ProfileItem(3, R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
-            list.add(new ProfileItem(4, R.drawable.ic_info, "تیکت‌ها"));
+            list.add(new ProfileItem(2, R.drawable.ic_info, getString(R.string.profile_transactions)));
+            list.add(new ProfileItem(3, R.drawable.ic_info, getString(R.string.profile_domain_support)));
+            list.add(new ProfileItem(4, R.drawable.ic_info, getString(R.string.profile_tickets)));
         }
 
         if (Constant.IsMyketMode) {
             binding.myketInfoView.setVisibility(View.VISIBLE);
-//            list.add(new ProfileItem(R.drawable.ic_info, "تراکنش‌ها"));
-//            list.add(new ProfileItem(R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
-//            list.add(new ProfileItem(R.drawable.ic_info, "تیکت‌ها"));
         }
 
         if (Constant.IsCafeBazaarMode) {
             binding.cafeBazaarInfoView.setVisibility(View.VISIBLE);
-            list.add(new ProfileItem(3, R.drawable.ic_info, "پشتیبانی دامنه‌ها"));
-            list.add(new ProfileItem(4, R.drawable.ic_info, "تیکت‌ها"));
+            list.add(new ProfileItem(3, R.drawable.ic_info, getString(R.string.profile_domain_support)));
+            list.add(new ProfileItem(4, R.drawable.ic_info, getString(R.string.profile_tickets)));
         }
 
         ProfileAdapter adapter = new ProfileAdapter(list, (position, item) -> {
@@ -153,6 +152,10 @@ public class ProfileFragment extends ToolbarFragment {
                         getActivity()
                 );
                 break;
+
+            case 5:
+                startActivity(new Intent(getActivity(), BillingPlansActivity.class));
+                break;
         }
     }
 
@@ -168,4 +171,3 @@ public class ProfileFragment extends ToolbarFragment {
 
     }
 }
-

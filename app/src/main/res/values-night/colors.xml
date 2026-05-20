@@ -50,6 +50,11 @@
     <color name="dividerStrokeColor">#143328</color>
     <color name="greenLightBack">#0E221B</color>
     <color name="orangeMain">#EE5F1D</color>
+    <color name="billingPayButtonEnabledText">#FFFFFF</color>
+    <color name="billingPayButtonDisabledText">#7B968C</color>
+    <color name="billingPayButtonDisabledBackground">#0E221B</color>
+    <color name="billingPayButtonDisabledStroke">#2C3E37</color>
+    <color name="billingPaymentOverlayBackground">#D6071711</color>
     <color name="greenAvatarBack">#2A4A3F</color>
     <color name="tabButtonGrayNotSelectedColor">#1A2F28</color>
     <color name="tabButtonGraySelectedColor">#1AFFFFFF</color>

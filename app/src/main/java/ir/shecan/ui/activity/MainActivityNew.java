@@ -38,6 +38,9 @@ import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.core.billing.CafeBazaarBillingManager;
 import ir.shecan.core.billing.CafeBazaarBillingProducts;
+import ir.shecan.core.billing.BillingHost;
+import ir.shecan.core.billing.BillingPurchaseObserver;
+import ir.shecan.core.billing.BillingStore;
 import ir.shecan.core.billing.MyketBillingManager;
 import ir.shecan.core.billing.MyketBillingProducts;
 import ir.shecan.core.constant.Constant;
@@ -59,7 +62,7 @@ import ir.shecan.ui.widget.CustomBottomBar;
 import ir.shecan.ui.widget.rateHelper.RatingDialog;
 import ir.shecan.ui.widget.rateHelper.RatingManager;
 
-public class MainActivityNew extends AppCompatActivity {
+public class MainActivityNew extends AppCompatActivity implements BillingHost {
 
     // Launch Actions
     public static final int LAUNCH_ACTION_NONE = 0;
@@ -93,6 +96,7 @@ public class MainActivityNew extends AppCompatActivity {
     private ThemeManager themeManager;
     private MyketBillingManager myketBillingManager;
     private CafeBazaarBillingManager cafeBazaarBillingManager;
+    private BillingPurchaseObserver billingPurchaseObserver;
     public List<BannerViewModel> bannerUrl;
 
     public static MainActivityNew getInstance() {
@@ -101,6 +105,22 @@ public class MainActivityNew extends AppCompatActivity {
 
     public ToolbarFragment getCurrentFragment() {
         return currentFragment;
+    }
+
+    public void setBillingPurchaseObserver(BillingPurchaseObserver billingPurchaseObserver) {
+        this.billingPurchaseObserver = billingPurchaseObserver;
+    }
+
+    public boolean isBillingReadyForStore(BillingStore store) {
+        switch (store) {
+            case CAFE_BAZAAR:
+                return cafeBazaarBillingManager != null && cafeBazaarBillingManager.isReady();
+            case MYKET:
+                return myketBillingManager != null && myketBillingManager.isReady();
+            case SITE:
+            default:
+                return true;
+        }
     }
 
 
@@ -204,11 +224,17 @@ public class MainActivityNew extends AppCompatActivity {
                     public void onConsumablePurchaseReady(Object purchase, boolean restoredFromInventory) {
                         Log.d("MyketBilling", "Consumable purchase is ready: " + purchase);
                         // Deliver on your backend first if needed, then call consumeMyketPurchase(purchase).
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplacePurchaseReady(BillingStore.MYKET, purchase, restoredFromInventory);
+                        }
                     }
 
                     @Override
                     public void onNonConsumablePurchaseReady(Object purchase, boolean restoredFromInventory) {
                         Log.d("MyketBilling", "Non-consumable purchase is ready: " + purchase);
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplacePurchaseReady(BillingStore.MYKET, purchase, restoredFromInventory);
+                        }
                     }
 
                     @Override
@@ -219,6 +245,9 @@ public class MainActivityNew extends AppCompatActivity {
                     @Override
                     public void onBillingError(String message) {
                         Log.e("MyketBilling", message);
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplaceBillingError(BillingStore.MYKET, message);
+                        }
                     }
                 }
         );
@@ -230,7 +259,7 @@ public class MainActivityNew extends AppCompatActivity {
         cafeBazaarBillingManager = new CafeBazaarBillingManager(this);
         cafeBazaarBillingManager.startSetup(
                 CafeBazaarBillingProducts.consumableSkus(),
-                CafeBazaarBillingProducts.subscriptionSkus(),
+                CafeBazaarBillingProducts.nonConsumableSkus(),
                 new CafeBazaarBillingManager.Listener() {
                     @Override
                     public void onBillingReady() {
@@ -253,11 +282,6 @@ public class MainActivityNew extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onSubscriptionSkuDetailsLoaded(@NonNull List<?> skuDetails) {
-                        Log.d("CafeBazaarBilling", "Loaded Cafe Bazaar subscription sku details: " + skuDetails.size());
-                    }
-
-                    @Override
                     public void onPurchaseFlowBegan(@NonNull String sku) {
                         Log.d("CafeBazaarBilling", "Purchase flow began: " + sku);
                     }
@@ -266,16 +290,25 @@ public class MainActivityNew extends AppCompatActivity {
                     public void onConsumablePurchaseReady(@NonNull Object purchaseInfo, boolean restoredFromInventory) {
                         Log.d("CafeBazaarBilling", "Consumable purchase is ready: " + purchaseInfo);
                         // Deliver on your backend first if needed, then call consumeCafeBazaarPurchase(token).
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplacePurchaseReady(BillingStore.CAFE_BAZAAR, purchaseInfo, restoredFromInventory);
+                        }
                     }
 
                     @Override
-                    public void onSubscriptionPurchaseReady(@NonNull Object purchaseInfo, boolean restoredFromInventory) {
-                        Log.d("CafeBazaarBilling", "Subscription purchase is ready: " + purchaseInfo);
+                    public void onNonConsumablePurchaseReady(@NonNull Object purchaseInfo, boolean restoredFromInventory) {
+                        Log.d("CafeBazaarBilling", "Non-consumable purchase is ready: " + purchaseInfo);
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplacePurchaseReady(BillingStore.CAFE_BAZAAR, purchaseInfo, restoredFromInventory);
+                        }
                     }
 
                     @Override
                     public void onPurchaseCanceled(@NonNull String sku) {
                         Log.d("CafeBazaarBilling", "Purchase canceled: " + sku);
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplacePurchaseCanceled(BillingStore.CAFE_BAZAAR, sku);
+                        }
                     }
 
                     @Override
@@ -286,6 +319,9 @@ public class MainActivityNew extends AppCompatActivity {
                     @Override
                     public void onBillingError(@NonNull String message) {
                         Log.e("CafeBazaarBilling", message);
+                        if (billingPurchaseObserver != null) {
+                            billingPurchaseObserver.onMarketplaceBillingError(BillingStore.CAFE_BAZAAR, message);
+                        }
                     }
                 }
         );
@@ -306,12 +342,6 @@ public class MainActivityNew extends AppCompatActivity {
     public void launchCafeBazaarPurchase(String sku) {
         if (cafeBazaarBillingManager != null) {
             cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku);
-        }
-    }
-
-    public void launchCafeBazaarSubscription(String sku) {
-        if (cafeBazaarBillingManager != null) {
-            cafeBazaarBillingManager.launchSubscriptionFlow(getActivityResultRegistry(), sku);
         }
     }
 
