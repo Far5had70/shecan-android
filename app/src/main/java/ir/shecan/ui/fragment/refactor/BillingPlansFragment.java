@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.DiscountViewModel;
+import ir.shecan.data.modelDto.EmptyResponse;
 import ir.shecan.data.modelDto.IapVerifyViewModel;
 import ir.shecan.data.modelDto.PriceViewModel;
 import ir.shecan.data.modelDto.SitePaymentViewModel;
@@ -54,6 +56,8 @@ import saman.zamani.persiandate.PersianDate;
 import saman.zamani.persiandate.PersianDateFormat;
 
 public class BillingPlansFragment extends ToolbarFragment implements BillingPurchaseObserver {
+
+    private static final String TAG = "BillingPlansFragment";
 
     private FragmentBillingPlansBinding binding;
     private AuthApi authApi;
@@ -103,7 +107,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         BillingStore store = BillingStore.current();
         binding.tvStore.setText(getString(R.string.billing_store_prefix, store.getTitle()));
         showStatus(null, false);
-        binding.tvDiscountToggle.setVisibility(store == BillingStore.SITE ? VISIBLE : GONE);
+        binding.tvDiscountToggle.setVisibility(VISIBLE);
         binding.discountRow.setVisibility(GONE);
         binding.tvDiscountMessage.setVisibility(GONE);
         binding.checkboxRules.setOnCheckedChangeListener((buttonView, isChecked) -> updatePayButtonState());
@@ -221,7 +225,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         pendingPlan = null;
         binding.etDiscountCode.setText("");
         binding.discountRow.setVisibility(GONE);
-        binding.tvDiscountToggle.setVisibility(BillingStore.current() == BillingStore.SITE ? VISIBLE : GONE);
+        binding.tvDiscountToggle.setVisibility(VISIBLE);
         binding.tvDiscountMessage.setVisibility(GONE);
         showStatus(null, false);
         updateFeatureBox(plan.getSla());
@@ -434,7 +438,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     }
 
     private void applyDiscountCode() {
-        if (BillingStore.current() != BillingStore.SITE || selectedItem == null) return;
+        if (selectedItem == null) return;
         String code = binding.etDiscountCode.getText() != null
                 ? binding.etDiscountCode.getText().toString().trim()
                 : "";
@@ -623,10 +627,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                             String order = data.getOrderId() != null
                                     ? getString(R.string.billing_order_code, String.valueOf(data.getOrderId()))
                                     : "";
-                            showStatus(getString(R.string.billing_iap_verified, order), false);
-                            showMessage(getString(R.string.billing_purchase_verified));
-                            pendingPlan = null;
-                            setPaymentLoading(false);
+                            consumeDiscountAfterIapVerifyIfNeeded(token, data, order);
                         } else {
                             String detail = data != null && data.getDetail() != null
                                     ? data.getDetail()
@@ -646,6 +647,62 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     }
                 }
         );
+    }
+
+    private void consumeDiscountAfterIapVerifyIfNeeded(VerifyApiViewModel token, IapVerifyViewModel verify, String orderMessage) {
+        if (!hasAppliedDiscount() || verify.getOrderId() == null) {
+            finishVerifiedIap(orderMessage);
+            return;
+        }
+
+        authApi.useDiscount(
+                normalizeIranMobile(token != null ? token.getLogin() : null),
+                selectedItem.getDiscountCode(),
+                verify.getOrderId(),
+                selectedItem.getPrice().getSafePrice(),
+                new ApiCallback<EmptyResponse>() {
+                    @Override
+                    public void onSuccess(EmptyResponse data, boolean fromCache) {
+                        finishVerifiedIap(orderMessage);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        Log.w(TAG, "Failed to consume discount code after IAP verify: " + message);
+                        finishVerifiedIap(orderMessage);
+                    }
+                }
+        );
+    }
+
+    private void finishVerifiedIap(String orderMessage) {
+        if (binding == null) return;
+        showStatus(getString(R.string.billing_iap_verified, orderMessage), false);
+        showMessage(getString(R.string.billing_purchase_verified));
+        pendingPlan = null;
+        setPaymentLoading(false);
+    }
+
+    private boolean hasAppliedDiscount() {
+        return selectedItem != null
+                && selectedItem.getDiscountCode() != null
+                && !selectedItem.getDiscountCode().trim().isEmpty()
+                && selectedItem.getDiscountedPrice() != null
+                && selectedItem.getPrice() != null;
+    }
+
+    private String normalizeIranMobile(String value) {
+        if (value == null) return "";
+        String digits = value.replaceAll("[^0-9]", "");
+        if (digits.startsWith("0098")) {
+            digits = digits.substring(4);
+        } else if (digits.startsWith("98")) {
+            digits = digits.substring(2);
+        }
+        if (digits.length() == 10 && digits.startsWith("9")) {
+            return "0" + digits;
+        }
+        return digits;
     }
 
     private String getMarketplaceProductId(BillingStore store, Object purchase) {

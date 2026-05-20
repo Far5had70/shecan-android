@@ -19,6 +19,7 @@ import ir.shecan.data.modelDio.DiscountApiInput;
 import ir.shecan.data.modelDio.LoginApiInput;
 import ir.shecan.data.modelDio.PriceApiInput;
 import ir.shecan.data.modelDio.SendOtpApiInput;
+import ir.shecan.data.modelDio.UseDiscountApiInput;
 import ir.shecan.data.modelDio.VerifyApiInput;
 import ir.shecan.data.modelDto.AccountViewModel;
 import ir.shecan.data.modelDto.BannerViewModel;
@@ -369,6 +370,25 @@ public class AuthApi {
                 false,
                 callback,
                 DiscountViewModel.class
+        );
+    }
+
+    public void useDiscount(
+            String phone,
+            String code,
+            long orderId,
+            long planPrice,
+            ApiCallback<EmptyResponse> callback
+    ) {
+        UseDiscountApiInput input = new UseDiscountApiInput(phone, code, orderId, planPrice);
+        repo.request(
+                "use_discount_" + orderId + "_" + code,
+                input,
+                "https://n8n.coolify.shcn.ir/webhook/use-discount",
+                HttpMethod.POST,
+                false,
+                callback,
+                EmptyResponse.class
         );
     }
 

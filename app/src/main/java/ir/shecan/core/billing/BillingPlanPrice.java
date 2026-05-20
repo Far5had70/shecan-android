@@ -88,7 +88,7 @@ public class BillingPlanPrice {
     public long getEffectivePrice(BillingStore store) {
         long basePrice = getEffectivePrice();
         if (store == BillingStore.CAFE_BAZAAR || store == BillingStore.MYKET) {
-            return Math.round(basePrice * 1.4d);
+            return Math.round(basePrice * 1.0d);
         }
         return basePrice;
     }
