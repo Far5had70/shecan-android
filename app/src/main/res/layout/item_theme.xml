@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="start"
-        android:text="خودکار"
+        android:text="@string/theme_auto"
         android:textStyle="bold"
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp" />

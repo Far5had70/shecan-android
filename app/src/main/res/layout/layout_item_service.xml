@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/root"
@@ -47,7 +48,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="کد سرویس"
+            android:text="@string/order_code"
             android:textColor="@color/serviceRowTitleColor"
             android:textSize="12sp" />
 
@@ -58,7 +59,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:gravity="center"
-            android:text="۲۹۳۲۸۶۴"
+            tools:text="۲۹۳۲۸۶۴"
             android:textColor="@color/primaryTextColor"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -80,7 +81,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="نوع سرویس"
+            android:text="@string/serviceType"
             android:layout_gravity="center"
             android:textColor="@color/serviceRowTitleColor"
             android:textSize="12sp" />
@@ -92,7 +93,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:gravity="center"
-            android:text="برنزی"
+            android:text="@string/bronze"
             android:textStyle="bold"
             android:textColor="@color/primaryTextColor"
             android:textSize="15sp" />
@@ -114,7 +115,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="وضعیت سرویس"
+            android:text="@string/service_status"
             android:layout_gravity="center"
             android:textColor="@color/serviceRowTitleColor"
             android:textSize="12sp" />
@@ -140,7 +141,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:text="در حال انقضا..."
+                android:text="@string/expiring"
                 android:textStyle="bold"
                 android:ellipsize="end"
                 android:singleLine="true"

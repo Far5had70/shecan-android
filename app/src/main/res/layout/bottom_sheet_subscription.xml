@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:text="در حال انقضا..."
+                android:text="@string/expiring"
                 android:textStyle="bold"
                 android:ellipsize="end"
                 android:singleLine="true"
@@ -81,7 +81,7 @@
                 android:textSize="16sp"
                 android:paddingHorizontal="16dp"
                 android:textColor="@color/greenSecondaryTextColor"
-                android:text="پشتیبانی"
+                android:text="@string/support"
                 />
 
         </FrameLayout>
@@ -126,7 +126,7 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_gravity="start"
-                       android:text="کد سرویس"
+                       android:text="@string/order_code"
                        android:textSize="13sp"
                        android:textColor="@color/greenSecondaryTextColor" />
 
@@ -137,7 +137,7 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_gravity="start"
-                       android:text="321311"
+                       tools:text="321311"
                        android:textSize="13sp"
                        android:textStyle="bold"
                        android:textColor="@color/primaryTextColor" />
@@ -156,7 +156,7 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_gravity="start"
-                       android:text="نوع سرویس"
+                       android:text="@string/serviceType"
                        android:textSize="13sp"
                        android:textColor="@color/greenSecondaryTextColor" />
 
@@ -167,7 +167,7 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_gravity="start"
-                       android:text="برنزی"
+                       android:text="@string/bronze"
                        android:textSize="13sp"
                        android:textStyle="bold"
                        android:textColor="@color/primaryTextColor" />
@@ -186,7 +186,7 @@
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:layout_gravity="start"
-                       android:text="نام شرکت"
+                       android:text="@string/company_name"
                        android:textSize="13sp"
                        android:textColor="@color/greenSecondaryTextColor" />
 
@@ -196,7 +196,7 @@
                        android:id="@+id/tvCompanyNameBody"
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
-                       android:text="-"
+                       tools:text="-"
                        android:layout_gravity="start"
                        android:textSize="13sp"
                        android:textStyle="bold"
@@ -225,7 +225,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="دوره پرداخت"
+                        android:text="@string/pay_cycle"
                         android:textSize="12sp"
                         android:textColor="@color/greenSecondaryTextColor" />
 
@@ -236,7 +236,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="ماهانه"
+                        android:text="@string/billing_period_monthly"
                         android:textStyle="bold"
                         android:textSize="13sp"
                         android:textColor="@color/primaryTextColor" />
@@ -254,7 +254,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="تاریخ شروع"
+                        android:text="@string/start_date"
                         android:textSize="12sp"
                         android:textColor="@color/greenSecondaryTextColor" />
 
@@ -265,7 +265,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="1404/05/28"
+                        tools:text="1404/05/28"
                         android:textStyle="bold"
                         android:textSize="13sp"
                         android:textColor="@color/primaryTextColor" />
@@ -283,7 +283,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="تاریخ انقضا"
+                        android:text="@string/expire_date"
                         android:textSize="12sp"
                         android:textColor="@color/greenSecondaryTextColor" />
 
@@ -294,7 +294,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="1404/06/28"
+                        tools:text="1404/06/28"
                         android:textStyle="bold"
                         android:textSize="13sp"
                         android:textColor="@color/primaryTextColor" />
@@ -329,7 +329,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="بررسی وضعیت سرویس"
+                android:text="@string/check_service_status"
                 android:textColor="@color/primaryTextColor"
                 android:textStyle="bold"
                 android:textSize="15sp"
@@ -344,7 +344,7 @@
             android:textColor="@color/primaryTextColor"
             android:textSize="13sp"
             android:padding="8dp"
-            android:text="تا آماده سازی اتصال شما به سرویس شکن ممکن است ۳۰ دقیقه زمان ببرد. به محض آماده شدن سرویس امکان اعلام IP برای شما فعال می‌شود."/>
+            android:text="@string/waiting_service_message"/>
 
 
         <ir.shecan.ui.widget.CustomButton
@@ -379,7 +379,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="راه‌اندازی مجدد سرویس"
+                android:text="@string/restart_service"
                 android:textColor="@color/primaryTextColor"
                 android:textStyle="bold"
                 android:textSize="15sp"
@@ -394,7 +394,7 @@
             android:textColor="@color/primaryTextColor"
             android:textSize="13sp"
             android:padding="8dp"
-            android:text="می‌تونی دوباره سرویست رو راه بندازی"/>
+            android:text="@string/restart_service_description"/>
 
 
         <ir.shecan.ui.widget.CustomButton
@@ -437,7 +437,7 @@
                     android:id="@+id/tvRemainingDesc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="۲۲ روز از سرویست مونده. می‌تونی برای مدت بیشتر رزرو کنی."
+                    android:text="@string/renew_remaining_sample"
                     android:textSize="13sp"
                     android:layout_marginTop="6dp"
                     android:textColor="@color/greenSecondaryTextColor" />
@@ -449,7 +449,7 @@
                     app:cb_primaryBackground="@color/colorAccent"
                     app:cb_defaultPadding="0dp"
                     android:layout_marginTop="12dp"
-                    android:text="تمدید سرویس"
+                    android:text="@string/renew_service"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:fontFamily="@font/iran_yekan_light"
@@ -471,7 +471,7 @@
                     android:id="@+id/remainingTimeTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="زمان باقی‌مانده"
+                    android:text="@string/remaining_time"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:textColor="@color/primaryTextColor" />
@@ -485,7 +485,7 @@
                     android:id="@+id/remainingTimeBody"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="22d 1h 23m"
+                    tools:text="22d 1h 23m"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:textColor="@color/primaryTextColor" />
