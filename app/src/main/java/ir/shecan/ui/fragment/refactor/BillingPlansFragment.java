@@ -30,6 +30,7 @@ import ir.myket.billingclient.util.Purchase;
 import ir.shecan.BuildConfig;
 import ir.shecan.R;
 import ir.shecan.core.billing.BillingHost;
+import ir.shecan.core.billing.BillingPaymentReturnState;
 import ir.shecan.core.billing.BillingPeriod;
 import ir.shecan.core.billing.BillingPlan;
 import ir.shecan.core.billing.BillingPlanCatalog;
@@ -416,6 +417,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                             return;
                         }
                         showStatus(getString(R.string.billing_site_payment_redirecting), false);
+                        new BillingPaymentReturnState(requireContext()).markBrowserOpening();
                         AppUtils.openUrl(data.getUrl(), requireActivity());
                         setPaymentLoading(false);
                     }

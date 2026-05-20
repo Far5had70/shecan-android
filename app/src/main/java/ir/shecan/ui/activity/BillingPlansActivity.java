@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -15,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import java.util.List;
 
 import ir.shecan.R;
+import ir.shecan.core.billing.BillingPaymentReturnState;
 import ir.shecan.core.billing.BillingStore;
 import ir.shecan.core.billing.BillingHost;
 import ir.shecan.core.billing.BillingPurchaseObserver;
@@ -33,6 +35,7 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
     private MyketBillingManager myketBillingManager;
     private CafeBazaarBillingManager cafeBazaarBillingManager;
     private BillingPurchaseObserver billingPurchaseObserver;
+    private BillingPaymentReturnState paymentReturnState;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,6 +43,7 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
 
         binding = ActivityBillingPlansBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        paymentReturnState = new BillingPaymentReturnState(this);
 
         adjustUi();
         setupMyketBilling();
@@ -51,6 +55,33 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
                     .replace(R.id.billingContainer, new BillingPlansFragment())
                     .commit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        restartAppIfReturnedFromPayment();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (paymentReturnState != null && paymentReturnState.isWaitingForBrowser()) {
+            paymentReturnState.markBrowserLeft();
+        }
+    }
+
+    private void restartAppIfReturnedFromPayment() {
+        if (paymentReturnState == null || !paymentReturnState.shouldRestartAfterReturn()) return;
+
+        paymentReturnState.clear();
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (launchIntent == null) {
+            launchIntent = new Intent(this, MainActivityNew.class);
+        }
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(launchIntent);
+        finish();
     }
 
     private void adjustUi() {
