@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -31,6 +32,7 @@ import ir.shecan.core.service.ConnectionStatusApiListener;
 import ir.shecan.core.service.CoreApiResponseListener;
 import ir.shecan.core.service.ShecanVpnService;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.DynamicBannerRequestFactory;
 import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
@@ -52,6 +54,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     private FragmentHomeBinding binding;
     private boolean isUpdateVersionCheck = false;
+    private boolean hasBanner = false;
     private ScheduledExecutorService scheduler;
     MainActivityNew activity;
 
@@ -73,7 +76,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
             boolean hide = height < width * 1.5f;
 
-            binding.bannerSlider.setVisibility(hide ? GONE : VISIBLE);
+            binding.bannerSlider.setVisibility(hide || !hasBanner ? GONE : VISIBLE);
             binding.constraintLayout.setVisibility(hide ? GONE : VISIBLE);
         });
 
@@ -239,17 +242,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void loadBanner() {
-//        if (!isAdded()) return;
-//        final String imageUrl = Shecan.ShecanInfo.getBannerImageUrl();
-//        if (!imageUrl.isEmpty()) {
-//            ImageUtils.INSTANCE.loadImage(requireContext(), imageUrl, binding.bannerImageView);
-//        }
-//        binding.bannerImageView.setOnClickListener(v -> {
-//            String url = Shecan.ShecanInfo.getBannerLink();
-//            if (!url.isEmpty() && isAdded()) {
-//                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-//            }
-//        });
+        if (!isAdded()) return;
+        updateBanner();
     }
 
     private void checkIsUpdateAvailable() {
@@ -362,6 +356,33 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void showBanner(AuthApi auth, HomePage res, boolean fromCache) {
+        auth.bannerMatch(
+                DynamicBannerRequestFactory.fromStorage(requireContext()),
+                new ApiCallback<BannerViewModel>() {
+                    @Override
+                    public void onSuccess(BannerViewModel banner, boolean fromCache) {
+                        if (!isAdded()) return;
+                        List<BannerViewModel> list = banner != null
+                                ? Collections.singletonList(banner)
+                                : new ArrayList<>();
+                        activity.bannerUrl = list;
+                        handleBannerImage(list);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        loadLegacyBanners(auth, res);
+                    }
+                }
+        );
+    }
+
+    private void loadLegacyBanners(AuthApi auth, HomePage res) {
+        if (res == null || res.getBannerService() == null) {
+            handleBannerImage(new ArrayList<>());
+            return;
+        }
+
         auth.bannerList(
                 res.getBannerService().getAndroid(),
                 new ApiCallback<List<BannerViewModel>>() {
@@ -374,6 +395,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
                     @Override
                     public void onError(int statusCode, String message) {
+                        if (!isAdded()) return;
+                        handleBannerImage(new ArrayList<>());
                         ToastManager.show(getContext(), message);
                     }
                 }
@@ -393,16 +416,15 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         if (!isAdded() || binding == null) return;
 
-        List<String> slideList = new ArrayList<>();
-
-        for (BannerViewModel banner : banners) {
-            if (banner.getType() == 1) {
-                slideList.add(banner.getImageURL());
-            } else if (banner.getType() == 2) {
-                slideList.add(banner.getImageBase64());
-            }
+        if (banners == null || banners.isEmpty()) {
+            hasBanner = false;
+            binding.bannerSlider.stop();
+            binding.bannerSlider.setVisibility(GONE);
+            return;
         }
 
+        hasBanner = true;
+        binding.bannerSlider.setVisibility(VISIBLE);
         binding.bannerSlider.setBanners(banners);
         binding.bannerSlider.start();
 

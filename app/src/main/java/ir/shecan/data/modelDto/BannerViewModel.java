@@ -8,10 +8,26 @@ public class BannerViewModel {
 
     private int type;
     private int order;
+    @SerializedName(value = "banner_id", alternate = {"bannerId", "id"})
+    private String bannerId;
+    @SerializedName(value = "priority", alternate = {"order_priority", "orderPriority"})
+    private Integer priority;
+    @SerializedName(value = "is_active", alternate = {"isActive"})
+    private Boolean active;
     private String url;
+    @SerializedName(value = "redirect_link", alternate = {"redirectLink", "link"})
+    private String redirectLink;
+    @SerializedName(value = "imageURL", alternate = {
+            "image_url",
+            "imageUrl",
+            "banner_link",
+            "bannerLink"
+    })
     private String imageURL;
     private String imageBase64;
     @SerializedName(value = "duration", alternate = {
+            "time_to_show",
+            "timeToShow",
             "duration_seconds",
             "durationSeconds",
             "display_duration",
@@ -42,12 +58,44 @@ public class BannerViewModel {
         this.order = order;
     }
 
+    public String getBannerId() {
+        return bannerId;
+    }
+
+    public void setBannerId(String bannerId) {
+        this.bannerId = bannerId;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
     public String getUrl() {
-        return url;
+        return redirectLink != null && !redirectLink.trim().isEmpty() ? redirectLink : url;
     }
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getRedirectLink() {
+        return redirectLink;
+    }
+
+    public void setRedirectLink(String redirectLink) {
+        this.redirectLink = redirectLink;
     }
 
     public String getImageURL() {

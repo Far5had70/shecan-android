@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import ir.shecan.data.modelDio.ExistApiInput;
+import ir.shecan.data.modelDio.BannerMatchApiInput;
 import ir.shecan.data.modelDio.DiscountApiInput;
 import ir.shecan.data.modelDio.LoginApiInput;
 import ir.shecan.data.modelDio.PriceApiInput;
@@ -312,6 +313,18 @@ public class AuthApi {
                         callback.onError(statusCode, message);
                     }
                 },
+                BannerViewModel.class
+        );
+    }
+
+    public void bannerMatch(BannerMatchApiInput input, ApiCallback<BannerViewModel> callback) {
+        repo.request(
+                "banner_match_" + (input != null ? input.getApiKey() + "_" + input.getServiceType() + "_" + input.getPlan() : "guest"),
+                input,
+                "https://my.shecan.ir/api/banner/match",
+                HttpMethod.POST,
+                false,
+                callback,
                 BannerViewModel.class
         );
     }

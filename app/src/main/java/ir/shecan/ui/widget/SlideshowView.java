@@ -216,7 +216,7 @@ public class SlideshowView extends RelativeLayout {
 
         if (banners != null) {
             for (BannerViewModel b : banners) {
-                String slide = b.getType() == 1 ? b.getImageURL() : b.getImageBase64();
+                String slide = firstNotEmpty(b.getImageBase64(), b.getImageURL());
                 if (slide == null || slide.trim().isEmpty()) continue;
                 bannerList.add(b);
                 slides.add(slide);
@@ -231,7 +231,12 @@ public class SlideshowView extends RelativeLayout {
 
     public BannerViewModel getCurrentBanner() {
         if (bannerList.isEmpty()) return null;
+        if (currentIndex >= bannerList.size()) return bannerList.get(0);
         return bannerList.get(currentIndex);
+    }
+
+    private String firstNotEmpty(String first, String second) {
+        return first != null && !first.trim().isEmpty() ? first : second;
     }
 
     private long getCurrentSlideDurationMs() {

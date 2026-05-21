@@ -14,9 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.DynamicBannerRequestFactory;
 import ir.shecan.core.util.ToastManager;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
@@ -206,12 +208,15 @@ public class ConfigListFragment extends ToolbarFragment {
                 new ApiCallback<HomePage>() {
                     @Override
                     public void onSuccess(HomePage res, boolean fromCache) {
-                        auth.bannerList(
-                                res.getBannerService().getAndroid(),
-                                new ApiCallback<List<BannerViewModel>>() {
+                        auth.bannerMatch(
+                                DynamicBannerRequestFactory.fromStorage(requireContext()),
+                                new ApiCallback<BannerViewModel>() {
                                     @Override
-                                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+                                    public void onSuccess(BannerViewModel banner, boolean fromCache) {
                                         if (!isAdded()) return;
+                                        List<BannerViewModel> list = banner != null
+                                                ? Collections.singletonList(banner)
+                                                : new ArrayList<>();
                                         activity.bannerUrl = list;
                                         handleBannerImage(list);
                                     }
@@ -219,7 +224,7 @@ public class ConfigListFragment extends ToolbarFragment {
                                     @Override
                                     public void onError(int statusCode, String message) {
                                         if (!isAdded()) return;
-                                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                                        loadLegacyBanners(auth, res);
                                     }
                                 }
                         );
@@ -233,21 +238,44 @@ public class ConfigListFragment extends ToolbarFragment {
         );
     }
 
+    private void loadLegacyBanners(AuthApi auth, HomePage res) {
+        if (res == null || res.getBannerService() == null) {
+            handleBannerImage(new ArrayList<>());
+            return;
+        }
+
+        auth.bannerList(
+                res.getBannerService().getAndroid(),
+                new ApiCallback<List<BannerViewModel>>() {
+                    @Override
+                    public void onSuccess(List<BannerViewModel> list, boolean fromCache) {
+                        if (!isAdded()) return;
+                        activity.bannerUrl = list;
+                        handleBannerImage(list);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        if (!isAdded()) return;
+                        handleBannerImage(new ArrayList<>());
+                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+    }
+
 
     private void handleBannerImage(List<BannerViewModel> banners) {
 
         if (!isAdded() || binding == null) return;
 
-        List<String> slideList = new ArrayList<>();
-
-        for (BannerViewModel banner : banners) {
-            if (banner.getType() == 1) {
-                slideList.add(banner.getImageURL());
-            } else if (banner.getType() == 2) {
-                slideList.add(banner.getImageBase64());
-            }
+        if (banners == null || banners.isEmpty()) {
+            binding.bannerSlider.stop();
+            binding.bannerSlider.setVisibility(GONE);
+            return;
         }
 
+        binding.bannerSlider.setVisibility(View.VISIBLE);
         binding.bannerSlider.setBanners(banners);
         binding.bannerSlider.start();
 
