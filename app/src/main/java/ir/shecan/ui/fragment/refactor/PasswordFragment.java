@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment;
 import ir.shecan.R;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.ToastManager;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentPasswordBinding;
@@ -94,6 +95,7 @@ public class PasswordFragment extends Fragment {
         binding.btnContinue.setOnClickListener(view -> {
 
             showLoading(true);
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_PASSWORD_ATTEMPT);
 
             AuthApi auth = new AuthApi(requireContext());
             auth.login(
@@ -106,6 +108,8 @@ public class PasswordFragment extends Fragment {
                             if (res != null) {
                                 AppStorage storage = new AppStorage(getContext());
                                 storage.saveToken(res);
+                                TrackingUtils.setUserId(requireContext(), String.valueOf(res.getId()));
+                                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_PASSWORD_SUCCESS);
                                 if (!res.getMail().contains("shecan.fake")) {
                                     getActivity().finish();
                                 } else {
@@ -130,6 +134,8 @@ public class PasswordFragment extends Fragment {
         });
 
         binding.btnContinueWithOtpCode.setOnClickListener(view -> {
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_OTP_REQUEST,
+                    TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "password_screen"));
 //            AuthApi auth = new AuthApi(requireContext());
 //            auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
 //                @Override

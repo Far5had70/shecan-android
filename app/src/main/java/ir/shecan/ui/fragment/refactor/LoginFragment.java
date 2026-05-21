@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import ir.shecan.R;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.ToastManager;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.ActivityAuthorizeBinding;
@@ -56,6 +57,7 @@ public class LoginFragment extends Fragment {
         binding.btnContinue.setOnClickListener(v -> {
 
             showLoading(true);
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_CONTINUE_CLICK);
 
             String inputNumber = binding.edtPhoneNumber.getText().toString();
             String identifier = formatPhoneNumber(inputNumber);
@@ -66,6 +68,9 @@ public class LoginFragment extends Fragment {
                         @Override
                         public void onSuccess(ExistApiViewModel res, boolean fromCache) {
                             if (res != null) {
+                                android.os.Bundle params = new android.os.Bundle();
+                                TrackingUtils.put(params, TrackingUtils.PARAM_HAS_ACCOUNT, res.getExists());
+                                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_IDENTIFIER_EXISTS, params);
 
                                 if (res.getExists()) {
                                     showLoading(false);

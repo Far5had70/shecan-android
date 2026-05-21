@@ -20,6 +20,7 @@ import java.util.List;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.DynamicBannerRequestFactory;
 import ir.shecan.core.util.ToastManager;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.BannerViewModel;
@@ -164,6 +165,7 @@ public class ConfigListFragment extends ToolbarFragment {
                 new ServiceAdapter.OnMoreClickListener() {
                     @Override
                     public void onBackgroundClicked(ServiceItem item) {
+                        logServiceEvent(TrackingUtils.EVENT_SERVICE_SELECTED, item);
                         appStorage.saveServiceStatus(item);
 
                         activity.configIsChange = true;
@@ -174,6 +176,7 @@ public class ConfigListFragment extends ToolbarFragment {
 
                     @Override
                     public void onOptionClicked(ServiceItem item) {
+                        logServiceEvent(TrackingUtils.EVENT_SERVICE_DETAILS_CLICK, item);
                         SubscriptionBottomSheet bottomSheet = SubscriptionBottomSheet.newInstance(item);
                         bottomSheet.show(getParentFragmentManager(), "subscription_sheet");
                     }
@@ -282,9 +285,19 @@ public class ConfigListFragment extends ToolbarFragment {
         binding.bannerSlider.getImageView().setOnClickListener(v -> {
             BannerViewModel banner = binding.bannerSlider.getCurrentBanner();
             if (banner != null && banner.getUrl() != null && !banner.getUrl().isEmpty()) {
+                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BANNER_CLICK,
+                        TrackingUtils.bundleOf(TrackingUtils.PARAM_BANNER_URL, banner.getUrl()));
                 AppUtils.openUrl(banner.getUrl(), getActivity());
             }
         });
+    }
+
+    private void logServiceEvent(String eventName, ServiceItem item) {
+        if (!isAdded() || item == null) return;
+        android.os.Bundle params = new android.os.Bundle();
+        TrackingUtils.put(params, TrackingUtils.PARAM_SERVICE_TYPE, item.getServiceType());
+        TrackingUtils.put(params, TrackingUtils.PARAM_ORDER_CODE, item.getOrderCode());
+        TrackingUtils.logEvent(requireContext(), eventName, params);
     }
 
     private void startLoading() {

@@ -32,6 +32,7 @@ import ir.shecan.R;
 import ir.shecan.core.receiver.OtpReceiver;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.ToastManager;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.databinding.FragmentOtpBinding;
@@ -229,6 +230,8 @@ public class OtpFragment extends Fragment {
         isSendingOtp = true;
 
         AuthApi auth = new AuthApi(requireContext());
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_OTP_REQUEST,
+                TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "otp_timer"));
         auth.sendOtp(identifier, new ApiCallback<SendOtpApiViewModel>() {
             @Override
             public void onSuccess(SendOtpApiViewModel data, boolean fromCache) {
@@ -272,6 +275,7 @@ public class OtpFragment extends Fragment {
 
         isVerifyingOtp = true;
         showLoading(true);
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_OTP_VERIFY_ATTEMPT);
 
         String code = codeBuilder.toString();
         AuthApi auth = new AuthApi(requireContext());
@@ -332,6 +336,9 @@ public class OtpFragment extends Fragment {
 
         AppStorage storage = new AppStorage(getContext());
         storage.saveToken(res);
+        TrackingUtils.setUserId(requireContext(), String.valueOf(res.getId()));
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_LOGIN_OTP_SUCCESS,
+                TrackingUtils.bundleOf(TrackingUtils.PARAM_METHOD, isNormal ? "normal" : "object"));
 
         if (isNormal) {
 

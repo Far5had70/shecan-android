@@ -40,6 +40,7 @@ import ir.shecan.core.billing.BillingPurchaseObserver;
 import ir.shecan.core.billing.BillingSla;
 import ir.shecan.core.billing.BillingStore;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.DiscountViewModel;
@@ -112,6 +113,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.tvDiscountMessage.setVisibility(GONE);
         binding.checkboxRules.setOnCheckedChangeListener((buttonView, isChecked) -> updatePayButtonState());
         binding.btnPay.setOnClickListener(v -> {
+            logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_CLICK);
             if (payButtonReady) {
                 startPurchase();
             } else {
@@ -222,6 +224,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         }
 
         selectedItem = new BillingPlanPrice(plan);
+        logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PLAN_SELECTED);
         pendingPlan = null;
         binding.etDiscountCode.setText("");
         binding.discountRow.setVisibility(GONE);
@@ -357,6 +360,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
         pendingPlan = selectedItem.getPlan();
         BillingStore store = BillingStore.current();
+        logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_START);
         showStatus(getString(R.string.billing_purchase_start, pendingPlan.getTitle(), store.getTitle()), false);
         setPaymentLoading(true);
 
@@ -439,6 +443,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
     private void applyDiscountCode() {
         if (selectedItem == null) return;
+        logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_DISCOUNT_CLICK);
         String code = binding.etDiscountCode.getText() != null
                 ? binding.etDiscountCode.getText().toString().trim()
                 : "";
@@ -479,6 +484,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                                 ? data.getMessage()
                                 : getString(R.string.billing_discount_applied);
                         selectedItem.applyDiscount(code, finalPrice, message);
+                        logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_DISCOUNT_SUCCESS);
                         binding.btnApplyDiscount.setText(R.string.billing_apply_discount);
                         showDiscountMessage(message);
                         renderPrice();
@@ -563,6 +569,10 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     public void onMarketplacePurchaseCanceled(BillingStore store, String sku) {
         if (binding == null) return;
         showError(getString(R.string.billing_purchase_canceled, store.getTitle()));
+        android.os.Bundle params = selectedPlanParams();
+        TrackingUtils.put(params, TrackingUtils.PARAM_STORE, store.name().toLowerCase(Locale.US));
+        TrackingUtils.put(params, TrackingUtils.PARAM_PLAN_SKU, sku);
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BILLING_PURCHASE_CANCEL, params);
         pendingPlan = null;
         setPaymentLoading(false);
     }
@@ -571,6 +581,10 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     public void onMarketplaceBillingError(BillingStore store, String message) {
         if (binding == null) return;
         showError(getString(R.string.billing_payment_error, store.getTitle(), message));
+        android.os.Bundle params = selectedPlanParams();
+        TrackingUtils.put(params, TrackingUtils.PARAM_STORE, store.name().toLowerCase(Locale.US));
+        TrackingUtils.put(params, TrackingUtils.PARAM_ERROR, message);
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BILLING_PURCHASE_ERROR, params);
         setPaymentLoading(false);
     }
 
@@ -679,6 +693,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         if (binding == null) return;
         showStatus(getString(R.string.billing_iap_verified, orderMessage), false);
         showMessage(getString(R.string.billing_purchase_verified));
+        logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_SUCCESS);
         pendingPlan = null;
         setPaymentLoading(false);
     }
@@ -805,6 +820,29 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 requireContext(),
                 error ? R.color.red : R.color.greenSecondaryTextColor
         ));
+    }
+
+    private void logSelectedPlanEvent(String eventName) {
+        if (!isAdded()) return;
+        TrackingUtils.logEvent(requireContext(), eventName, selectedPlanParams());
+    }
+
+    private android.os.Bundle selectedPlanParams() {
+        android.os.Bundle params = new android.os.Bundle();
+        BillingPlan plan = selectedItem != null ? selectedItem.getPlan() : pendingPlan;
+        BillingStore store = BillingStore.current();
+        TrackingUtils.put(params, TrackingUtils.PARAM_STORE, store.name().toLowerCase(Locale.US));
+        if (plan != null) {
+            TrackingUtils.put(params, TrackingUtils.PARAM_PLAN_SKU, plan.getSku());
+            TrackingUtils.put(params, TrackingUtils.PARAM_PLAN_TITLE, plan.getTitle());
+            TrackingUtils.put(params, TrackingUtils.PARAM_SERVICE_LEVEL, plan.getSla().getApiValue());
+            TrackingUtils.put(params, TrackingUtils.PARAM_PERIOD, plan.getPeriod().getApiValue());
+        }
+        if (selectedItem != null && selectedItem.getPrice() != null) {
+            TrackingUtils.put(params, TrackingUtils.PARAM_AMOUNT, selectedItem.getTotalPrice(store));
+            TrackingUtils.put(params, TrackingUtils.PARAM_DISCOUNT_APPLIED, hasAppliedDiscount());
+        }
+        return params;
     }
 
     @Override

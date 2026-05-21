@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +34,7 @@ import ir.shecan.core.service.ShecanVpnService;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.DynamicBannerRequestFactory;
 import ir.shecan.core.util.ToastManager;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.BannerViewModel;
@@ -97,16 +97,22 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             Shecan app = (Shecan) requireContext().getApplicationContext();
 
             if (ShecanVpnService.isActivated()) {
+                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_DISCONNECT_CLICK,
+                        TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_button"));
                 app.getVpnState().setValue(0);
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
                 Shecan.deactivateService(requireContext());
             } else if (binding.vpnButton.isLoading()) {
+                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_DISCONNECT_CLICK,
+                        TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_button_loading"));
                 app.getVpnState().setValue(0);
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
                 Shecan.deactivateService(requireContext());
             } else {
+                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_CONNECT_CLICK,
+                        TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_button"));
                 app.connectVpn(requireContext(), HomeFragment.this);
             }
         });
@@ -148,6 +154,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
 
         binding.chooseConfig.setOnClickListener(v -> {
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_SERVICE_DETAILS_CLICK,
+                    TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_choose_config"));
             activity.updateFragment(0);
             activity.binding.customBar.select(0);
         });
@@ -163,6 +171,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         }
 
         binding.servicePanel.setOnClickListener(view -> {
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_SERVICE_DETAILS_CLICK,
+                    TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_service_panel"));
             activity.updateFragment(0);
             activity.binding.customBar.select(0);
         });
@@ -278,12 +288,18 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onSuccess(String response) {
         if (!isAdded()) return;
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_CONNECTED,
+                TrackingUtils.bundleOf(TrackingUtils.PARAM_METHOD, ShecanVpnService.isDynamicIPMode() ? "dynamic" : "static"));
         startActivity(new Intent(requireActivity(), MainActivityNew.class)
                 .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
     }
 
     @Override
     public void onError(String errorMessage) {
+        if (isAdded()) {
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_ERROR,
+                    TrackingUtils.bundleOf(TrackingUtils.PARAM_ERROR, errorMessage != null ? errorMessage : "unknown"));
+        }
         Shecan app = (Shecan) requireContext().getApplicationContext();
         app.getVpnState().setValue(0);
     }
@@ -307,6 +323,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onInTheRange() {
         if (isAdded()) {
+            TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_CONNECTED,
+                    TrackingUtils.bundleOf(TrackingUtils.PARAM_METHOD, "static"));
             Shecan.setStaticIPMode();
             startActivity(new Intent(requireActivity(), MainActivityNew.class)
                     .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
@@ -449,6 +467,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         binding.bannerSlider.getImageView().setOnClickListener(v -> {
             BannerViewModel banner = binding.bannerSlider.getCurrentBanner();
             if (banner != null && banner.getUrl() != null && !banner.getUrl().isEmpty()) {
+                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BANNER_CLICK,
+                        TrackingUtils.bundleOf(TrackingUtils.PARAM_BANNER_URL, banner.getUrl()));
                 AppUtils.openUrl(banner.getUrl(), getActivity());
             }
         });

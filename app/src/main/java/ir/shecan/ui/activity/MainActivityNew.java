@@ -45,6 +45,7 @@ import ir.shecan.core.billing.MyketBillingManager;
 import ir.shecan.core.billing.MyketBillingProducts;
 import ir.shecan.core.constant.Constant;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.AccountViewModel;
@@ -138,6 +139,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         Shecan.getInstance().updateLocale();
 
         super.onCreate(savedInstanceState);
+        TrackingUtils.logEvent(this, TrackingUtils.EVENT_APP_OPEN);
 
         int selectedTab = 1;
         if (savedInstanceState != null) {
@@ -194,7 +196,11 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
 
     private void vipClickHandler() {
         binding.toolbar.vip.setVisibility(Constant.IsSiteMode ? VISIBLE : GONE);
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
+        binding.toolbar.vip.setOnClickListener(view -> {
+            TrackingUtils.logEvent(this, TrackingUtils.EVENT_VIP_CLICK,
+                    TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "main_toolbar"));
+            AppUtils.openUrl(Constant.PlanUrl, this);
+        });
     }
 
     private void setupMyketBilling() {
@@ -398,6 +404,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
             }
 
             currentTab = index;
+            logTabSelected(index);
             updateFragment(index);
 
             switch (index) {
@@ -417,6 +424,13 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
                     break;
             }
         });
+    }
+
+    private void logTabSelected(int index) {
+        android.os.Bundle params = new android.os.Bundle();
+        TrackingUtils.put(params, TrackingUtils.PARAM_TAB_INDEX, index);
+        TrackingUtils.put(params, TrackingUtils.PARAM_TAB_NAME, TabItem.fromIndex(index).name().toLowerCase(java.util.Locale.US));
+        TrackingUtils.logEvent(this, TrackingUtils.EVENT_TAB_SELECTED, params);
     }
 
 
@@ -537,6 +551,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         AppStorage storage = new AppStorage(getApplicationContext());
         VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
         if (token != null && token.getApiKey() != null) {
+            TrackingUtils.setUserId(getApplicationContext(), String.valueOf(token.getId()));
             AuthApi auth = new AuthApi(getApplicationContext());
             auth.me(
                     token.getApiKey(),
