@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.monitoring.MonitoringManager;
 import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
 import ir.shecan.core.service.CoreApiResponseListener;
@@ -56,6 +57,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean isUpdateVersionCheck = false;
     private boolean hasBanner = false;
     private ScheduledExecutorService scheduler;
+    private MonitoringManager monitoringManager;
     MainActivityNew activity;
 
     private static final String TAG = "HomeFragment";
@@ -86,6 +88,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         else handleBannerImage(activity.bannerUrl);
 
         AppStorage appStorage = new AppStorage(getContext());
+        monitoringManager = new MonitoringManager(requireContext());
         ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
 
 //        ServiceItem finalServiceItem = serviceItem;
@@ -190,6 +193,9 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onResume() {
         super.onResume();
         fetchData();
+        if (monitoringManager != null) {
+            monitoringManager.start();
+        }
         ((MainActivityNew) getActivity()).binding.customBar.select(1);
 
         if (activity.configIsChange) {
@@ -206,6 +212,14 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             }
         }
 
+    }
+
+    @Override
+    public void onPause() {
+        if (monitoringManager != null) {
+            monitoringManager.stop();
+        }
+        super.onPause();
     }
 
     private void setupDonatePadding() {
@@ -332,6 +346,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();
             scheduler = null;
+        }
+        if (monitoringManager != null) {
+            monitoringManager.stop();
+            monitoringManager = null;
         }
         binding = null;
     }
