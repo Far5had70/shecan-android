@@ -121,6 +121,9 @@ public class APIManager {
 
     private Map<String, String> buildHeaders(Map<String, String> extraHeaders) {
         Map<String, String> headers = new HashMap<>();
+        String store = getStoreHeaderValue();
+        headers.put("Referer", store);
+        headers.put("x-app-store", store);
 
         if (!authToken.isEmpty()) {
             headers.put("Authorization", "Bearer " + authToken);
@@ -143,6 +146,20 @@ public class APIManager {
         }
 
         return headers;
+    }
+
+    private String getStoreHeaderValue() {
+        String store = BuildConfig.STORE != null ? BuildConfig.STORE : "";
+        switch (store.toLowerCase(Locale.US)) {
+            case "cafebazaar":
+                return "cafebazaar";
+            case "myket":
+                return "myket";
+            case "site":
+                return "site";
+            default:
+                return store.toLowerCase(Locale.US);
+        }
     }
 
     // -------------------------------------

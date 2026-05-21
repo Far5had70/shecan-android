@@ -94,7 +94,7 @@ public class BillingPlanPrice {
         if (store == BillingStore.CAFE_BAZAAR || store == BillingStore.MYKET) {
             double priceWithoutTax = basePrice / 1.1d;
             long marketplacePrice = (long) Math.ceil(priceWithoutTax * 1.43d);
-            return roundUp(marketplacePrice, 100_000L);
+            return roundUp(marketplacePrice, 10_000L);
         }
         return basePrice;
     }

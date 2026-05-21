@@ -98,6 +98,13 @@
     <string name="cancel">لغو</string>
     <string name="cancel2">لغو</string>
     <string name="new_version_available">نسخه ی جدیدی از اپلیکیشن در دسترس است</string>
+    <string name="site_update_url_missing">لینک دانلود بروزرسانی هنوز تنظیم نشده است.</string>
+    <string name="site_update_download_started">در حال دانلود بروزرسانی...</string>
+    <string name="site_update_download_failed">دانلود بروزرسانی ناموفق بود.</string>
+    <string name="site_update_install_permission_required">اجازه نصب بروزرسانی از این برنامه را فعال کنید و دوباره بروزرسانی را بزنید.</string>
+    <string name="site_update_downloading_percent">در حال دانلود بروزرسانی... %1$d%%</string>
+    <string name="site_update_install_ready">بروزرسانی دانلود شد. در حال باز کردن نصب...</string>
+    <string name="site_update_install">نصب</string>
     <string name="out_of_range_ip_error">آی پی شما در لیست آی پی‌های معرفی شده به شکن نمی باشد!</string>
     <string name="contact_support">ارتباط با پشتیبانی</string>
     <string name="empty_link_updater_error">لطفا لینک بروزرسان خود را وارد کنید</string>

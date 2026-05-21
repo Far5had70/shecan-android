@@ -289,9 +289,9 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
             return;
         }
         BillingStore store = BillingStore.current();
-        binding.tvServicePrice.setText(formatRial(selectedItem.getServicePrice(store)));
-        binding.tvTax.setText(formatRial(selectedItem.getTaxPrice(store)));
-        binding.tvTotal.setText(formatRial(selectedItem.getTotalPrice(store)));
+        binding.tvServicePrice.setText(formatToman(selectedItem.getServicePrice(store)));
+        binding.tvTax.setText(formatToman(selectedItem.getTaxPrice(store)));
+        binding.tvTotal.setText(formatToman(selectedItem.getTotalPrice(store)));
         PriceViewModel priceViewModel = selectedItem.getPrice();
         if (priceViewModel.getDueDate() != null) {
             binding.tvDueDate.setText(getString(R.string.billing_expire_date, formatPersianDate(priceViewModel.getDueDate())));
@@ -301,9 +301,9 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     }
 
     private void clearPriceUi() {
-        binding.tvServicePrice.setText(formatRial(0));
-        binding.tvTax.setText(formatRial(0));
-        binding.tvTotal.setText(formatRial(0));
+        binding.tvServicePrice.setText(formatToman(0));
+        binding.tvTax.setText(formatToman(0));
+        binding.tvTotal.setText(formatToman(0));
         binding.tvDueDate.setText("");
     }
 
@@ -574,8 +574,8 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         setPaymentLoading(false);
     }
 
-    private String formatRial(long rial) {
-        return getString(R.string.billing_price_rial, numberFormat.format(Math.max(0L, rial)));
+    private String formatToman(long rial) {
+        return getString(R.string.billing_price_toman, numberFormat.format(Math.max(0L, rial)));
     }
 
     private long getPayablePrice() {

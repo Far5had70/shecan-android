@@ -26,6 +26,7 @@ android {
 
         buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
+        buildConfigField "String", "SITE_APK_UPDATE_URL", "\"https://shecan.ir/shecan.apk\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

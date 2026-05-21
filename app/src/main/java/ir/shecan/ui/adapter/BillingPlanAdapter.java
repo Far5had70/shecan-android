@@ -82,7 +82,7 @@ public class BillingPlanAdapter extends RecyclerView.Adapter<BillingPlanAdapter.
             holder.binding.tvPrice.setText(R.string.billing_unknown_price);
             holder.binding.tvMeta.setText(item.getErrorMessage());
         } else if (price != null) {
-            holder.binding.tvPrice.setText(context.getString(R.string.billing_price_rial, numberFormat.format(item.getEffectivePrice(BillingStore.current()))));
+            holder.binding.tvPrice.setText(context.getString(R.string.billing_price_toman, numberFormat.format(item.getEffectivePrice(BillingStore.current()))));
             holder.binding.tvMeta.setText(buildPriceMeta(context, item));
         } else {
             holder.binding.tvPrice.setText(R.string.billing_unknown_price);
