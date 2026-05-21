@@ -230,7 +230,7 @@
                     android:textColor="@color/primaryTextColor"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    tools:text="۳۸۵٬۰۰۰ تومان" />
+                    tools:text="۳۸۵٬۰۰۰ ریال" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -256,7 +256,7 @@
                     android:gravity="start"
                     android:textColor="@color/red"
                     android:textSize="14sp"
-                    tools:text="۰ تومان" />
+                    tools:text="۰ ریال" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -289,7 +289,7 @@
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp"
                     android:textStyle="bold"
-                    tools:text="۳۸۵٬۰۰۰ تومان" />
+                    tools:text="۳۸۵٬۰۰۰ ریال" />
 
                 <TextView
                     android:layout_width="wrap_content"

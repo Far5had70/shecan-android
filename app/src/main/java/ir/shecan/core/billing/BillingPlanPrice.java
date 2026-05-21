@@ -86,10 +86,32 @@ public class BillingPlanPrice {
     }
 
     public long getEffectivePrice(BillingStore store) {
+        return getTotalPrice(store);
+    }
+
+    public long getServicePrice(BillingStore store) {
         long basePrice = getEffectivePrice();
         if (store == BillingStore.CAFE_BAZAAR || store == BillingStore.MYKET) {
-            return Math.round(basePrice * 1.0d);
+            double priceWithoutTax = basePrice / 1.1d;
+            long marketplacePrice = (long) Math.ceil(priceWithoutTax * 1.43d);
+            return roundUp(marketplacePrice, 100_000L);
         }
         return basePrice;
+    }
+
+    public long getTaxPrice(BillingStore store) {
+        if (store == BillingStore.CAFE_BAZAAR || store == BillingStore.MYKET) {
+            return Math.round(getServicePrice(store) * 0.1d);
+        }
+        return 0L;
+    }
+
+    public long getTotalPrice(BillingStore store) {
+        return getServicePrice(store) + getTaxPrice(store);
+    }
+
+    private long roundUp(long value, long step) {
+        if (value <= 0L || step <= 0L) return Math.max(0L, value);
+        return ((value + step - 1L) / step) * step;
     }
 }
