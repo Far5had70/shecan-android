@@ -1,7 +1,7 @@
 package ir.shecan.ui.activity.mainActivityUtils;
 
 import android.content.Context;
-
+import android.content.res.Configuration;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -16,10 +16,11 @@ public class ThemeManager {
     private final Context context;
     private final AppStorage appStorage;
     private int currentMode = AppCompatDelegate.MODE_NIGHT_NO;
+    private boolean recreatedForUiModeSync;
 
     public ThemeManager(@NonNull Context context) {
-        this.context = context.getApplicationContext();
-        this.appStorage = new AppStorage(this.context);
+        this.context = context;
+        this.appStorage = new AppStorage(context.getApplicationContext());
         loadTheme();
     }
 
@@ -48,11 +49,33 @@ public class ThemeManager {
         AppConfig appConfig = appStorage.getAppConfig(AppConfig.class);
         if (appConfig != null) {
             int mode = appConfig.getMode();
-            if (currentMode != mode) {
+            boolean delegateDrifted = AppCompatDelegate.getDefaultNightMode() != mode;
+            if (delegateDrifted) {
+                AppCompatDelegate.setDefaultNightMode(mode);
+            }
+
+            boolean modeChanged = currentMode != mode;
+            boolean uiModeDrifted = isForcedModeOutOfSync(mode);
+            if (modeChanged || (uiModeDrifted && !recreatedForUiModeSync)) {
                 currentMode = mode;
+                recreatedForUiModeSync = uiModeDrifted;
                 return true; // needs recreate
+            }
+
+            if (!uiModeDrifted) {
+                recreatedForUiModeSync = false;
             }
         }
         return false;
+    }
+
+    private boolean isForcedModeOutOfSync(int mode) {
+        if (mode != AppCompatDelegate.MODE_NIGHT_NO && mode != AppCompatDelegate.MODE_NIGHT_YES) {
+            return false;
+        }
+
+        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNight = nightMode == Configuration.UI_MODE_NIGHT_YES;
+        return mode == AppCompatDelegate.MODE_NIGHT_NO ? isNight : !isNight;
     }
 }

@@ -27,13 +27,12 @@ import java.util.concurrent.TimeUnit;
 import ir.shecan.R;
 import ir.shecan.core.billing.BillingPeriod;
 import ir.shecan.core.billing.BillingSla;
-import ir.shecan.core.constant.Constant;
 import ir.shecan.core.constant.DurationType;
 import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.databinding.BottomSheetSubscriptionBinding;
 import ir.shecan.data.modelDto.ServiceItem;
-import ir.shecan.core.util.AppUtils;
 import ir.shecan.ui.activity.BillingPlansActivity;
+import ir.shecan.ui.activity.PanelWebActivity;
 import saman.zamani.persiandate.PersianDate;
 import saman.zamani.persiandate.PersianDateFormat;
 
@@ -147,7 +146,7 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         binding.ivChevron.setOnClickListener(v -> dismiss());
 
         binding.btnSupport.setOnClickListener(view -> {
-            AppUtils.openUrl(AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()), getActivity());
+            PanelWebActivity.openTickets(requireContext());
         });
 
         binding.btnRenew.setOnClickListener(view -> {

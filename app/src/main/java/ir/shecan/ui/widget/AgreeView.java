@@ -1,8 +1,6 @@
 package ir.shecan.ui.widget;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -16,7 +14,9 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import ir.shecan.R;
 import ir.shecan.databinding.ViewAgreeBinding;
+import ir.shecan.ui.activity.PanelWebActivity;
 
 public class AgreeView extends LinearLayout {
 
@@ -59,11 +59,7 @@ public class AgreeView extends LinearLayout {
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getContext().startActivity(intent);
-                } catch (Exception ignored) {}
+                PanelWebActivity.openPublic(getContext(), url, R.string.billing_rules_link_text);
             }
         };
 

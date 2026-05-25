@@ -508,7 +508,10 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
     @Override
     public void onResume() {
         super.onResume();
-        if (themeManager != null && themeManager.handleOnResume()) recreate();
+        if (themeManager != null && themeManager.handleOnResume()) {
+            recreate();
+            return;
+        }
         checkUserIsLogin();
         updateLoginInformation();
 

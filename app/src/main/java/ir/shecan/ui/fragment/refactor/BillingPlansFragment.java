@@ -58,6 +58,7 @@ import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentBillingPlansBinding;
 import ir.shecan.ui.activity.MainActivityNew;
+import ir.shecan.ui.activity.PanelWebActivity;
 import ir.shecan.ui.fragment.ToolbarFragment;
 import saman.zamani.persiandate.PersianDate;
 import saman.zamani.persiandate.PersianDateFormat;
@@ -153,7 +154,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         text.setSpan(new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                AppUtils.openUrl(Constant.TermsUrl, requireActivity());
+                PanelWebActivity.openTerms(requireContext());
             }
 
             @Override

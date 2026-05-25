@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.view.View;
@@ -16,6 +17,7 @@ import androidx.core.content.ContextCompat;
 
 import ir.shecan.R;
 import ir.shecan.core.constant.Constant;
+import ir.shecan.data.modelDto.AppConfig;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 
@@ -89,29 +91,57 @@ public class AppUtils {
 
     public static void adjustUIForFragment(Activity activity, int statusBarColor, int bottomNavigationColor) {
 
-        int mode = AppCompatDelegate.getDefaultNightMode();
-        boolean isLight = (mode == AppCompatDelegate.MODE_NIGHT_NO);
+        boolean isLight = isLightTheme(activity);
         applyStatusBarMode(activity, isLight, statusBarColor);
         applyNavigationBarMode(activity, isLight, bottomNavigationColor);
+    }
+
+    public static boolean isLightTheme(Context context) {
+        int mode = getSavedNightMode(context);
+        if (mode == AppCompatDelegate.MODE_NIGHT_UNSPECIFIED) {
+            mode = AppCompatDelegate.getDefaultNightMode();
+        }
+
+        if (mode == AppCompatDelegate.MODE_NIGHT_NO) {
+            return true;
+        }
+        if (mode == AppCompatDelegate.MODE_NIGHT_YES) {
+            return false;
+        }
+
+        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightMode != Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    public static int getSavedNightMode(Context context) {
+        AppConfig appConfig = new AppStorage(context.getApplicationContext()).getAppConfig(AppConfig.class);
+        if (appConfig != null) {
+            return appConfig.getMode();
+        }
+        return AppCompatDelegate.MODE_NIGHT_NO;
+    }
+
+    public static void applySavedNightMode(Context context) {
+        AppCompatDelegate.setDefaultNightMode(getSavedNightMode(context));
     }
 
     public static void applyStatusBarMode(Activity activity, boolean isLightMode, int statusBarColor) {
         Window window = activity.getWindow();
         window.setStatusBarColor(ContextCompat.getColor(activity, statusBarColor));
 
+        int flags = window.getDecorView().getSystemUiVisibility();
         if (isLightMode) {
             // حالت آیکون‌های تیره (API 23+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                window.getDecorView().setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                );
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
             }
         } else {
             // حذف حالت آیکون‌های تیره
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                window.getDecorView().setSystemUiVisibility(0);
+                flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
             }
         }
+        window.getDecorView().setSystemUiVisibility(flags);
     }
 
     public static void applyNavigationBarMode(Activity activity, boolean isLightMode, int navigationBarColor) {

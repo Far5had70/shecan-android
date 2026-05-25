@@ -17,7 +17,6 @@ import java.util.List;
 import ir.shecan.BuildConfig;
 import ir.shecan.R;
 import ir.shecan.core.constant.Constant;
-import ir.shecan.core.util.AppUtils;
 import ir.shecan.data.modelDto.ProfileItem;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
@@ -25,6 +24,7 @@ import ir.shecan.databinding.FragmentProfileBinding;
 import ir.shecan.ui.activity.AuthorizeActivity;
 import ir.shecan.ui.activity.BillingPlansActivity;
 import ir.shecan.ui.activity.MainActivityNew;
+import ir.shecan.ui.activity.PanelWebActivity;
 import ir.shecan.ui.activity.ThemeActivity;
 import ir.shecan.ui.activity.UpdateProfileActivity;
 import ir.shecan.ui.adapter.ProfileAdapter;
@@ -106,6 +106,8 @@ public class ProfileFragment extends ToolbarFragment {
 
         if (Constant.IsMyketMode) {
             binding.myketInfoView.setVisibility(View.VISIBLE);
+            list.add(new ProfileItem(3, R.drawable.ic_info, getString(R.string.profile_domain_support)));
+            list.add(new ProfileItem(4, R.drawable.ic_info, getString(R.string.profile_tickets)));
         }
 
         if (Constant.IsCafeBazaarMode) {
@@ -133,24 +135,15 @@ public class ProfileFragment extends ToolbarFragment {
                 break;
 
             case 2:
-                AppUtils.openUrl(
-                        AppUtils.buildRedirect(Constant.TransactionUrlRaw, getContext()),
-                        getActivity()
-                );
+                PanelWebActivity.openTransactions(requireContext());
                 break;
 
             case 3:
-                AppUtils.openUrl(
-                        AppUtils.buildRedirect(Constant.DomainUrlRaw, getContext()),
-                        getActivity()
-                );
+                PanelWebActivity.openDomainSupport(requireContext());
                 break;
 
             case 4:
-                AppUtils.openUrl(
-                        AppUtils.buildRedirect(Constant.TicketUrlRaw, getContext()),
-                        getActivity()
-                );
+                PanelWebActivity.openTickets(requireContext());
                 break;
 
             case 5:
