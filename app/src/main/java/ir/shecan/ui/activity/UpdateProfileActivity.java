@@ -133,8 +133,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(int statusCode, String message) {
-                        showLoading(false);
-                        ToastManager.show(getApplicationContext(), message);
+                        if (statusCode == -2) {
+                            updateUserInformation();
+                        } else {
+                            showLoading(false);
+                            ToastManager.show(getApplicationContext(), message);
+                        }
                     }
                 }
         );
@@ -160,8 +164,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(int statusCode, String message) {
-                        showLoading(false);
-                        ToastManager.show(getApplicationContext(), message);
+                        if (statusCode == -2) {
+                            updateUserInformation();
+                        } else {
+                            showLoading(false);
+                            ToastManager.show(getApplicationContext(), message);
+                        }
                     }
                 }
         );

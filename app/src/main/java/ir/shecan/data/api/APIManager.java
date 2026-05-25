@@ -121,9 +121,6 @@ public class APIManager {
 
     private Map<String, String> buildHeaders(Map<String, String> extraHeaders) {
         Map<String, String> headers = new HashMap<>();
-        String store = getStoreHeaderValue();
-        headers.put("Referer", store);
-        headers.put("x-app-store", store);
 
         if (!authToken.isEmpty()) {
             headers.put("Authorization", "Bearer " + authToken);
@@ -148,7 +145,7 @@ public class APIManager {
         return headers;
     }
 
-    private String getStoreHeaderValue() {
+    public static String getStoreHeaderValue() {
         String store = BuildConfig.STORE != null ? BuildConfig.STORE : "";
         switch (store.toLowerCase(Locale.US)) {
             case "cafebazaar":
@@ -184,7 +181,32 @@ public class APIManager {
                 useCache,
                 callback,
                 clazz,
-                false // 👈 retry نشده
+                false, // 👈 retry نشده
+                null
+        );
+    }
+
+    public <T, P> void requestObject(
+            String cacheKey,
+            P payloadModel,
+            Map<String, String> extraHeaders,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            ApiCallback<T> callback,
+            Class<T> clazz
+    ) {
+
+        requestObjectInternal(
+                cacheKey,
+                payloadModel,
+                url,
+                method,
+                useCache,
+                callback,
+                clazz,
+                false,
+                extraHeaders
         );
     }
 
@@ -280,7 +302,7 @@ public class APIManager {
 
                         callback.onError(
                                 nr != null ? nr.statusCode : -1,
-                                parseVolleyError(nr, error)
+                                parseTraceableError(url, nr, error)
                         );
                     }
             ) {
@@ -372,7 +394,7 @@ public class APIManager {
 
                         callback.onError(
                                 nr != null ? nr.statusCode : -1,
-                                parseVolleyError(nr, error)
+                                parseTraceableError(url, nr, error)
                         );
                     }
             ) {
@@ -471,7 +493,7 @@ public class APIManager {
 
                         callback.onError(
                                 nr != null ? nr.statusCode : -1,
-                                parseVolleyError(nr, error)
+                                parseTraceableError(url, nr, error)
                         );
                     }
             ) {
@@ -519,7 +541,34 @@ public class APIManager {
                 isPublicApi,
                 callback,
                 clazz,
-                false // 👈 هنوز retry نشده
+                false, // 👈 هنوز retry نشده
+                null
+        );
+    }
+
+    public <T, P> void requestList(
+            String cacheKey,
+            P payloadModel,
+            Map<String, String> extraHeaders,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            boolean isPublicApi,
+            ApiCallback<List<T>> callback,
+            Class<T> clazz
+    ) {
+
+        requestListInternal(
+                cacheKey,
+                payloadModel,
+                url,
+                method,
+                useCache,
+                isPublicApi,
+                callback,
+                clazz,
+                false,
+                extraHeaders
         );
     }
 
@@ -531,7 +580,8 @@ public class APIManager {
             boolean useCache,
             ApiCallback<T> callback,
             Class<T> clazz,
-            boolean retried
+            boolean retried,
+            Map<String, String> extraHeaders
     ) {
 
         try {
@@ -546,7 +596,7 @@ public class APIManager {
             JSONObject payload = payloadModel != null
                     ? new JSONObject(gson.toJson(payloadModel))
                     : null;
-            Map<String, String> headers = buildHeaders();
+            Map<String, String> headers = buildHeaders(extraHeaders);
 
             JsonObjectRequest request = new JsonObjectRequest(
                     convertMethod(method),
@@ -598,7 +648,7 @@ public class APIManager {
                             }
 
                             if (retried) {
-                                callback.onError(nr.statusCode, parseVolleyError(nr, error));
+                                callback.onError(nr.statusCode, parseTraceableError(url, nr, error));
                                 return;
                             }
 
@@ -615,14 +665,15 @@ public class APIManager {
                                     useCache,
                                     callback,
                                     clazz,
-                                    true
+                                    true,
+                                    extraHeaders
                             );
                             return;
                         }
 
                         callback.onError(
                                 nr != null ? nr.statusCode : -1,
-                                parseVolleyError(nr, error)
+                                parseTraceableError(url, nr, error)
                         );
                     }
             ) {
@@ -649,7 +700,8 @@ public class APIManager {
             boolean isPublicApi,
             ApiCallback<List<T>> callback,
             Class<T> clazz,
-            boolean retried
+            boolean retried,
+            Map<String, String> extraHeaders
     ) {
 
         try {
@@ -666,7 +718,7 @@ public class APIManager {
             JSONObject payload = payloadModel != null
                     ? new JSONObject(gson.toJson(payloadModel))
                     : null;
-            Map<String, String> headers = buildHeaders();
+            Map<String, String> headers = buildHeaders(extraHeaders);
 
             CustomJsonArrayRequest request = new CustomJsonArrayRequest(
                     convertMethod(method),
@@ -710,7 +762,8 @@ public class APIManager {
                                     isPublicApi,
                                     callback,
                                     clazz,
-                                    true
+                                    true,
+                                    extraHeaders
                             );
                             return;
                         }
@@ -757,7 +810,30 @@ public class APIManager {
 
         int statusCode = response != null ? response.statusCode : -1;
         String message = error != null ? error.getClass().getSimpleName() : "Unknown";
-        Log.e(TAG, "<-- ERROR " + statusCode + " " + url + " (" + message + ")");
+        String requestId = response != null ? getHeaderIgnoreCase(response.headers, "x-request-id") : null;
+        String correlationId = response != null ? getHeaderIgnoreCase(response.headers, "x-correlation-id") : null;
+        StringBuilder log = new StringBuilder("<-- ERROR ")
+                .append(statusCode)
+                .append(" ")
+                .append(url)
+                .append(" (")
+                .append(message)
+                .append(")");
+        if (requestId != null && !requestId.isEmpty()) {
+            log.append(" requestId=").append(requestId);
+        }
+        if (correlationId != null && !correlationId.isEmpty() && !correlationId.equals(requestId)) {
+            log.append(" correlationId=").append(correlationId);
+        }
+        Log.e(TAG, log.toString());
+
+        if (response != null && response.data != null && response.data.length > 0) {
+            String body = sanitizeBody(new String(response.data, StandardCharsets.UTF_8));
+            if (body.length() > 1500) {
+                body = body.substring(0, 1500) + "...";
+            }
+            Log.e(TAG, "<-- ERROR BODY " + body);
+        }
     }
 
     private String buildCurl(HttpMethod method, String url, Map<String, String> headers, String body, String contentType) {
@@ -966,36 +1042,38 @@ public class APIManager {
                 String json = new String(response.data, StandardCharsets.UTF_8);
                 JSONObject obj = new JSONObject(json);
 
-                if (obj.has("message"))
-                    return obj.getString("message");
+                if (obj.has("message")) {
+                    return appendErrorDetail(obj.optString("message"), obj.optString("detail"));
+                }
 
                 if (obj.has("err")) {
                     Object errObj = obj.get("err");
                     if (errObj instanceof JSONObject) {
                         JSONObject err = (JSONObject) errObj;
                         if (err.has("body")) {
-                            return err.optString("body");
+                            return appendErrorDetail(err.optString("body"), obj.optString("detail"));
                         }
                         if (err.has("context")) {
-                            return err.optString("context");
+                            return appendErrorDetail(err.optString("context"), obj.optString("detail"));
                         }
                         if (err.has("errors")) {
                             Object errorsObj = err.get("errors");
                             if (errorsObj instanceof JSONArray) {
                                 JSONArray errors = (JSONArray) errorsObj;
                                 if (errors.length() > 0) {
-                                    return errors.getString(0);
+                                    return appendErrorDetail(errors.getString(0), obj.optString("detail"));
                                 }
                             }
-                            return err.optString("errors");
+                            return appendErrorDetail(err.optString("errors"), obj.optString("detail"));
                         }
-                        return err.toString();
+                        return appendErrorDetail(err.toString(), obj.optString("detail"));
                     }
-                    return String.valueOf(errObj);
+                    return appendErrorDetail(String.valueOf(errObj), obj.optString("detail"));
                 }
 
-                if (obj.has("error"))
-                    return obj.getString("error");
+                if (obj.has("error")) {
+                    return appendErrorDetail(obj.optString("error"), obj.optString("detail"));
+                }
 
                 if (obj.has("detail"))
                     return obj.getString("detail");
@@ -1035,6 +1113,42 @@ public class APIManager {
             return "سرور یافت نشد (مشکل DNS)";
 
         return "خطایی رخ داده است";
+    }
+
+    private String parseTraceableError(String url, NetworkResponse response, Throwable error) {
+        String message = parseVolleyError(response, error);
+        if (!isBillingEndpoint(url)) {
+            return message;
+        }
+
+        String requestId = response != null ? getHeaderIgnoreCase(response.headers, "x-request-id") : null;
+        if (requestId == null || requestId.trim().isEmpty()) {
+            requestId = response != null ? getHeaderIgnoreCase(response.headers, "x-correlation-id") : null;
+        }
+        if (requestId == null || requestId.trim().isEmpty()) {
+            return message;
+        }
+        return message + " | کد پیگیری: " + requestId;
+    }
+
+    private boolean isBillingEndpoint(String url) {
+        return url != null && (url.contains("/price")
+                || url.contains("/discount")
+                || url.contains("/payment")
+                || url.contains("/iap/verify")
+                || url.contains("/use-discount"));
+    }
+
+    private String appendErrorDetail(String message, String detail) {
+        String safeMessage = message != null ? message.trim() : "";
+        String safeDetail = detail != null ? detail.trim() : "";
+        if (safeDetail.isEmpty() || safeDetail.equals(safeMessage)) {
+            return safeMessage;
+        }
+        if (safeMessage.isEmpty()) {
+            return safeDetail;
+        }
+        return safeMessage + ": " + safeDetail;
     }
 
 }

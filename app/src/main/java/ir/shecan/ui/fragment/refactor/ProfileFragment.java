@@ -159,7 +159,6 @@ public class ProfileFragment extends ToolbarFragment {
         }
     }
 
-
     private void openFragment(Class fragmentClass) {
         if (getActivity() instanceof MainActivityNew) {
             ((MainActivityNew) getActivity()).switchFragment(fragmentClass, true);

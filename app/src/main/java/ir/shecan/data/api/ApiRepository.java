@@ -25,6 +25,19 @@ public class ApiRepository {
         apiManager.requestObject(cacheKey, payload, url, method, useCache, callback, clazz);
     }
 
+    public <T, P> void request(
+            String cacheKey,
+            P payload,
+            Map<String, String> headers,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            ApiCallback<T> callback,
+            Class<T> clazz
+    ) {
+        apiManager.requestObject(cacheKey, payload, headers, url, method, useCache, callback, clazz);
+    }
+
     public <T, P> void requestList(
             String cacheKey,
             P payload,
@@ -36,6 +49,20 @@ public class ApiRepository {
             Class<T> clazz
     ) {
         apiManager.requestList(cacheKey, payload, url, method, useCache, isPublicApi, callback, clazz);
+    }
+
+    public <T, P> void requestList(
+            String cacheKey,
+            P payload,
+            Map<String, String> headers,
+            String url,
+            HttpMethod method,
+            boolean useCache,
+            boolean isPublicApi,
+            ApiCallback<List<T>> callback,
+            Class<T> clazz
+    ) {
+        apiManager.requestList(cacheKey, payload, headers, url, method, useCache, isPublicApi, callback, clazz);
     }
 
     public <T> void requestForm(

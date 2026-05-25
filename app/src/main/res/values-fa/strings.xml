@@ -118,6 +118,7 @@
     <string name="billing_have_discount_code">کد تخفیف دارم</string>
     <string name="billing_discount_info">کد تخفیف را روی همان پلنی وارد کنید که می‌خواهید بخرید.</string>
     <string name="billing_apply_discount">اعمال</string>
+    <string name="billing_remove_discount">حذف</string>
     <string name="billing_loading_prices">در حال دریافت قیمت پلن‌ها...</string>
     <string name="billing_loaded_prices">قیمت %1$d پلن آماده است. Bronze فعلا غیرفعال است.</string>
     <string name="billing_plan_not_purchasable">این پلن فعلا برای خرید فعال نیست.</string>
@@ -129,6 +130,7 @@
     <string name="billing_site_payment_redirecting">درگاه پرداخت آماده شد. در حال انتقال...</string>
     <string name="billing_site_payment_empty_url">آدرس درگاه از سرور دریافت نشد.</string>
     <string name="billing_site_payment_failed">شروع پرداخت سایت ناموفق بود.</string>
+    <string name="billing_error_with_http_status">%1$s (کد پاسخ: %2$d)</string>
     <string name="billing_payment_loading">در حال آماده‌سازی پرداخت...</string>
     <string name="billing_payment_login_required">برای پرداخت ابتدا وارد حساب شوید.</string>
     <string name="billing_discount_required">کد تخفیف را وارد کنید.</string>
@@ -137,12 +139,14 @@
     <string name="billing_discount_login_required">برای اعمال کد تخفیف ابتدا وارد حساب شوید.</string>
     <string name="billing_discount_applied">کد تخفیف اعمال شد.</string>
     <string name="billing_discount_invalid">کد تخفیف معتبر نیست.</string>
+    <string name="billing_discount_consume_failed">خرید تایید شد، اما ثبت استفاده از کد تخفیف ناموفق بود.</string>
     <string name="billing_restored_purchase_found">خرید قبلی از %1$s پیدا شد. در حال بررسی با بک‌اند...</string>
     <string name="billing_iap_verify_in_progress">خرید انجام شد. در حال تایید با بک‌اند...</string>
     <string name="billing_purchase_verified">خرید تایید شد.</string>
     <string name="billing_iap_verified">خرید درون‌برنامه‌ای تایید شد. %1$s</string>
     <string name="billing_iap_verify_failed">تایید خرید درون‌برنامه‌ای ناموفق بود.</string>
     <string name="billing_iap_purchase_token_missing">توکن خرید از مارکت دریافت نشد.</string>
+    <string name="billing_iap_unknown_product">محصول خریداری‌شده در برنامه شناسایی نشد.</string>
     <string name="billing_purchase_canceled">خرید از %1$s لغو شد.</string>
     <string name="billing_payment_error">خطای پرداخت %1$s: %2$s</string>
     <string name="billing_available">قابل خرید</string>
@@ -163,6 +167,7 @@
     <string name="billing_total">جمع هزینه</string>
     <string name="billing_pay">پرداخت</string>
     <string name="billing_accept_rules">همه قوانین را خوانده‌ام و قبول دارم</string>
+    <string name="billing_rules_link_text">قوانین</string>
     <string name="billing_rules_required">برای پرداخت، قوانین را تایید کنید.</string>
     <string name="billing_support_warning">⚠️ شکن از سایت‌ها و اپ‌های مسدود پشتیبانی نمی‌کند. حتما قبل از خرید، از تحت پوشش بودن سرویس مورد نظر خود در شکن مطمئن شوید.</string>
     <string name="billing_feature_speed">سرعت: تا %1$s</string>

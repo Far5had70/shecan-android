@@ -22,4 +22,5 @@ public class Constant {
     public static String DomainBazaarUrlRaw = "https://my.shecan.ir/panel/domains";
     public static String OrderWebPageUrlRaw = "https://my.shecan.ir/panel/orders";
     public static String PlanUrl = "https://shecan.ir/";
+    public static String TermsUrl = "https://shecan.ir/terms/";
 }

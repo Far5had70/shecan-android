@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -24,12 +25,15 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
+import ir.shecan.core.billing.BillingPeriod;
+import ir.shecan.core.billing.BillingSla;
 import ir.shecan.core.constant.Constant;
 import ir.shecan.core.constant.DurationType;
 import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.databinding.BottomSheetSubscriptionBinding;
 import ir.shecan.data.modelDto.ServiceItem;
 import ir.shecan.core.util.AppUtils;
+import ir.shecan.ui.activity.BillingPlansActivity;
 import saman.zamani.persiandate.PersianDate;
 import saman.zamani.persiandate.PersianDateFormat;
 
@@ -140,12 +144,6 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         // Progressbar
         binding.customProgress.setProgressAnimated(percentRemaining);
 
-        binding.btnRenew.setOnClickListener(v -> {
-            if (item.getUpdateLink() != null && !item.getUpdateLink().isEmpty()) {
-                // TODO: open link
-            }
-        });
-
         binding.ivChevron.setOnClickListener(v -> dismiss());
 
         binding.btnSupport.setOnClickListener(view -> {
@@ -153,15 +151,15 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         });
 
         binding.btnRenew.setOnClickListener(view -> {
-            AppUtils.openUrl(Constant.PlanUrl, getActivity());
+            openBillingPlans();
         });
 
         binding.btnBuyService.setOnClickListener(view -> {
-            AppUtils.openUrl(Constant.PlanUrl, getActivity());
+            openBillingPlans();
         });
 
         binding.btnCheckAgain.setOnClickListener(view -> {
-            AppUtils.openUrl(Constant.PlanUrl, getActivity());
+            openBillingPlans();
         });
 
         if (item.statusId == RequestStatus.SUPPORT_FINISHED.getValue()) {
@@ -177,6 +175,40 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
             binding.cardWaitingForActivation.setVisibility(GONE);
             binding.cardRemaining.setVisibility(VISIBLE);
         }
+    }
+
+    private void openBillingPlans() {
+        if (!isAdded()) return;
+
+        Intent intent = new Intent(requireContext(), BillingPlansActivity.class);
+        BillingSla sla = getBillingSla(item != null ? item.cfServiceType : null);
+        BillingPeriod period = getBillingPeriod(item != null ? item.cfDuration : null);
+
+        if (sla != null) {
+            intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_SLA, sla.getApiValue());
+        }
+        if (period != null) {
+            intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_PERIOD, period.getApiValue());
+        }
+
+        startActivity(intent);
+        dismiss();
+    }
+
+    private BillingSla getBillingSla(Integer serviceTypeId) {
+        if (serviceTypeId == null) return null;
+        for (BillingSla sla : BillingSla.values()) {
+            if (sla.getPlanId() == serviceTypeId) return sla;
+        }
+        return null;
+    }
+
+    private BillingPeriod getBillingPeriod(Integer durationId) {
+        if (durationId == null) return null;
+        for (BillingPeriod period : BillingPeriod.values()) {
+            if (period.getDurationId() == durationId) return period;
+        }
+        return null;
     }
 
     // تبدیل میلادی به شمسی

@@ -155,6 +155,18 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/btnClearDiscount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:minWidth="48dp"
+                    android:text="@string/billing_remove_discount"
+                    android:textColor="@color/red"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
                 <EditText
                     android:id="@+id/etDiscountCode"
                     android:layout_width="0dp"

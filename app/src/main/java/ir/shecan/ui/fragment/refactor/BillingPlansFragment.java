@@ -5,6 +5,11 @@ import static android.view.View.VISIBLE;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +44,7 @@ import ir.shecan.core.billing.BillingPlanPrice;
 import ir.shecan.core.billing.BillingPurchaseObserver;
 import ir.shecan.core.billing.BillingSla;
 import ir.shecan.core.billing.BillingStore;
+import ir.shecan.core.constant.Constant;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
@@ -59,6 +65,8 @@ import saman.zamani.persiandate.PersianDateFormat;
 public class BillingPlansFragment extends ToolbarFragment implements BillingPurchaseObserver {
 
     private static final String TAG = "BillingPlansFragment";
+    public static final String ARG_PREFILL_SLA = "prefill_sla";
+    public static final String ARG_PREFILL_PERIOD = "prefill_period";
 
     private FragmentBillingPlansBinding binding;
     private AuthApi authApi;
@@ -80,6 +88,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         storage = new AppStorage(requireContext());
         setupUi();
         setupOptions();
+        applyPrefillSelection();
         updateSelectedPlan();
         return binding.getRoot();
     }
@@ -110,7 +119,9 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         showStatus(null, false);
         binding.tvDiscountToggle.setVisibility(VISIBLE);
         binding.discountRow.setVisibility(GONE);
+        binding.btnClearDiscount.setVisibility(GONE);
         binding.tvDiscountMessage.setVisibility(GONE);
+        setupRulesLink();
         binding.checkboxRules.setOnCheckedChangeListener((buttonView, isChecked) -> updatePayButtonState());
         binding.btnPay.setOnClickListener(v -> {
             logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_CLICK);
@@ -121,10 +132,39 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
             }
         });
         binding.btnApplyDiscount.setOnClickListener(v -> applyDiscountCode());
+        binding.btnClearDiscount.setOnClickListener(v -> clearAppliedDiscount());
         binding.tvDiscountToggle.setOnClickListener(v -> {
             binding.discountRow.setVisibility(VISIBLE);
             binding.tvDiscountToggle.setVisibility(GONE);
         });
+    }
+
+    private void setupRulesLink() {
+        String fullText = getString(R.string.billing_accept_rules);
+        String linkText = getString(R.string.billing_rules_link_text);
+        int linkStart = fullText.indexOf(linkText);
+        if (linkStart < 0) {
+            binding.checkboxRules.setText(fullText);
+            return;
+        }
+
+        SpannableString text = new SpannableString(fullText);
+        int linkEnd = linkStart + linkText.length();
+        text.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                AppUtils.openUrl(Constant.TermsUrl, requireActivity());
+            }
+
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                ds.setColor(ContextCompat.getColor(requireContext(), R.color.orangeMain));
+                ds.setUnderlineText(true);
+            }
+        }, linkStart, linkEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        binding.checkboxRules.setText(text);
+        binding.checkboxRules.setMovementMethod(LinkMovementMethod.getInstance());
+        binding.checkboxRules.setHighlightColor(android.graphics.Color.TRANSPARENT);
     }
 
     private void setupOptions() {
@@ -159,6 +199,38 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.spinnerService.setOnItemSelectedListener(listener);
         binding.spinnerPeriod.setOnItemSelectedListener(listener);
         suppressSelectionEvents = false;
+    }
+
+    private void applyPrefillSelection() {
+        Bundle args = getArguments();
+        if (args == null) return;
+
+        String prefillSla = args.getString(ARG_PREFILL_SLA);
+        String prefillPeriod = args.getString(ARG_PREFILL_PERIOD);
+
+        int serviceIndex = findServiceIndex(prefillSla);
+        int periodIndex = findPeriodIndex(prefillPeriod);
+
+        suppressSelectionEvents = true;
+        if (serviceIndex >= 0) binding.spinnerService.setSelection(serviceIndex, false);
+        if (periodIndex >= 0) binding.spinnerPeriod.setSelection(periodIndex, false);
+        suppressSelectionEvents = false;
+    }
+
+    private int findServiceIndex(String apiValue) {
+        if (apiValue == null || apiValue.trim().isEmpty()) return -1;
+        for (int i = 0; i < serviceOptions.size(); i++) {
+            if (apiValue.equals(serviceOptions.get(i).getApiValue())) return i;
+        }
+        return -1;
+    }
+
+    private int findPeriodIndex(String apiValue) {
+        if (apiValue == null || apiValue.trim().isEmpty()) return -1;
+        for (int i = 0; i < periodOptions.size(); i++) {
+            if (apiValue.equals(periodOptions.get(i).getApiValue())) return i;
+        }
+        return -1;
     }
 
     private List<String> buildServiceTitles() {
@@ -229,6 +301,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.etDiscountCode.setText("");
         binding.discountRow.setVisibility(GONE);
         binding.tvDiscountToggle.setVisibility(VISIBLE);
+        binding.btnClearDiscount.setVisibility(GONE);
         binding.tvDiscountMessage.setVisibility(GONE);
         showStatus(null, false);
         updateFeatureBox(plan.getSla());
@@ -258,7 +331,9 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         updatePayButtonState();
 
         BillingPlan plan = selectedItem.getPlan();
+        VerifyApiViewModel token = storage != null ? storage.getToken(VerifyApiViewModel.class) : null;
         authApi.price(
+                token != null ? token.getApiKey() : null,
                 plan.getSla().getApiValue(),
                 plan.getPeriod().getApiValue(),
                 0,
@@ -277,7 +352,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     public void onError(int statusCode, String message) {
                         if (binding == null || requestId != priceRequestSeq) return;
                         selectedItem.setLoading(false);
-                        selectedItem.setErrorMessage(message != null ? message : getString(R.string.billing_unknown_price));
+                        selectedItem.setErrorMessage(formatBillingApiError(statusCode, message, R.string.billing_unknown_price));
                         showStatus(selectedItem.getErrorMessage(), true);
                         clearPriceUi();
                         updatePayButtonState();
@@ -434,7 +509,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     public void onError(int statusCode, String message) {
                         if (binding == null) return;
                         pendingPlan = null;
-                        showError(message != null ? message : getString(R.string.billing_site_payment_failed));
+                        showPaymentError(statusCode, message, R.string.billing_site_payment_failed);
                         setPaymentLoading(false);
                     }
                 }
@@ -471,7 +546,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 token.getApiKey(),
                 selectedItem.getPrice().getSafePrice(),
                 selectedItem.getPlan().getPlanId(),
-                token.getLogin(),
+                normalizeIranMobile(token.getLogin()),
                 code,
                 selectedItem.getPlan().getDurationId(),
                 new ApiCallback<DiscountViewModel>() {
@@ -486,6 +561,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                         selectedItem.applyDiscount(code, finalPrice, message);
                         logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_DISCOUNT_SUCCESS);
                         binding.btnApplyDiscount.setText(R.string.billing_apply_discount);
+                        binding.btnClearDiscount.setVisibility(VISIBLE);
                         showDiscountMessage(message);
                         renderPrice();
                         updatePayButtonState();
@@ -495,14 +571,25 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     public void onError(int statusCode, String message) {
                         if (binding == null || selectedItem == null) return;
                         selectedItem.setDiscountLoading(false);
-                        selectedItem.clearDiscount(message != null ? message : getString(R.string.billing_discount_invalid));
+                        selectedItem.clearDiscount(formatBillingApiError(statusCode, message, R.string.billing_discount_invalid));
                         binding.btnApplyDiscount.setText(R.string.billing_apply_discount);
+                        binding.btnClearDiscount.setVisibility(GONE);
                         showDiscountMessage(selectedItem.getDiscountMessage());
                         renderPrice();
                         updatePayButtonState();
                     }
                 }
         );
+    }
+
+    private void clearAppliedDiscount() {
+        if (selectedItem == null) return;
+        selectedItem.clearDiscount(null);
+        binding.etDiscountCode.setText("");
+        binding.btnClearDiscount.setVisibility(GONE);
+        showDiscountMessage(null);
+        renderPrice();
+        updatePayButtonState();
     }
 
     private Long resolveDiscountedPrice(DiscountViewModel data, long originalPrice) {
@@ -557,10 +644,15 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         if (binding == null) return;
         if (pendingPlan == null) {
             showStatus(getString(R.string.billing_restored_purchase_found, store.getTitle()), false);
-            setPaymentLoading(false);
-            return;
+            pendingPlan = BillingPlanCatalog.findBySku(getMarketplaceProductId(store, purchase));
+            if (pendingPlan == null) {
+                showError(getString(R.string.billing_iap_unknown_product));
+                setPaymentLoading(false);
+                return;
+            }
         }
 
+        setPaymentLoading(true);
         showStatus(getString(R.string.billing_iap_verify_in_progress), false);
         verifyMarketplacePurchase(store, purchase);
     }
@@ -631,7 +723,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 packageName,
                 productId,
                 purchaseToken,
-                getPayablePrice(),
+                getIapVerificationAmount(),
                 storeOrderId,
                 new ApiCallback<IapVerifyViewModel>() {
                     @Override
@@ -655,12 +747,18 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     @Override
                     public void onError(int statusCode, String message) {
                         if (binding == null) return;
-                        showError(message != null ? message : getString(R.string.billing_iap_verify_failed));
+                        showPaymentError(statusCode, message, R.string.billing_iap_verify_failed);
                         pendingPlan = null;
                         setPaymentLoading(false);
                     }
                 }
         );
+    }
+
+    private long getIapVerificationAmount() {
+        if (selectedItem == null || pendingPlan == null || selectedItem.getPrice() == null) return 0L;
+        if (!pendingPlan.getSku().equals(selectedItem.getPlan().getSku())) return 0L;
+        return getPayablePrice();
     }
 
     private void consumeDiscountAfterIapVerifyIfNeeded(VerifyApiViewModel token, IapVerifyViewModel verify, String orderMessage) {
@@ -682,8 +780,10 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
                     @Override
                     public void onError(int statusCode, String message) {
-                        Log.w(TAG, "Failed to consume discount code after IAP verify: " + message);
+                        String error = formatBillingApiError(statusCode, message, R.string.billing_discount_consume_failed);
+                        Log.w(TAG, "Failed to consume discount code after IAP verify: " + error);
                         finishVerifiedIap(orderMessage);
+                        showError(error);
                     }
                 }
         );
@@ -790,7 +890,20 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 ? message
                 : getString(R.string.billing_site_payment_failed);
         showStatus(safeMessage, true);
-        showMessage(safeMessage);
+        if (isAdded()) Toast.makeText(requireContext(), safeMessage, Toast.LENGTH_LONG).show();
+    }
+
+    private void showPaymentError(int statusCode, String message, int fallbackMessageRes) {
+        showError(formatBillingApiError(statusCode, message, fallbackMessageRes));
+    }
+
+    private String formatBillingApiError(int statusCode, String message, int fallbackMessageRes) {
+        String safeMessage = message != null && !message.trim().isEmpty()
+                ? message
+                : getString(fallbackMessageRes);
+        return statusCode > 0
+                ? getString(R.string.billing_error_with_http_status, safeMessage, statusCode)
+                : safeMessage;
     }
 
     private void setPaymentLoading(boolean loading) {
@@ -803,6 +916,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.discountRow.setEnabled(!loading);
         binding.etDiscountCode.setEnabled(!loading);
         binding.btnApplyDiscount.setEnabled(!loading);
+        binding.btnClearDiscount.setEnabled(!loading);
         binding.checkboxRules.setEnabled(!loading);
         updatePayButtonState();
     }

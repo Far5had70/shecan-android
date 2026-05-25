@@ -91,19 +91,15 @@ public class BillingPlanPrice {
 
     public long getServicePrice(BillingStore store) {
         long basePrice = getEffectivePrice();
-        if (store == BillingStore.CAFE_BAZAAR || store == BillingStore.MYKET) {
-            double priceWithoutTax = basePrice / 1.1d;
-            long marketplacePrice = (long) Math.ceil(priceWithoutTax * 1.43d);
-            return roundUp(marketplacePrice, 10_000L);
-        }
-        return basePrice;
+        double priceWithoutTax = basePrice / 1.1d;
+        double adjustedPrice = store == BillingStore.SITE
+                ? priceWithoutTax
+                : priceWithoutTax * 1.43d;
+        return roundUp((long) Math.ceil(adjustedPrice), 10_000L);
     }
 
     public long getTaxPrice(BillingStore store) {
-        if (store == BillingStore.CAFE_BAZAAR || store == BillingStore.MYKET) {
-            return Math.round(getServicePrice(store) * 0.1d);
-        }
-        return 0L;
+        return Math.round(getServicePrice(store) * 0.1d);
     }
 
     public long getTotalPrice(BillingStore store) {

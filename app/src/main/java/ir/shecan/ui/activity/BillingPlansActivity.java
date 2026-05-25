@@ -31,6 +31,9 @@ import ir.shecan.ui.fragment.refactor.BillingPlansFragment;
 
 public class BillingPlansActivity extends AppCompatActivity implements BillingHost {
 
+    public static final String EXTRA_PREFILL_SLA = "prefill_sla";
+    public static final String EXTRA_PREFILL_PERIOD = "prefill_period";
+
     private ActivityBillingPlansBinding binding;
     private MyketBillingManager myketBillingManager;
     private CafeBazaarBillingManager cafeBazaarBillingManager;
@@ -50,9 +53,15 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
         setupCafeBazaarBilling();
 
         if (savedInstanceState == null) {
+            BillingPlansFragment fragment = new BillingPlansFragment();
+            Bundle args = new Bundle();
+            args.putString(BillingPlansFragment.ARG_PREFILL_SLA, getIntent().getStringExtra(EXTRA_PREFILL_SLA));
+            args.putString(BillingPlansFragment.ARG_PREFILL_PERIOD, getIntent().getStringExtra(EXTRA_PREFILL_PERIOD));
+            fragment.setArguments(args);
+
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.billingContainer, new BillingPlansFragment())
+                    .replace(R.id.billingContainer, fragment)
                     .commit();
         }
     }

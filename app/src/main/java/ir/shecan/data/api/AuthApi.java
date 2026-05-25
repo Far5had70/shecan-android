@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.Collections;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +55,7 @@ public class AuthApi {
         repo.request(
                 "otp_exists_" + identifier,
                 input,
+                storeHeader(),
                 "https://my.shecan.ir/api/auth/exists",
                 HttpMethod.POST,
                 false,
@@ -72,6 +74,7 @@ public class AuthApi {
         repo.request(
                 "login_" + identifier,
                 input,
+                storeHeader(),
                 "https://my.shecan.ir/api/auth/login",
                 HttpMethod.POST,
                 false,
@@ -90,6 +93,7 @@ public class AuthApi {
         repo.request(
                 "otp_send_" + identifier,
                 input,
+                storeHeader(),
                 "https://my.shecan.ir/api/auth/send-otp",
                 HttpMethod.POST,
                 false,
@@ -109,6 +113,7 @@ public class AuthApi {
         repo.request(
                 "otp_verify_Object_" + identifier,
                 input,
+                storeHeader(),
                 "https://my.shecan.ir/api/auth/verify",
                 HttpMethod.POST,
                 false,
@@ -124,6 +129,7 @@ public class AuthApi {
         repo.requestList(
                 "otp_verify_" + identifier,
                 input,
+                storeHeader(),
                 "https://my.shecan.ir/api/auth/verify",
                 HttpMethod.POST,
                 false,
@@ -147,6 +153,10 @@ public class AuthApi {
                 },
                 VerifyApiViewModel.class
         );
+    }
+
+    private Map<String, String> storeHeader() {
+        return Collections.singletonMap("Referer", APIManager.getStoreHeaderValue());
     }
 
     // ---------------------------------------------------
@@ -346,7 +356,12 @@ public class AuthApi {
     }
 
     public void price(String sla, String period, int discount, ApiCallback<PriceViewModel> callback) {
+        price(null, sla, period, discount, callback);
+    }
+
+    public void price(String apiKey, String sla, String period, int discount, ApiCallback<PriceViewModel> callback) {
         PriceApiInput input = new PriceApiInput(sla, period, discount);
+        repo.apiManager.setApiKey(apiKey != null ? apiKey : "");
 
         repo.request(
                 "price_" + sla + "_" + period + "_" + discount,
@@ -372,6 +387,7 @@ public class AuthApi {
         input.put("api_key", apiKey);
         input.put("plan_price", planPrice);
         input.put("plan_id", planId);
+        input.put("phone", phone);
         input.put("code", code);
         input.put("duration_id", durationId);
 
@@ -438,7 +454,7 @@ public class AuthApi {
                 "site_payment_" + sla + "_" + period + "_" + amount + "_" + discount,
                 rawBody,
                 createWebPaymentHeaders(),
-                "https://my.shecan.ir/api/payment",
+                "https://my.shecan.ir/order/shecan/payment",
                 false,
                 callback,
                 SitePaymentViewModel.class
@@ -461,11 +477,15 @@ public class AuthApi {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("api_key", apiKey);
         payload.put("market", market);
-        payload.put("issue_id", issueId);
+        if (issueId > 0) {
+            payload.put("issue_id", issueId);
+        }
         payload.put("package_name", packageName);
         payload.put("product_id", productId);
         payload.put("purchase_token", purchaseToken);
-        payload.put("amount", amount);
+        if (amount > 0) {
+            payload.put("amount", amount);
+        }
         if (storeOrderId != null && !storeOrderId.trim().isEmpty()) {
             payload.put("store_order_id", storeOrderId);
         }
@@ -501,15 +521,13 @@ public class AuthApi {
             userPayload.put("admin", false);
             userPayload.put("status", 1);
             userPayload.put("groups", new ArrayList<>());
-            userPayload.put("memberships", createWebPaymentMemberships());
+            userPayload.put("memberships", new ArrayList<>());
             userPayload.put("welcome_text", createWebPaymentWelcomeText());
             return userPayload;
         }
 
-        String normalizedPhone = normalizeIranMobile(user.getLogin());
-        String normalizedPhoneWithoutZero = removeLeadingZero(normalizedPhone);
         userPayload.put("id", user.getId());
-        userPayload.put("login", safeString(normalizedPhoneWithoutZero != null ? normalizedPhoneWithoutZero : user.getLogin()));
+        userPayload.put("login", createLegacyPaymentLogin(user.getLogin()));
         userPayload.put("api_key", apiKey);
         userPayload.put("firstname", safeString(user.getFirstname()));
         userPayload.put("lastname", safeString(user.getLastname()));
@@ -519,7 +537,7 @@ public class AuthApi {
         userPayload.put("admin", user.getAdmin() != null ? user.getAdmin() : false);
         userPayload.put("status", user.getStatus());
         userPayload.put("groups", new ArrayList<>());
-        userPayload.put("memberships", createWebPaymentMemberships());
+        userPayload.put("memberships", new ArrayList<>());
         userPayload.put("welcome_text", createWebPaymentWelcomeText());
 
         return userPayload;
@@ -549,43 +567,37 @@ public class AuthApi {
         return value != null ? value : "";
     }
 
-    private List<Map<String, Object>> createWebPaymentMemberships() {
-        List<Map<String, Object>> memberships = new ArrayList<>();
-        Map<String, Object> membership = new LinkedHashMap<>();
-        Map<String, Object> project = new LinkedHashMap<>();
-        project.put("id", 7);
-        project.put("name", "شکن");
-        project.put("identifier", "shecan");
-        membership.put("project", project);
-
-        List<Map<String, Object>> roles = new ArrayList<>();
-        Map<String, Object> role = new LinkedHashMap<>();
-        role.put("id", 6);
-        role.put("name", "پشتیبان");
-        roles.add(role);
-        membership.put("roles", roles);
-        memberships.add(membership);
-        return memberships;
-    }
-
     private Map<String, String> createWebPaymentHeaders() {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("accept", "*/*");
-        headers.put("accept-language", "en-US,en;q=0.9");
-        headers.put("cache-control", "no-cache");
+        headers.put("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+        headers.put("accept-language", "en-US,en;q=0.9,fa-IR;q=0.8,fa;q=0.7");
+        headers.put("cache-control", "max-age=0");
         headers.put("content-type", "application/x-www-form-urlencoded");
         headers.put("origin", "https://my.shecan.ir");
-        headers.put("pragma", "no-cache");
-        headers.put("priority", "u=1, i");
+        headers.put("priority", "u=0, i");
         headers.put("referer", "https://my.shecan.ir/panel/order");
         headers.put("sec-ch-ua", "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"");
         headers.put("sec-ch-ua-mobile", "?0");
-        headers.put("sec-ch-ua-platform", "\"Windows\"");
-        headers.put("sec-fetch-dest", "empty");
-        headers.put("sec-fetch-mode", "cors");
+        headers.put("sec-ch-ua-platform", "\"macOS\"");
+        headers.put("sec-fetch-dest", "document");
+        headers.put("sec-fetch-mode", "navigate");
         headers.put("sec-fetch-site", "same-origin");
-        headers.put("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
+        headers.put("sec-fetch-user", "?1");
+        headers.put("upgrade-insecure-requests", "1");
+        headers.put("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
         return headers;
+    }
+
+    private String createLegacyPaymentLogin(String login) {
+        String safeLogin = safeString(login).trim();
+        if (safeLogin.regionMatches(true, 0, "Old", 0, 3)) {
+            return safeLogin;
+        }
+        String normalized = normalizeIranMobile(safeLogin);
+        String withoutLeadingZero = removeLeadingZero(normalized);
+        return withoutLeadingZero == null || withoutLeadingZero.isEmpty()
+                ? safeLogin
+                : "Old" + withoutLeadingZero;
     }
 
     private Map<String, Object> createPaymentUserPayload(String apiKey, VerifyApiViewModel user) {
