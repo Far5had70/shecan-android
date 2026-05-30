@@ -440,11 +440,13 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     }
 
     private void checkRatingRule(String url) {
-        RatingManager ratingManager = new RatingManager(getContext());
+        if (!isAdded()) return;
+
+        RatingManager ratingManager = new RatingManager(requireContext());
         ratingManager.initFirstOpenIfNeeded();
 
         if (ratingManager.shouldShowRatingDialog()) {
-            new RatingDialog(getContext(), url).show();
+            RatingDialog.showIfNotVisible(requireContext(), url);
         }
     }
 

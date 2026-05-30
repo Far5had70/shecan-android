@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -31,6 +32,9 @@ import ir.shecan.ui.activity.MainActivityNew;
 
 public class RatingDialog extends Dialog {
 
+    private static final String TAG = "RatingDialog";
+    private static RatingDialog visibleDialog;
+
     private RatingBar ratingBar;
     private Button btnSubmit;
     private Button btnLater;
@@ -44,6 +48,34 @@ public class RatingDialog extends Dialog {
         super(context);
         ratingManager = new RatingManager(context);
         this.url = url;
+    }
+
+    public static boolean showIfNotVisible(@NonNull Context context, String url) {
+        RatingDialog dialog;
+        synchronized (RatingDialog.class) {
+            if (visibleDialog != null) {
+                return false;
+            }
+            dialog = new RatingDialog(context, url);
+            visibleDialog = dialog;
+        }
+
+        try {
+            dialog.show();
+            return true;
+        } catch (RuntimeException exception) {
+            dialog.releaseVisibleReference();
+            Log.w(TAG, "Unable to display rating dialog", exception);
+            return false;
+        }
+    }
+
+    private void releaseVisibleReference() {
+        synchronized (RatingDialog.class) {
+            if (visibleDialog == this) {
+                visibleDialog = null;
+            }
+        }
     }
 
     @Override
@@ -63,6 +95,7 @@ public class RatingDialog extends Dialog {
         findViewById(android.R.id.content).startAnimation(fadeIn);
 
         setOnDismissListener(dialog -> {
+            releaseVisibleReference();
             if (!userRated) {
                 ratingManager.onDialogDismissed();
             }
@@ -79,12 +112,7 @@ public class RatingDialog extends Dialog {
             }
         });
 
-        btnLater.setOnClickListener(v ->{
-            if (!userRated) {
-                ratingManager.onDialogDismissed();
-            }
-            dismiss();
-        });
+        btnLater.setOnClickListener(v -> dismiss());
 
         btnSubmit.setOnClickListener(v -> {
 
@@ -95,12 +123,11 @@ public class RatingDialog extends Dialog {
                 return;
             }
 
-            userRated = true;
-
             AppStorage storage = new AppStorage(getContext());
             VerifyApiViewModel token = storage.getToken(VerifyApiViewModel.class);
 
             if (token != null) {
+                userRated = true;
 
                 long weeklyTime = Shecan.getPrefs()
                         .getLong("weekly_connection_time", 0L);
@@ -108,11 +135,13 @@ public class RatingDialog extends Dialog {
                 AppStorage appStorage = new AppStorage(getContext());
                 IssuesViewModel viewModel = appStorage.getIssue(IssuesViewModel.class);
                 boolean isHaveProItemInList = false;
-                for (IssuesViewModel.IssuesDTO issue : viewModel.getIssues()) {
-                    ServiceItem item = ServiceItemMapper.map(getContext(), issue);
-                    boolean isFreeMode = item.getOrderCode().equals("0");
-                    if(!isFreeMode){
-                        isHaveProItemInList = true;
+                if (viewModel != null && viewModel.getIssues() != null) {
+                    for (IssuesViewModel.IssuesDTO issue : viewModel.getIssues()) {
+                        ServiceItem item = ServiceItemMapper.map(getContext(), issue);
+                        boolean isFreeMode = "0".equals(item.getOrderCode());
+                        if (!isFreeMode) {
+                            isHaveProItemInList = true;
+                        }
                     }
                 }
 
