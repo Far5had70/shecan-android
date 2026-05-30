@@ -8,6 +8,7 @@ public class AppStorage {
     private static final String App_Config_KEY = "APP_CONFIG_MODEL";
     private static final String Issue_KEY = "Issue_MODEL";
     private static final String SERVICE_STATUS_KEY = "SERVICE_STATUS_MODEL1";
+    private static final String SERVICE_CATALOG_KEY = "SERVICE_CATALOG_MODEL";
     private static final String RATING_STATE_KEY = "RATING_STATE_MODEL100";
 
 
@@ -56,6 +57,19 @@ public class AppStorage {
         pref.remove(Issue_KEY);
     }
 
+    // ---------------- Service Catalog ----------------
+    public <T> void saveServiceCatalog(T catalog) {
+        pref.saveModel(SERVICE_CATALOG_KEY, catalog);
+    }
+
+    public <T> T getServiceCatalog(Class<T> clazz) {
+        return pref.getModel(SERVICE_CATALOG_KEY, clazz);
+    }
+
+    public void removeServiceCatalog() {
+        pref.remove(SERVICE_CATALOG_KEY);
+    }
+
     // ---------------- Rating State ----------------
     public <T> void saveRatingState(T issue) {
         pref.saveModel(RATING_STATE_KEY, issue);
@@ -90,4 +104,3 @@ public class AppStorage {
         pref.clearAll();
     }
 }
-

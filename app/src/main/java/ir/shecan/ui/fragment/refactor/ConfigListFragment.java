@@ -28,6 +28,7 @@ import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.ServiceItem;
 import ir.shecan.data.modelDto.ServiceItemMapper;
+import ir.shecan.data.modelDto.ServicesViewModel;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentConfigListBinding;
@@ -73,7 +74,23 @@ public class ConfigListFragment extends ToolbarFragment {
             return;
         }
 
-        new AuthApi(getContext()).issues(
+        AuthApi authApi = new AuthApi(getContext());
+        authApi.services(new ApiCallback<ServicesViewModel>() {
+            @Override
+            public void onSuccess(ServicesViewModel res, boolean fromCache) {
+                if (res != null) {
+                    storage.saveServiceCatalog(res);
+                    reloadServices(storage);
+                }
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                // The most recently saved catalog remains available as a display fallback.
+            }
+        });
+
+        authApi.issues(
                 token.getApiKey(),
                 0,
                 1000,

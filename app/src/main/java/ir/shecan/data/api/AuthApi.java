@@ -33,6 +33,7 @@ import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.IapVerifyViewModel;
 import ir.shecan.data.modelDto.PriceViewModel;
 import ir.shecan.data.modelDto.SendOtpApiViewModel;
+import ir.shecan.data.modelDto.ServicesViewModel;
 import ir.shecan.data.modelDto.SitePaymentViewModel;
 import ir.shecan.data.modelDto.UserRating;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
@@ -253,6 +254,19 @@ public class AuthApi {
                 false,
                 callback,
                 IssuesViewModel.class
+        );
+    }
+
+    public void services(ApiCallback<ServicesViewModel> callback) {
+        repo.request(
+                "services_catalog",
+                null,
+                storeHeader(),
+                "https://my.shecan.ir/api/services",
+                HttpMethod.GET,
+                false,
+                callback,
+                ServicesViewModel.class
         );
     }
 

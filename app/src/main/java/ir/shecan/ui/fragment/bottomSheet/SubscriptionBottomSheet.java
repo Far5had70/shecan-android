@@ -113,10 +113,10 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         binding.tvServiceTypeBody.setText(item.getServiceType());
         binding.tvCompanyNameBody.setText(item.projectName != null ? item.projectName : "-");
 
-        // تبدیل دوره با DurationType
         binding.tvPayCycleBody.setText(
-                item.cfDuration != null ?
-                        DurationType.fromId(item.cfDuration).getTitle() : "نامشخص"
+                item.getDurationTitle() != null && !item.getDurationTitle().isEmpty()
+                        ? item.getDurationTitle()
+                        : "نامشخص"
         );
 
         binding.tvStartDateBody.setText(startShamsi);

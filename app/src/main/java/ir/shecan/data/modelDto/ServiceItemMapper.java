@@ -6,6 +6,7 @@ import ir.shecan.R;
 import ir.shecan.core.constant.DurationType;
 import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.core.constant.ServiceType;
+import ir.shecan.data.storage.AppStorage;
 
 public class ServiceItemMapper {
 
@@ -14,10 +15,10 @@ public class ServiceItemMapper {
         String orderCode = String.valueOf(dto.getId());
 
         int serviceTypeId = getCustomFieldInt(dto, 58);
-        ServiceType serviceType = ServiceType.fromId(serviceTypeId);
+        String serviceTypeTitle = resolveServiceTypeTitle(context, serviceTypeId);
 
         int durationId = getCustomFieldInt(dto, 21);
-        DurationType durationType = DurationType.fromId(durationId);
+        String durationTitle = resolveDurationTitle(context, durationId);
 
         String updateLink = getCustomFieldString(dto, 95);
 
@@ -31,7 +32,8 @@ public class ServiceItemMapper {
         // ساخت ServiceItem
         ServiceItem item = new ServiceItem(
                 orderCode,
-                serviceType != null ? serviceType.getTitle() : "",
+                serviceTypeTitle,
+                durationTitle,
                 statusText,
                 updateLink,
                 statusIcon,
@@ -78,6 +80,32 @@ public class ServiceItemMapper {
         item.cfUpdateLink = getCustomFieldString(dto, 95);
 
         return item;
+    }
+
+    private static String resolveServiceTypeTitle(Context context, int serviceTypeId) {
+        if (context != null) {
+            ServicesViewModel catalog = new AppStorage(context).getServiceCatalog(ServicesViewModel.class);
+            ServicesViewModel.ServiceDTO service = catalog != null
+                    ? catalog.findByPeygirCode(serviceTypeId)
+                    : null;
+            if (service != null && service.getNameFa() != null && !service.getNameFa().trim().isEmpty()) {
+                return service.getNameFa().trim();
+            }
+        }
+        return ServiceType.fromId(serviceTypeId).getTitle();
+    }
+
+    private static String resolveDurationTitle(Context context, int durationId) {
+        if (context != null) {
+            ServicesViewModel catalog = new AppStorage(context).getServiceCatalog(ServicesViewModel.class);
+            ServicesViewModel.DurationDTO duration = catalog != null
+                    ? catalog.findDurationById(durationId)
+                    : null;
+            if (duration != null && duration.getTitle() != null && !duration.getTitle().trim().isEmpty()) {
+                return duration.getTitle().trim();
+            }
+        }
+        return DurationType.fromId(durationId).getTitle();
     }
 
     private static int getCustomFieldInt(IssuesViewModel.IssuesDTO dto, int id) {

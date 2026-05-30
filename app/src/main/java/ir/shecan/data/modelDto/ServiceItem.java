@@ -5,6 +5,7 @@ public class ServiceItem {
     // فیلدهای فعلی
     private final String orderCode;
     private final String serviceType;
+    private final String durationTitle;
     private final String statusText;
     private final String updateLink;
     private final int statusIcon;
@@ -55,6 +56,7 @@ public class ServiceItem {
     public ServiceItem(
             String orderCode,
             String serviceType,
+            String durationTitle,
             String statusText,
             String updateLink,
             int statusIcon,
@@ -63,6 +65,7 @@ public class ServiceItem {
     ) {
         this.orderCode = orderCode;
         this.serviceType = serviceType;
+        this.durationTitle = durationTitle;
         this.statusText = statusText;
         this.updateLink = updateLink;
         this.statusIcon = statusIcon;
@@ -73,6 +76,7 @@ public class ServiceItem {
     // گترهای قبلی
     public String getOrderCode() { return orderCode; }
     public String getServiceType() { return serviceType; }
+    public String getDurationTitle() { return durationTitle; }
     public String getStatusText() { return statusName; }
     public String getUpdateLink() { return updateLink; }
     public int getStatusIcon() { return statusIcon; }

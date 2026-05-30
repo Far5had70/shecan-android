@@ -162,7 +162,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
 
         if (serviceItem == null) {
-            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free), "", "", 0, 0, IssuesViewModel.IssuesDTO.createDefault());
+            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free), "", "", "", 0, 0, IssuesViewModel.IssuesDTO.createDefault());
         }
         try {
             binding.servicePanel.setStatus(serviceItem);
