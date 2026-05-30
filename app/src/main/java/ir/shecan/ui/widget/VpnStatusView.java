@@ -1,7 +1,5 @@
 package ir.shecan.ui.widget;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -11,13 +9,13 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import ir.shecan.R;
+import ir.shecan.core.service.ShecanVpnService;
 import ir.shecan.databinding.ViewServiceStatusBinding;
 
 public class VpnStatusView extends FrameLayout {
@@ -63,7 +61,7 @@ public class VpnStatusView extends FrameLayout {
         checkStatus();
     }
 
-    private void checkStatus() {
+    public void checkStatus() {
         if (checkUrl == null) return;
 
         showLoadingState();
@@ -78,7 +76,7 @@ public class VpnStatusView extends FrameLayout {
                 },
                 error -> {
                     stopLoadingAnimation();
-                    setDisconnected();
+                    setFallbackStatus();
                 }
         );
 
@@ -101,7 +99,20 @@ public class VpnStatusView extends FrameLayout {
                 setFree();
                 break;
             default:
-                setDisconnected();
+                setFallbackStatus();
+        }
+    }
+
+    private void setFallbackStatus() {
+        if (!ShecanVpnService.isActivated()) {
+            setDisconnected();
+            return;
+        }
+
+        if (ShecanVpnService.isProMode()) {
+            setPro();
+        } else {
+            setFree();
         }
     }
 

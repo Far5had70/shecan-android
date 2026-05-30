@@ -69,6 +69,9 @@ public class ProfileFragment extends ToolbarFragment {
         if (storage != null) {
             updateUi();
         }
+        if (binding != null) {
+            binding.vpnStatusView.checkStatus();
+        }
         ((MainActivityNew) getActivity()).updateLoginInformation();
 //        ((MainActivityNew) getActivity()).binding.customBar.select(2);
         adjustUIForFragment(getActivity(), R.color.profileBackground, R.color.mainBack);
