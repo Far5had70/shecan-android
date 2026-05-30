@@ -634,11 +634,10 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     }
                 },
                 error -> {
-                    // show the cached connected IP connected before the api call, when gets error
                     if (ShecanVpnService.isActivated()) {
                         Logger.error("Connecting to: " + apiUrl + " Resolved IP: " + OkHttpLogger.resolvedIp + " is Failed");
-                        listener.onRetry();
                     }
+                    listener.onRetry();
                 }
         );
     }

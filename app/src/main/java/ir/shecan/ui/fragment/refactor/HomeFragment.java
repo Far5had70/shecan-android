@@ -58,9 +58,12 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean hasBanner = false;
     private ScheduledExecutorService scheduler;
     private MonitoringManager monitoringManager;
+    private long dynamicIpCheckDeadlineMs = 0L;
     MainActivityNew activity;
 
     private static final String TAG = "HomeFragment";
+    private static final long DYNAMIC_IP_CHECK_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(70);
+    private static final long DYNAMIC_IP_CHECK_RETRY_DELAY_SECONDS = 10;
 
     @Nullable
     @Override
@@ -99,6 +102,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             if (ShecanVpnService.isActivated()) {
                 TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_DISCONNECT_CLICK,
                         TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_button"));
+                cancelDynamicIpStatusCheck();
                 app.getVpnState().setValue(0);
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
@@ -106,6 +110,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             } else if (binding.vpnButton.isLoading()) {
                 TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_DISCONNECT_CLICK,
                         TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_button_loading"));
+                cancelDynamicIpStatusCheck();
                 app.getVpnState().setValue(0);
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
@@ -288,10 +293,11 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onSuccess(String response) {
         if (!isAdded()) return;
-        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_CONNECTED,
-                TrackingUtils.bundleOf(TrackingUtils.PARAM_METHOD, ShecanVpnService.isDynamicIPMode() ? "dynamic" : "static"));
-        startActivity(new Intent(requireActivity(), MainActivityNew.class)
-                .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+        if (ShecanVpnService.isDynamicIPMode()) {
+            waitForDynamicIpActivation();
+        } else {
+            startVpnAfterConnectionStatusVerified("static");
+        }
     }
 
     @Override
@@ -333,21 +339,31 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     @Override
     public void onConnected() {
-//        if (!isAdded()) return;
+        if (!isAdded()) return;
+        cancelDynamicIpStatusCheck();
+        startVpnAfterConnectionStatusVerified(ShecanVpnService.isDynamicIPMode() ? "dynamic" : "static");
     }
 
     @Override
     public void onRetry() {
+        if (!isAdded() || isRemoving()) return;
+
         if (ShecanVpnService.isDynamicIPMode()) {
-            if (scheduler != null && !scheduler.isShutdown()) scheduler.shutdownNow();
+            if (!isDynamicIpCheckInProgress()) {
+                failDynamicIpStatusCheck();
+                return;
+            }
+            cancelScheduler();
             scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(() -> {
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    if (isAdded() && !isRemoving()) {
+                    if (isAdded() && !isRemoving() && isDynamicIpCheckInProgress()) {
                         ShecanVpnService.callConnectionStatusAPI(requireContext(), HomeFragment.this, null);
+                    } else if (isAdded() && !isRemoving()) {
+                        failDynamicIpStatusCheck();
                     }
                 });
-            }, 20, TimeUnit.SECONDS);
+            }, DYNAMIC_IP_CHECK_RETRY_DELAY_SECONDS, TimeUnit.SECONDS);
         } else {
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (!isAdded() || isRemoving()) return;
@@ -356,15 +372,47 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         }
     }
 
+    private void waitForDynamicIpActivation() {
+        dynamicIpCheckDeadlineMs = System.currentTimeMillis() + DYNAMIC_IP_CHECK_TIMEOUT_MS;
+        ShecanVpnService.callConnectionStatusAPI(requireContext(), this, null);
+    }
+
+    private boolean isDynamicIpCheckInProgress() {
+        return dynamicIpCheckDeadlineMs > 0 && System.currentTimeMillis() <= dynamicIpCheckDeadlineMs;
+    }
+
+    private void failDynamicIpStatusCheck() {
+        cancelDynamicIpStatusCheck();
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.getVpnStatus().setValue(getString(R.string.dynamic_ip_connection_not_ready));
+        app.getVpnState().setValue(0);
+    }
+
+    private void startVpnAfterConnectionStatusVerified(String method) {
+        TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_CONNECTED,
+                TrackingUtils.bundleOf(TrackingUtils.PARAM_METHOD, method));
+        startActivity(new Intent(requireActivity(), MainActivityNew.class)
+                .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_ACTIVATE));
+    }
+
+    private void cancelDynamicIpStatusCheck() {
+        dynamicIpCheckDeadlineMs = 0L;
+        cancelScheduler();
+    }
+
+    private void cancelScheduler() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+        }
+        scheduler = null;
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
         if (binding != null) binding.bannerSlider.stop();
-        if (scheduler != null && !scheduler.isShutdown()) {
-            scheduler.shutdownNow();
-            scheduler = null;
-        }
+        cancelDynamicIpStatusCheck();
         if (monitoringManager != null) {
             monitoringManager.stop();
             monitoringManager = null;
