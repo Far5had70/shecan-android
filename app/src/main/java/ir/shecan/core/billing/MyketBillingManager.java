@@ -216,12 +216,14 @@ public class MyketBillingManager {
             return;
         }
 
-        if (!verifyDeveloperPayload(purchase)) {
+        if (!restoredFromInventory && !verifyPendingDeveloperPayload(purchase)) {
             notifyError("Myket developer payload verification failed for sku: " + purchase.getSku());
             return;
         }
 
-        clearPendingPayload(purchase.getSku());
+        if (!restoredFromInventory) {
+            clearPendingPayload(purchase.getSku());
+        }
 
         if (consumableSkus.contains(purchase.getSku())) {
             if (listener != null) listener.onConsumablePurchaseReady(purchase, restoredFromInventory);
@@ -230,12 +232,10 @@ public class MyketBillingManager {
         }
     }
 
-    private boolean verifyDeveloperPayload(Purchase purchase) {
+    private boolean verifyPendingDeveloperPayload(Purchase purchase) {
         String expectedPayload = preferences.getString(payloadKey(purchase.getSku()), null);
-        if (expectedPayload == null) {
-            return !TextUtils.isEmpty(purchase.getDeveloperPayload());
-        }
-        return expectedPayload.equals(purchase.getDeveloperPayload());
+        // The backend remains authoritative if the active request was lost on process recreation.
+        return expectedPayload == null || expectedPayload.equals(purchase.getDeveloperPayload());
     }
 
     private String createDeveloperPayload(String sku) {

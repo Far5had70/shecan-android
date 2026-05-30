@@ -2,7 +2,6 @@ package ir.shecan.core.billing
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.text.TextUtils
 import android.util.Log
 import androidx.activity.result.ActivityResultRegistry
 import ir.cafebazaar.poolakey.Connection
@@ -182,12 +181,14 @@ class CafeBazaarBillingManager(context: Context) {
     }
 
     private fun handleVerifiedPurchase(purchaseInfo: PurchaseInfo, restoredFromInventory: Boolean) {
-        if (!verifyDeveloperPayload(purchaseInfo)) {
+        if (!restoredFromInventory && !verifyPendingDeveloperPayload(purchaseInfo)) {
             notifyError("Cafe Bazaar developer payload verification failed for sku: ${purchaseInfo.productId}")
             return
         }
 
-        clearPendingPayload(purchaseInfo.productId)
+        if (!restoredFromInventory) {
+            clearPendingPayload(purchaseInfo.productId)
+        }
 
         when {
             nonConsumableSkus.contains(purchaseInfo.productId) ->
@@ -197,13 +198,10 @@ class CafeBazaarBillingManager(context: Context) {
         }
     }
 
-    private fun verifyDeveloperPayload(purchaseInfo: PurchaseInfo): Boolean {
+    private fun verifyPendingDeveloperPayload(purchaseInfo: PurchaseInfo): Boolean {
         val expectedPayload = preferences.getString(payloadKey(purchaseInfo.productId), null)
-        return if (expectedPayload == null) {
-            !TextUtils.isEmpty(purchaseInfo.payload)
-        } else {
-            expectedPayload == purchaseInfo.payload
-        }
+        // Backend verification is authoritative if the active request was lost on recreation.
+        return expectedPayload == null || expectedPayload == purchaseInfo.payload
     }
 
     private fun createDeveloperPayload(sku: String): String {
