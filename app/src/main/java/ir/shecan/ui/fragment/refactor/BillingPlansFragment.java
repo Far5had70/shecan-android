@@ -53,6 +53,7 @@ import ir.shecan.data.modelDto.DiscountViewModel;
 import ir.shecan.data.modelDto.EmptyResponse;
 import ir.shecan.data.modelDto.IapVerifyViewModel;
 import ir.shecan.data.modelDto.PriceViewModel;
+import ir.shecan.data.modelDto.ServicesViewModel;
 import ir.shecan.data.modelDto.SitePaymentViewModel;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
@@ -81,16 +82,22 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private boolean paymentInProgress;
     private boolean suppressSelectionEvents;
     private int priceRequestSeq;
+    private ServicesViewModel serviceCatalog;
+    private BillingSla prefillSla;
+    private BillingPeriod prefillPeriod;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentBillingPlansBinding.inflate(inflater, container, false);
         authApi = new AuthApi(requireContext());
         storage = new AppStorage(requireContext());
+        serviceCatalog = storage.getServiceCatalog(ServicesViewModel.class);
+        readPrefillArgs();
         setupUi();
         setupOptions();
         applyPrefillSelection();
         updateSelectedPlan();
+        loadServiceCatalog();
         return binding.getRoot();
     }
 
@@ -169,20 +176,14 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     }
 
     private void setupOptions() {
+        String selectedSla = getSelectedSlaValue();
+        String selectedPeriod = getSelectedPeriodValue();
         suppressSelectionEvents = true;
         serviceOptions.clear();
         periodOptions.clear();
 
-        Set<BillingSla> uniqueServices = new LinkedHashSet<>();
-        for (BillingPlan plan : BillingPlanCatalog.purchasablePlans()) {
-            uniqueServices.add(plan.getSla());
-        }
-        serviceOptions.addAll(uniqueServices);
-
-        periodOptions.add(BillingPeriod.ONE_MONTH);
-        periodOptions.add(BillingPeriod.THREE_MONTHS);
-        periodOptions.add(BillingPeriod.SIX_MONTHS);
-        periodOptions.add(BillingPeriod.ONE_YEAR);
+        serviceOptions.addAll(buildAllowedServices());
+        periodOptions.addAll(buildAllowedPeriods());
 
         binding.spinnerService.setAdapter(createSpinnerAdapter(buildServiceTitles()));
         binding.spinnerPeriod.setAdapter(createSpinnerAdapter(buildPeriodTitles()));
@@ -199,23 +200,190 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         };
         binding.spinnerService.setOnItemSelectedListener(listener);
         binding.spinnerPeriod.setOnItemSelectedListener(listener);
+
+        selectSpinnerValues(
+                selectedSla != null ? selectedSla : (prefillSla != null ? prefillSla.getApiValue() : null),
+                selectedPeriod != null ? selectedPeriod : (prefillPeriod != null ? prefillPeriod.getApiValue() : null)
+        );
         suppressSelectionEvents = false;
     }
 
-    private void applyPrefillSelection() {
+    private void readPrefillArgs() {
         Bundle args = getArguments();
         if (args == null) return;
 
         String prefillSla = args.getString(ARG_PREFILL_SLA);
         String prefillPeriod = args.getString(ARG_PREFILL_PERIOD);
 
-        int serviceIndex = findServiceIndex(prefillSla);
-        int periodIndex = findPeriodIndex(prefillPeriod);
+        this.prefillSla = BillingSla.fromApiValue(prefillSla);
+        this.prefillPeriod = BillingPeriod.fromApiValue(prefillPeriod);
+    }
+
+    private void applyPrefillSelection() {
+        selectSpinnerValues(
+                prefillSla != null ? prefillSla.getApiValue() : null,
+                prefillPeriod != null ? prefillPeriod.getApiValue() : null
+        );
+    }
+
+    private void selectSpinnerValues(String slaValue, String periodValue) {
+        int serviceIndex = findServiceIndex(slaValue);
+        int periodIndex = findPeriodIndex(periodValue);
 
         suppressSelectionEvents = true;
         if (serviceIndex >= 0) binding.spinnerService.setSelection(serviceIndex, false);
         if (periodIndex >= 0) binding.spinnerPeriod.setSelection(periodIndex, false);
         suppressSelectionEvents = false;
+    }
+
+    private void loadServiceCatalog() {
+        authApi.services(new ApiCallback<ServicesViewModel>() {
+            @Override
+            public void onSuccess(ServicesViewModel res, boolean fromCache) {
+                if (binding == null || res == null) return;
+                serviceCatalog = res;
+                storage.saveServiceCatalog(res);
+                setupOptions();
+                updateSelectedPlan();
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                Log.w(TAG, "Failed to load billing services catalog: " + message);
+            }
+        });
+    }
+
+    private List<BillingSla> buildAllowedServices() {
+        LinkedHashSet<BillingSla> options = new LinkedHashSet<>();
+        if (serviceCatalog != null && serviceCatalog.getServices() != null) {
+            if (prefillSla != null) {
+                addRenewableCurrentService(options);
+                addAllowedChangeServices(options);
+            } else {
+                for (ServicesViewModel.ServiceDTO service : serviceCatalog.getServices()) {
+                    if (service == null || !service.isPurchaseEnabled()) continue;
+                    BillingSla sla = BillingSla.fromApiValue(service.getCode());
+                    if (sla != null) options.add(sla);
+                }
+            }
+        }
+
+        if (options.isEmpty()) {
+            for (BillingPlan plan : BillingPlanCatalog.purchasablePlans()) {
+                options.add(plan.getSla());
+            }
+        }
+        return new ArrayList<>(options);
+    }
+
+    private void addRenewableCurrentService(Set<BillingSla> options) {
+        ServicesViewModel.ServiceDTO service = findService(prefillSla);
+        if (service == null || service.isRenewalEnabled()) {
+            options.add(prefillSla);
+        }
+    }
+
+    private void addAllowedChangeServices(Set<BillingSla> options) {
+        ServicesViewModel.ServiceDTO current = findService(prefillSla);
+        if (current == null || current.getAllowedChangeCodes() == null) return;
+
+        for (String code : current.getAllowedChangeCodes()) {
+            BillingSla sla = BillingSla.fromApiValue(code);
+            ServicesViewModel.ServiceDTO target = findService(sla);
+            if (sla != null && (target == null || target.isPurchaseEnabled())) {
+                options.add(sla);
+            }
+        }
+    }
+
+    private List<BillingPeriod> buildAllowedPeriods() {
+        LinkedHashSet<BillingPeriod> options = new LinkedHashSet<>();
+        if (serviceCatalog != null && serviceCatalog.getDuration() != null) {
+            for (ServicesViewModel.DurationDTO duration : serviceCatalog.getDuration()) {
+                if (duration == null) continue;
+                BillingPeriod period = BillingPeriod.fromApiValue(duration.getKey());
+                if (period != null) options.add(period);
+            }
+        }
+
+        if (options.isEmpty()) {
+            options.add(BillingPeriod.ONE_MONTH);
+            options.add(BillingPeriod.THREE_MONTHS);
+            options.add(BillingPeriod.SIX_MONTHS);
+            options.add(BillingPeriod.ONE_YEAR);
+        }
+        return new ArrayList<>(options);
+    }
+
+    private String getSelectedSlaValue() {
+        if (binding == null || serviceOptions.isEmpty()) return null;
+        int position = binding.spinnerService.getSelectedItemPosition();
+        if (position < 0 || position >= serviceOptions.size()) return null;
+        return serviceOptions.get(position).getApiValue();
+    }
+
+    private String getSelectedPeriodValue() {
+        if (binding == null || periodOptions.isEmpty()) return null;
+        int position = binding.spinnerPeriod.getSelectedItemPosition();
+        if (position < 0 || position >= periodOptions.size()) return null;
+        return periodOptions.get(position).getApiValue();
+    }
+
+    private String getServiceTitle(BillingSla sla) {
+        ServicesViewModel.ServiceDTO service = findService(sla);
+        if (service != null && service.getNameFa() != null && !service.getNameFa().trim().isEmpty()) {
+            return service.getNameFa();
+        }
+        return sla.getTitle();
+    }
+
+    private String getPeriodTitle(BillingPeriod period) {
+        ServicesViewModel.DurationDTO duration = findDuration(period);
+        if (duration != null) {
+            if (duration.getText() != null && !duration.getText().trim().isEmpty()) {
+                return duration.getText();
+            }
+            if (duration.getTitle() != null && !duration.getTitle().trim().isEmpty()) {
+                return duration.getTitle();
+            }
+        }
+        return period.getTitle();
+    }
+
+    private ServicesViewModel.ServiceDTO findService(BillingSla sla) {
+        if (sla == null || serviceCatalog == null || serviceCatalog.getServices() == null) return null;
+        for (ServicesViewModel.ServiceDTO service : serviceCatalog.getServices()) {
+            if (service != null && sla.getApiValue().equals(service.getCode())) {
+                return service;
+            }
+        }
+        return null;
+    }
+
+    private ServicesViewModel.DurationDTO findDuration(BillingPeriod period) {
+        if (period == null || serviceCatalog == null || serviceCatalog.getDuration() == null) return null;
+        for (ServicesViewModel.DurationDTO duration : serviceCatalog.getDuration()) {
+            if (duration != null && period.getApiValue().equals(duration.getKey())) {
+                return duration;
+            }
+        }
+        return null;
+    }
+
+    private List<String> getServiceFeatureTexts(BillingSla sla) {
+        List<String> featureTexts = new ArrayList<>();
+        ServicesViewModel.ServiceDTO service = findService(sla);
+        if (service == null || service.getFeatures() == null) return featureTexts;
+
+        for (ServicesViewModel.FeatureDTO feature : service.getFeatures()) {
+            if (feature == null || feature.getText() == null || feature.getText().trim().isEmpty()) {
+                continue;
+            }
+            featureTexts.add(feature.getText());
+            if (featureTexts.size() == 2) break;
+        }
+        return featureTexts;
     }
 
     private int findServiceIndex(String apiValue) {
@@ -237,7 +405,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private List<String> buildServiceTitles() {
         List<String> titles = new ArrayList<>();
         for (BillingSla sla : serviceOptions) {
-            titles.add(getString(R.string.billing_service_name, sla.getTitle()));
+            titles.add(getString(R.string.billing_service_name, getServiceTitle(sla)));
         }
         return titles;
     }
@@ -268,20 +436,20 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     }
 
     private void forceRtlSpinnerItem(View view) {
-        view.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
-        view.setTextDirection(View.TEXT_DIRECTION_LTR);
+        view.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        view.setTextDirection(View.TEXT_DIRECTION_RTL);
         view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.lightBack));
         if (view instanceof TextView) {
             TextView textView = (TextView) view;
-            textView.setGravity(android.view.Gravity.END | android.view.Gravity.CENTER_VERTICAL);
-            textView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+            textView.setGravity(android.view.Gravity.RIGHT | android.view.Gravity.CENTER_VERTICAL);
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_GRAVITY);
         }
     }
 
     private List<String> buildPeriodTitles() {
         List<String> titles = new ArrayList<>();
         for (BillingPeriod period : periodOptions) {
-            titles.add(period.getTitle());
+            titles.add(getPeriodTitle(period));
         }
         return titles;
     }
@@ -387,8 +555,14 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     }
 
     private void updateFeatureBox(BillingSla sla) {
-        binding.tvFeatureOne.setText(getString(R.string.billing_feature_speed, getSpeedText(sla)));
-        binding.tvFeatureTwo.setText(getString(R.string.billing_feature_dns, getDnsText(sla)));
+        List<String> features = getServiceFeatureTexts(sla);
+        if (features.size() >= 2) {
+            binding.tvFeatureOne.setText(features.get(0));
+            binding.tvFeatureTwo.setText(features.get(1));
+        } else {
+            binding.tvFeatureOne.setText(getString(R.string.billing_feature_speed, getSpeedText(sla)));
+            binding.tvFeatureTwo.setText(getString(R.string.billing_feature_dns, getDnsText(sla)));
+        }
     }
 
     private String getSpeedText(BillingSla sla) {

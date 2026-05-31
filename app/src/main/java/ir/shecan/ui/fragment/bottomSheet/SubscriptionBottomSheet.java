@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
+import ir.shecan.Shecan;
 import ir.shecan.core.billing.BillingPeriod;
 import ir.shecan.core.billing.BillingSla;
 import ir.shecan.core.constant.DurationType;
@@ -153,6 +154,10 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
             openBillingPlans();
         });
 
+        binding.btnConnect.setOnClickListener(view -> {
+            connectCurrentService();
+        });
+
         binding.btnBuyService.setOnClickListener(view -> {
             openBillingPlans();
         });
@@ -160,6 +165,16 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
         binding.btnCheckAgain.setOnClickListener(view -> {
             openBillingPlans();
         });
+
+        RequestStatus status = RequestStatus.fromValue(item.statusId);
+        boolean isExpired = status == RequestStatus.SUPPORT_FINISHED
+                || status == RequestStatus.WAITING_FOR_PAYMENT_OR_RENEW
+                || status == RequestStatus.WAITING_FOR_PAYMENT_OR_ACTIVATION
+                || status == RequestStatus.SUSPENDED
+                || isDueDateExpired(item.dueDate);
+        boolean isExpiring = status == RequestStatus.EXPIRING && !isExpired;
+
+        binding.btnConnect.setVisibility(isExpiring ? VISIBLE : GONE);
 
         if (item.statusId == RequestStatus.SUPPORT_FINISHED.getValue()) {
             binding.cardBuyService.setVisibility(VISIBLE);
@@ -174,6 +189,13 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
             binding.cardWaitingForActivation.setVisibility(GONE);
             binding.cardRemaining.setVisibility(VISIBLE);
         }
+    }
+
+    private void connectCurrentService() {
+        if (!isAdded()) return;
+        Shecan app = (Shecan) requireContext().getApplicationContext();
+        app.connectVpn(requireContext(), null);
+        dismiss();
     }
 
     private void openBillingPlans() {
@@ -208,6 +230,20 @@ public class SubscriptionBottomSheet extends BottomSheetDialogFragment {
             if (period.getDurationId() == durationId) return period;
         }
         return null;
+    }
+
+    private boolean isDueDateExpired(String dueDate) {
+        try {
+            if (dueDate == null || dueDate.trim().isEmpty()) return false;
+            String normalized = dueDate.trim();
+            if (normalized.contains("T")) normalized = normalized.substring(0, normalized.indexOf("T"));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(normalized);
+            if (date == null) return false;
+            return date.getTime() < System.currentTimeMillis();
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     // تبدیل میلادی به شمسی

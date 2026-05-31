@@ -69,10 +69,10 @@ public final class BillingPlanCatalog {
 
     private static List<BillingPlan> buildPlans() {
         List<BillingPlan> plans = new ArrayList<>();
-        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.ONE_MONTH, SKU_BRONZE_1M, false));
-        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.THREE_MONTHS, SKU_BRONZE_3M, false));
-        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.SIX_MONTHS, SKU_BRONZE_6M, false));
-        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.ONE_YEAR, SKU_BRONZE_1Y, false));
+        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.ONE_MONTH, SKU_BRONZE_1M, true));
+        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.THREE_MONTHS, SKU_BRONZE_3M, true));
+        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.SIX_MONTHS, SKU_BRONZE_6M, true));
+        plans.add(new BillingPlan(BillingSla.BRONZE, BillingPeriod.ONE_YEAR, SKU_BRONZE_1Y, true));
 
         plans.add(new BillingPlan(BillingSla.SILVER, BillingPeriod.ONE_MONTH, SKU_SILVER_1M, true));
         plans.add(new BillingPlan(BillingSla.SILVER, BillingPeriod.THREE_MONTHS, SKU_SILVER_3M, true));

@@ -442,20 +442,49 @@
                     android:layout_marginTop="6dp"
                     android:textColor="@color/greenSecondaryTextColor" />
 
-                <ir.shecan.ui.widget.CustomButton
-                    android:id="@+id/btnRenew"
+                <LinearLayout
+                    android:id="@+id/renewActionRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cb_primaryBackground="@color/colorAccent"
-                    app:cb_defaultPadding="0dp"
                     android:layout_marginTop="12dp"
-                    android:text="@string/renew_service"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:fontFamily="@font/iran_yekan_light"
-                    android:backgroundTint="@color/orangeMain"
-                    android:textColor="#FFFFFF"
-                    android:textAllCaps="false" />
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ir.shecan.ui.widget.CustomButton
+                        android:id="@+id/btnConnect"
+                        style="@style/CustomButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:text="@string/connect"
+                        android:textAllCaps="false"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:cb_defaultPadding="0dp"
+                        app:cb_secondaryBorderColor="@color/orangeMain"
+                        app:cb_secondaryTextColor="@color/orangeMain"
+                        app:type="secondary"
+                        tools:visibility="visible" />
+
+                    <ir.shecan.ui.widget.CustomButton
+                        android:id="@+id/btnRenew"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        app:cb_primaryBackground="@color/colorAccent"
+                        app:cb_defaultPadding="0dp"
+                        android:text="@string/renew_service"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:fontFamily="@font/iran_yekan_light"
+                        android:backgroundTint="@color/orangeMain"
+                        android:textColor="#FFFFFF"
+                        android:textAllCaps="false" />
+                </LinearLayout>
 
             </LinearLayout>
 

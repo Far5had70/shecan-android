@@ -27,4 +27,23 @@ public enum BillingSla {
     public int getPlanId() {
         return planId;
     }
+
+    public static BillingSla fromApiValue(String value) {
+        if (value == null) return null;
+        for (BillingSla sla : values()) {
+            if (sla.apiValue.equalsIgnoreCase(value.trim())) {
+                return sla;
+            }
+        }
+        return null;
+    }
+
+    public static BillingSla fromPlanId(int planId) {
+        for (BillingSla sla : values()) {
+            if (sla.planId == planId) {
+                return sla;
+            }
+        }
+        return null;
+    }
 }

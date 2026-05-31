@@ -56,9 +56,10 @@
                 android:layout_height="46dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/bg_billing_chip"
-                android:layoutDirection="ltr"
-                android:paddingHorizontal="8dp"
+                android:layoutDirection="rtl"
+                android:paddingHorizontal="12dp"
                 android:popupBackground="@drawable/bg_billing_spinner_popup"
+                android:textDirection="rtl"
                 android:spinnerMode="dropdown" />
 
             <TextView
@@ -78,9 +79,10 @@
                 android:layout_height="46dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/bg_billing_chip"
-                android:layoutDirection="ltr"
-                android:paddingHorizontal="8dp"
+                android:layoutDirection="rtl"
+                android:paddingHorizontal="12dp"
                 android:popupBackground="@drawable/bg_billing_spinner_popup"
+                android:textDirection="rtl"
                 android:spinnerMode="dropdown" />
 
             <LinearLayout
@@ -330,14 +332,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:buttonTint="@color/greenMain"
+            android:fontFamily="@font/iran_yekan_bakh_vm"
             android:gravity="start|center_vertical"
             android:layoutDirection="rtl"
+            android:lineSpacingExtra="2dp"
+            android:minHeight="42dp"
             android:text="@string/billing_accept_rules"
             android:textAlignment="viewStart"
             android:textColor="@color/primaryTextColor"
             android:textDirection="rtl"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnPay"

@@ -26,7 +26,10 @@ import java.util.concurrent.TimeUnit;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.billing.BillingPeriod;
+import ir.shecan.core.billing.BillingSla;
 import ir.shecan.core.monitoring.MonitoringManager;
+import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
 import ir.shecan.core.service.CoreApiResponseListener;
@@ -43,6 +46,7 @@ import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.ServiceItem;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentHomeBinding;
+import ir.shecan.ui.activity.BillingPlansActivity;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.dialog.ContactSupportDialog;
 import ir.shecan.ui.dialog.RenewalDialog;
@@ -59,6 +63,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private ScheduledExecutorService scheduler;
     private MonitoringManager monitoringManager;
     private long dynamicIpCheckDeadlineMs = 0L;
+    private ServiceItem currentServiceItem;
     MainActivityNew activity;
 
     private static final String TAG = "HomeFragment";
@@ -92,7 +97,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         AppStorage appStorage = new AppStorage(getContext());
         monitoringManager = new MonitoringManager(requireContext());
-        ServiceItem serviceItem = appStorage.getServiceStatus(ServiceItem.class);
+        currentServiceItem = appStorage.getServiceStatus(ServiceItem.class);
 
 //        ServiceItem finalServiceItem = serviceItem;
 
@@ -115,6 +120,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 ShecanVpnService.cancelConnectionStatusAPI(requireContext());
                 ShecanVpnService.cancelCoreAPI(requireContext());
                 Shecan.deactivateService(requireContext());
+            } else if (shouldOpenRenewalBeforeConnect()) {
+                TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BILLING_PURCHASE_CLICK,
+                        TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_expired_service"));
+                openBillingPlansForCurrentService();
             } else {
                 TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_VPN_CONNECT_CLICK,
                         TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "home_button"));
@@ -166,11 +175,11 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         });
 
 
-        if (serviceItem == null) {
-            serviceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free), "", "", "", 0, 0, IssuesViewModel.IssuesDTO.createDefault());
+        if (currentServiceItem == null) {
+            currentServiceItem = new ServiceItem("", ContextCompat.getString(getContext(), R.string.free), "", "", "", 0, 0, IssuesViewModel.IssuesDTO.createDefault());
         }
         try {
-            binding.servicePanel.setStatus(serviceItem);
+            binding.servicePanel.setStatus(currentServiceItem);
         } catch (ParseException ignored) {
 
         }
@@ -183,6 +192,54 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         });
 
         return root;
+    }
+
+    private boolean shouldOpenRenewalBeforeConnect() {
+        RequestStatus status = currentServiceItem != null
+                ? RequestStatus.fromValue(currentServiceItem.statusId)
+                : null;
+        if (status == RequestStatus.SUPPORT_FINISHED
+                || status == RequestStatus.WAITING_FOR_PAYMENT_OR_RENEW
+                || status == RequestStatus.WAITING_FOR_PAYMENT_OR_ACTIVATION
+                || status == RequestStatus.SUSPENDED) {
+            return true;
+        }
+        return isDueDateExpired(currentServiceItem != null ? currentServiceItem.dueDate : null);
+    }
+
+    private boolean isDueDateExpired(String dueDate) {
+        try {
+            if (dueDate == null || dueDate.trim().isEmpty()) return false;
+            String normalized = dueDate.trim();
+            if (normalized.contains("T")) normalized = normalized.substring(0, normalized.indexOf("T"));
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+            java.util.Date date = sdf.parse(normalized);
+            if (date == null) return false;
+            return date.getTime() < System.currentTimeMillis();
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private void openBillingPlansForCurrentService() {
+        if (!isAdded()) return;
+        Intent intent = new Intent(requireContext(), BillingPlansActivity.class);
+
+        BillingSla sla = BillingSla.fromPlanId(currentServiceItem != null && currentServiceItem.cfServiceType != null
+                ? currentServiceItem.cfServiceType
+                : -1);
+        BillingPeriod period = BillingPeriod.fromDurationId(currentServiceItem != null && currentServiceItem.cfDuration != null
+                ? currentServiceItem.cfDuration
+                : -1);
+
+        if (sla != null) {
+            intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_SLA, sla.getApiValue());
+        }
+        if (period != null) {
+            intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_PERIOD, period.getApiValue());
+        }
+
+        startActivity(intent);
     }
 
     private boolean isUpdateLinkMode(ServiceItem serviceItem) {
