@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ir.shecan.core.billing.BillingPeriod;
+import ir.shecan.core.billing.BillingSla;
+import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.DynamicBannerRequestFactory;
 import ir.shecan.core.util.ToastManager;
@@ -32,6 +36,7 @@ import ir.shecan.data.modelDto.ServicesViewModel;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentConfigListBinding;
+import ir.shecan.ui.activity.BillingPlansActivity;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.adapter.ServiceAdapter;
 import ir.shecan.ui.fragment.ToolbarFragment;
@@ -183,6 +188,11 @@ public class ConfigListFragment extends ToolbarFragment {
                     @Override
                     public void onBackgroundClicked(ServiceItem item) {
                         logServiceEvent(TrackingUtils.EVENT_SERVICE_SELECTED, item);
+                        if (shouldOpenRenewal(item)) {
+                            openBillingPlans(item);
+                            return;
+                        }
+
                         appStorage.saveServiceStatus(item);
 
                         activity.configIsChange = true;
@@ -202,6 +212,53 @@ public class ConfigListFragment extends ToolbarFragment {
 
         adapter.setSelectedPosition(defaultSelected);
         return adapter;
+    }
+
+    private boolean shouldOpenRenewal(ServiceItem item) {
+        if (item == null) return false;
+        RequestStatus status = RequestStatus.fromValue(item.statusId);
+        if (status == RequestStatus.SUPPORT_FINISHED
+                || status == RequestStatus.WAITING_FOR_PAYMENT_OR_RENEW
+                || status == RequestStatus.WAITING_FOR_PAYMENT_OR_ACTIVATION
+                || status == RequestStatus.SUSPENDED) {
+            return true;
+        }
+        return isDueDateExpired(item.dueDate);
+    }
+
+    private boolean isDueDateExpired(String dueDate) {
+        try {
+            if (dueDate == null || dueDate.trim().isEmpty()) return false;
+            String normalized = dueDate.trim();
+            if (normalized.contains("T")) normalized = normalized.substring(0, normalized.indexOf("T"));
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+            java.util.Date date = sdf.parse(normalized);
+            if (date == null) return false;
+            return date.getTime() < System.currentTimeMillis();
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private void openBillingPlans(ServiceItem item) {
+        if (!isAdded()) return;
+        Intent intent = new Intent(requireContext(), BillingPlansActivity.class);
+
+        BillingSla sla = BillingSla.fromPlanId(item != null && item.cfServiceType != null
+                ? item.cfServiceType
+                : -1);
+        BillingPeriod period = BillingPeriod.fromDurationId(item != null && item.cfDuration != null
+                ? item.cfDuration
+                : -1);
+
+        if (sla != null) {
+            intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_SLA, sla.getApiValue());
+        }
+        if (period != null) {
+            intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_PERIOD, period.getApiValue());
+        }
+
+        startActivity(intent);
     }
 
     @Override

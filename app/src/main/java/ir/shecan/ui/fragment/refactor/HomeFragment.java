@@ -137,6 +137,9 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
             switch (state) {
                 case 0:
+                    if (monitoringManager != null) {
+                        monitoringManager.stop();
+                    }
                     binding.vpnButton.showLoading(false);
                     binding.statusTv.setVisibility(GONE);
                     if (app.getVpnStatus().getValue() != null && !app.getVpnStatus().getValue().isEmpty()) {
@@ -151,6 +154,9 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 case 2:
                     binding.vpnButton.setConnected(true);
                     binding.statusTv.setVisibility(VISIBLE);
+                    if (monitoringManager != null) {
+                        monitoringManager.start();
+                    }
                     break;
             }
         });
@@ -265,7 +271,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     public void onResume() {
         super.onResume();
         fetchData();
-        if (monitoringManager != null) {
+        if (monitoringManager != null && ShecanVpnService.isActivated()) {
             monitoringManager.start();
         }
         ((MainActivityNew) getActivity()).binding.customBar.select(1);

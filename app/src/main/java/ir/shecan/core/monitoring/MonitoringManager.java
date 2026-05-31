@@ -17,10 +17,16 @@ import ir.shecan.data.modelDto.monitoring.MonitoringLogsRequest;
 import ir.shecan.data.modelDto.monitoring.MonitoringLogsResponse;
 import ir.shecan.data.modelDto.monitoring.MonitoringTarget;
 import ir.shecan.data.modelDto.monitoring.MonitoringTargetsResponse;
+import ir.shecan.core.service.ShecanVpnService;
 
 public class MonitoringManager {
     private static final String TAG = "MonitoringManager";
     private static final int DEFAULT_INTERVAL_SECONDS = 300;
+    private static final long TARGET_CACHE_TTL_MS = 15 * 60 * 1000L;
+
+    private static volatile List<MonitoringTarget> cachedTargets = new ArrayList<>();
+    private static volatile int cachedIntervalSeconds = DEFAULT_INTERVAL_SECONDS;
+    private static volatile long cachedTargetsAtMs = 0L;
 
     private final Context context;
     private final MonitoringApi api;
@@ -43,7 +49,16 @@ public class MonitoringManager {
     }
 
     public synchronized void start() {
+        if (active) return;
+        if (!ShecanVpnService.isActivated()) return;
+
         active = true;
+        if (hasFreshCachedTargets()) {
+            targets = cachedTargets;
+            intervalSeconds = cachedIntervalSeconds;
+            scheduleLoop();
+            return;
+        }
         fetchTargets();
     }
 
@@ -57,7 +72,10 @@ public class MonitoringManager {
     }
 
     private void fetchTargets() {
-        if (!connectivity.isOnline()) return;
+        if (!connectivity.isOnline() || !ShecanVpnService.isActivated()) {
+            active = false;
+            return;
+        }
 
         api.targets(new ApiCallback<MonitoringTargetsResponse>() {
             @Override
@@ -65,6 +83,9 @@ public class MonitoringManager {
                 if (!active || response == null) return;
                 targets = response.getTargets();
                 intervalSeconds = Math.max(60, response.getIntervalSeconds());
+                cachedTargets = targets;
+                cachedIntervalSeconds = intervalSeconds;
+                cachedTargetsAtMs = System.currentTimeMillis();
                 scheduleLoop();
             }
 
@@ -73,6 +94,11 @@ public class MonitoringManager {
                 Log.d(TAG, "Monitoring targets unavailable: " + statusCode + " " + message);
             }
         });
+    }
+
+    private boolean hasFreshCachedTargets() {
+        return !cachedTargets.isEmpty()
+                && System.currentTimeMillis() - cachedTargetsAtMs < TARGET_CACHE_TTL_MS;
     }
 
     private synchronized void scheduleLoop() {
@@ -85,14 +111,14 @@ public class MonitoringManager {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleWithFixedDelay(
                 this::runOnceSafely,
-                0,
+                intervalSeconds,
                 intervalSeconds,
                 TimeUnit.SECONDS
         );
     }
 
     private void runOnceSafely() {
-        if (!active || !connectivity.isOnline()) return;
+        if (!active || !connectivity.isOnline() || !ShecanVpnService.isActivated()) return;
         if (!runningChecks.compareAndSet(false, true)) return;
 
         try {
