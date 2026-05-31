@@ -176,12 +176,6 @@ public class ShecanVpnService extends VpnService implements Runnable {
                     }
                     Shecan.updateShortcut(applicationContext);
 
-                    // Use application context to start activity to avoid leaking activity instances
-                    Intent launchIntent = new Intent(applicationContext, MainActivityNew.class)
-                            .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_SERVICE_DONE);
-                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    applicationContext.startActivity(launchIntent);
-
                     return START_STICKY;
                 case ACTION_DEACTIVATE:
                     stopThread();
@@ -341,17 +335,8 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
         if (shouldRefresh) {
             ((Shecan) getApplicationContext()).getVpnState().postValue(0);
+            Shecan.updateShortcut(getApplicationContext());
             Logger.info("shecan service has stopped");
-            // Launch UI update on main thread (UI-safe)
-            try {
-                Context applicationContext = getApplicationContext();
-                Intent intent = new Intent(applicationContext, MainActivityNew.class)
-                        .putExtra(MainActivityNew.LAUNCH_ACTION, MainActivityNew.LAUNCH_ACTION_SERVICE_DONE);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                applicationContext.startActivity(intent);
-            } catch (Exception ex) {
-                Logger.logException(ex);
-            }
         }
     }
 

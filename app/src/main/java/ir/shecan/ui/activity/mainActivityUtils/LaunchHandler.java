@@ -61,8 +61,6 @@ public final class LaunchHandler {
 
             case MainActivityNew.LAUNCH_ACTION_SERVICE_DONE:
                 Shecan.updateShortcut(activity.getApplicationContext());
-                activity.applyThemeForRecreate();
-                activity.recreate();
                 break;
 
             case MainActivityNew.LAUNCH_ACTION_NONE:

@@ -14,7 +14,9 @@ public class LoadingCircleView extends View {
     private Paint paint;
     private RectF rectF;
 
-    private float sweepAngle = 90f;       // مقدار پیشفرض
+    private static final float DEFAULT_SWEEP_ANGLE = 90f;
+
+    private float sweepAngle = DEFAULT_SWEEP_ANGLE;       // مقدار پیشفرض
     private final float startAngle = 225f;
     private float rotation = 0f;
     private final int strokeWidth = 8;
@@ -84,7 +86,9 @@ public class LoadingCircleView extends View {
 
     // شروع چرخش
     public void start() {
+        sweepAngle = DEFAULT_SWEEP_ANGLE;
         isSpinning = true;
+        invalidate();
     }
 
     // توقف چرخش
