@@ -99,6 +99,7 @@
     <string name="cancel">لغو</string>
     <string name="cancel2">لغو</string>
     <string name="new_version_available">نسخه ی جدیدی از اپلیکیشن در دسترس است</string>
+    <string name="site_update_dialog_description">نسخه جدید سایت را مستقیم دانلود کنید و نصب را از داخل اپ ادامه دهید.</string>
     <string name="site_update_url_missing">لینک دانلود بروزرسانی هنوز تنظیم نشده است.</string>
     <string name="site_update_download_started">در حال دانلود بروزرسانی...</string>
     <string name="site_update_download_failed">دانلود بروزرسانی ناموفق بود.</string>

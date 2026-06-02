@@ -38,6 +38,7 @@ import de.measite.minidns.Question;
 import de.measite.minidns.Record;
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.monitoring.MonitoringManager;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.fragment.DNSQuery;
 import ir.shecan.core.provider.Provider;
@@ -77,6 +78,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
     private boolean statisticQuery;
     private Provider provider;
     private ParcelFileDescriptor descriptor;
+    private MonitoringManager monitoringManager;
 
     private Thread mThread = null;
 
@@ -109,6 +111,7 @@ public class ShecanVpnService extends VpnService implements Runnable {
     @Override
     public void onCreate() {
         super.onCreate();
+        monitoringManager = new MonitoringManager(getApplicationContext());
     }
 
     @Override
@@ -243,6 +246,9 @@ public class ShecanVpnService extends VpnService implements Runnable {
     private void stopThread() {
         Log.d(TAG, "stopThread");
         activated = false;
+        if (monitoringManager != null) {
+            monitoringManager.stop();
+        }
 
         // ===== SAVE SESSION DURATION =====
         if (sessionStartTime > 0) {
@@ -456,6 +462,9 @@ public class ShecanVpnService extends VpnService implements Runnable {
 
             Logger.info("shecan service is started");
             ((Shecan) getApplicationContext()).getVpnState().postValue(2);
+            if (monitoringManager != null) {
+                monitoringManager.start();
+            }
 
             // ===== START SESSION TRACKING =====
             sessionStartTime = System.currentTimeMillis();

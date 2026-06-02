@@ -6,6 +6,7 @@ import java.util.List;
 public class MonitoringTargetsResponse {
     private int version;
     private Integer intervalSeconds;
+    private Integer samplingPercent;
     private List<MonitoringTarget> targets;
 
     public int getVersion() {
@@ -14,6 +15,11 @@ public class MonitoringTargetsResponse {
 
     public int getIntervalSeconds() {
         return intervalSeconds != null && intervalSeconds > 0 ? intervalSeconds : 300;
+    }
+
+    public int getSamplingPercent() {
+        if (samplingPercent == null) return 100;
+        return Math.max(0, Math.min(100, samplingPercent));
     }
 
     public List<MonitoringTarget> getTargets() {

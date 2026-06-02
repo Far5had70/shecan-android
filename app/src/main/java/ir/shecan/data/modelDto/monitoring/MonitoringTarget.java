@@ -8,6 +8,9 @@ public class MonitoringTarget {
     private String domain;
     private String url;
     private Integer timeoutMs;
+    private String proxyNode;
+    private String datacenter;
+    private String targetDomain;
 
     public String getId() {
         return id;
@@ -35,5 +38,17 @@ public class MonitoringTarget {
 
     public int getTimeoutMs(int fallback) {
         return timeoutMs != null && timeoutMs > 0 ? timeoutMs : fallback;
+    }
+
+    public String getProxyNode() {
+        return proxyNode;
+    }
+
+    public String getDatacenter() {
+        return datacenter;
+    }
+
+    public String getTargetDomain() {
+        return targetDomain;
     }
 }

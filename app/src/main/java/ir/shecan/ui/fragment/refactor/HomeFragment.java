@@ -24,11 +24,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import ir.shecan.BuildConfig;
 import ir.shecan.R;
 import ir.shecan.Shecan;
 import ir.shecan.core.billing.BillingPeriod;
 import ir.shecan.core.billing.BillingSla;
-import ir.shecan.core.monitoring.MonitoringManager;
 import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
@@ -61,7 +61,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private boolean isUpdateVersionCheck = false;
     private boolean hasBanner = false;
     private ScheduledExecutorService scheduler;
-    private MonitoringManager monitoringManager;
     private long dynamicIpCheckDeadlineMs = 0L;
     private ServiceItem currentServiceItem;
     MainActivityNew activity;
@@ -69,6 +68,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private static final String TAG = "HomeFragment";
     private static final long DYNAMIC_IP_CHECK_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(70);
     private static final long DYNAMIC_IP_CHECK_RETRY_DELAY_SECONDS = 10;
+    private static boolean testSiteDirectUpdateDialogShown = false;
 
     @Nullable
     @Override
@@ -96,7 +96,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         else handleBannerImage(activity.bannerUrl);
 
         AppStorage appStorage = new AppStorage(getContext());
-        monitoringManager = new MonitoringManager(requireContext());
         currentServiceItem = appStorage.getServiceStatus(ServiceItem.class);
 
 //        ServiceItem finalServiceItem = serviceItem;
@@ -137,9 +136,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
             switch (state) {
                 case 0:
-                    if (monitoringManager != null) {
-                        monitoringManager.stop();
-                    }
                     binding.vpnButton.showLoading(false);
                     binding.statusTv.setVisibility(GONE);
                     if (app.getVpnStatus().getValue() != null && !app.getVpnStatus().getValue().isEmpty()) {
@@ -154,9 +150,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                 case 2:
                     binding.vpnButton.setConnected(true);
                     binding.statusTv.setVisibility(VISIBLE);
-                    if (monitoringManager != null) {
-                        monitoringManager.start();
-                    }
                     break;
             }
         });
@@ -270,10 +263,8 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     @Override
     public void onResume() {
         super.onResume();
+        maybeShowTestSiteDirectUpdateDialog();
         fetchData();
-        if (monitoringManager != null && ShecanVpnService.isActivated()) {
-            monitoringManager.start();
-        }
         ((MainActivityNew) getActivity()).binding.customBar.select(1);
 
         if (activity.configIsChange) {
@@ -290,14 +281,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             }
         }
 
-    }
-
-    @Override
-    public void onPause() {
-        if (monitoringManager != null) {
-            monitoringManager.stop();
-        }
-        super.onPause();
     }
 
     private void setupDonatePadding() {
@@ -340,6 +323,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     private void checkIsUpdateAvailable() {
         if (!isAdded()) return;
+        if (BuildConfig.TEST_SITE_DIRECT_UPDATE && "Site".equals(BuildConfig.STORE)) {
+            return;
+        }
+
         boolean isForce = false;
         String currentVersion = AppUtils.getVersionName(requireActivity());
         String minVersion = Shecan.ShecanInfo.getMinVersion();
@@ -351,6 +338,23 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         if (AppUtils.compareVersionNames(latestVersion, currentVersion) == 1) {
             new UpdateDialog(requireActivity()).show(isForce);
         }
+    }
+
+    private void maybeShowTestSiteDirectUpdateDialog() {
+        if (!shouldShowTestSiteDirectUpdate()) return;
+        testSiteDirectUpdateDialogShown = true;
+        isUpdateVersionCheck = true;
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (isAdded()) {
+                new UpdateDialog(requireActivity()).show(false);
+            }
+        }, 300);
+    }
+
+    private boolean shouldShowTestSiteDirectUpdate() {
+        return BuildConfig.TEST_SITE_DIRECT_UPDATE
+                && "Site".equals(BuildConfig.STORE)
+                && !testSiteDirectUpdateDialogShown;
     }
 
     @Override
@@ -476,10 +480,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         if (binding != null) binding.bannerSlider.stop();
         cancelDynamicIpStatusCheck();
-        if (monitoringManager != null) {
-            monitoringManager.stop();
-            monitoringManager = null;
-        }
         binding = null;
     }
 

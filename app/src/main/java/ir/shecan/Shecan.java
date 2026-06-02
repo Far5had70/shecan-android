@@ -48,6 +48,7 @@ import ir.shecan.core.service.BaseApiResponseListener;
 import ir.shecan.core.service.ConnectionStatusApiListener;
 import ir.shecan.core.service.CoreApiResponseListener;
 import ir.shecan.core.service.ShecanVpnService;
+import ir.shecan.core.monitoring.MonitoringAppState;
 import ir.shecan.core.service.VolleyHelper;
 import ir.shecan.core.util.Configurations;
 import ir.shecan.core.util.LanguageHelper;
@@ -131,6 +132,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         super.onCreate();
 
         instance = this;
+        MonitoringAppState.initialize(this);
         Fresco.initialize(this);
 
         Logger.init();
@@ -680,4 +682,3 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         }
     }
 }
-

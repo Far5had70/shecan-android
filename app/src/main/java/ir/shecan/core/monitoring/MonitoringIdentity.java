@@ -6,6 +6,7 @@ import android.provider.Settings;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.math.BigInteger;
 import java.util.UUID;
 
 import ir.shecan.core.util.AppUtils;
@@ -39,6 +40,18 @@ class MonitoringIdentity {
         if (token == null) return "";
         String userId = token.getId() > 0 ? String.valueOf(token.getId()) : token.getLogin();
         return sha256(userId != null ? userId : "");
+    }
+
+    boolean isInSample(int samplingPercent) {
+        if (samplingPercent >= 100) return true;
+        if (samplingPercent <= 0) return false;
+
+        String hash = hashedDeviceId();
+        if (hash.length() < 8) return false;
+        int bucket = new BigInteger(hash.substring(0, 8), 16)
+                .mod(BigInteger.valueOf(100))
+                .intValue();
+        return bucket < samplingPercent;
     }
 
     private String sha256(String value) {

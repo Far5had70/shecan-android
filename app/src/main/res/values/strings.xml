@@ -110,6 +110,7 @@
     <string name="cancel">Cancel</string>
     <string name="cancel2">Cancel</string>
     <string name="new_version_available">A new version of the app is available</string>
+    <string name="site_update_dialog_description">Download the latest Site version directly and install it from inside the app.</string>
     <string name="site_update_url_missing">Update download link is not configured yet.</string>
     <string name="site_update_download_started">Downloading update...</string>
     <string name="site_update_download_failed">Update download failed.</string>

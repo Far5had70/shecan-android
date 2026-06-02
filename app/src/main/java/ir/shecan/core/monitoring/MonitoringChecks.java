@@ -91,6 +91,11 @@ class MonitoringChecks {
 
     private MonitoringLog proxy(MonitoringTarget target) {
         MonitoringLog log = baseLog(target, "proxy");
+        log.proxyNode = target.getProxyNode();
+        log.datacenter = target.getDatacenter();
+        log.targetDomain = safe(target.getTargetDomain()).isEmpty()
+                ? target.getDomain()
+                : target.getTargetDomain();
         if (safe(target.getIp()).isEmpty()) {
             log.success = false;
             log.errorType = "invalid_target";
@@ -170,7 +175,6 @@ class MonitoringChecks {
         log.userId = identity.hashedUserId();
         log.sessionId = identity.sessionId();
         log.isp = connectivity.carrierName();
-        log.region = connectivity.countryCode();
         log.timestamp = utcTimestamp();
         log.payload = new HashMap<>();
         return log;
