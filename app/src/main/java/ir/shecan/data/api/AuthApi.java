@@ -371,8 +371,7 @@ public class AuthApi {
         repo.request(
                 "banner_match_" + (input != null ? input.getApiKey() + "_" + input.getServiceType() + "_" + input.getPlan() : "guest"),
                 input,
-                // TODO temporary test endpoint: revert to https://my.shecan.ir/api/banner/match after backend test.
-                "https://n8n.coolify.shcn.ir/webhook/api/banner/match",
+                "https://my.shecan.ir/api/banner/match",
                 HttpMethod.POST,
                 false,
                 new ApiCallback<BannerViewModel>() {
