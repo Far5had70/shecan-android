@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,11 +37,14 @@ import ir.shecan.core.service.CoreApiResponseListener;
 import ir.shecan.core.service.ShecanVpnService;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.DynamicBannerRequestFactory;
+import ir.shecan.core.util.DynamicDialogRequestFactory;
 import ir.shecan.core.util.ToastManager;
 import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
+import ir.shecan.data.modelDio.DialogMatchApiInput;
 import ir.shecan.data.modelDto.BannerViewModel;
+import ir.shecan.data.modelDto.DynamicDialogViewModel;
 import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.ServiceItem;
@@ -49,6 +53,7 @@ import ir.shecan.databinding.FragmentHomeBinding;
 import ir.shecan.ui.activity.BillingPlansActivity;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.dialog.ContactSupportDialog;
+import ir.shecan.ui.dialog.DynamicAppDialog;
 import ir.shecan.ui.dialog.RenewalDialog;
 import ir.shecan.ui.dialog.UpdateDialog;
 import ir.shecan.ui.fragment.ToolbarFragment;
@@ -63,12 +68,20 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private ScheduledExecutorService scheduler;
     private long dynamicIpCheckDeadlineMs = 0L;
     private ServiceItem currentServiceItem;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private Runnable pendingDynamicDialogRunnable;
     MainActivityNew activity;
 
     private static final String TAG = "HomeFragment";
     private static final long DYNAMIC_IP_CHECK_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(70);
     private static final long DYNAMIC_IP_CHECK_RETRY_DELAY_SECONDS = 10;
     private static boolean testSiteDirectUpdateDialogShown = false;
+    private static final Object DYNAMIC_DIALOG_SESSION_LOCK = new Object();
+    private static boolean dynamicDialogRequested = false;
+    private static boolean dynamicDialogRequestFinished = false;
+    private static boolean dynamicDialogDisplayed = false;
+    private static DynamicDialogViewModel dynamicDialogSessionModel = null;
+    private static String dynamicDialogSessionMobile = "";
 
     @Nullable
     @Override
@@ -283,6 +296,16 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
     }
 
+    @Override
+    public void onDestroyView() {
+        cancelPendingDynamicDialog();
+        super.onDestroyView();
+
+        if (binding != null) binding.bannerSlider.stop();
+        cancelDynamicIpStatusCheck();
+        binding = null;
+    }
+
     private void setupDonatePadding() {
 //        final LinearLayout donate = binding.linearLayoutDonate;
 //        if (!ViewConfiguration.get(requireContext()).hasPermanentMenuKey()) {
@@ -301,6 +324,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             @Override
             public void onError(String errorMessage) {
                 if (!isAdded()) return;
+                maybeShowDynamicDialog();
                 loadBanner();
             }
 
@@ -311,6 +335,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
                     checkIsUpdateAvailable();
                     isUpdateVersionCheck = true;
                 }
+                maybeShowDynamicDialog();
                 loadBanner();
             }
         });
@@ -319,6 +344,46 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
     private void loadBanner() {
         if (!isAdded()) return;
         updateBanner();
+    }
+
+    private void maybeShowDynamicDialog() {
+        if (!isAdded()) return;
+
+        synchronized (DYNAMIC_DIALOG_SESSION_LOCK) {
+            if (dynamicDialogDisplayed) return;
+            if (dynamicDialogRequestFinished) {
+                scheduleDynamicDialog(dynamicDialogSessionModel, dynamicDialogSessionMobile);
+                return;
+            }
+            if (dynamicDialogRequested) return;
+            dynamicDialogRequested = true;
+        }
+
+        AuthApi auth = new AuthApi(requireContext());
+        DialogMatchApiInput input = DynamicDialogRequestFactory.fromStorage(requireContext());
+        auth.dialogMatch(input, new ApiCallback<DynamicDialogViewModel>() {
+            @Override
+            public void onSuccess(DynamicDialogViewModel dialog, boolean fromCache) {
+                synchronized (DYNAMIC_DIALOG_SESSION_LOCK) {
+                    dynamicDialogRequestFinished = true;
+                    dynamicDialogSessionModel = dialog;
+                    dynamicDialogSessionMobile = input.getMobileNumber();
+                }
+                if (!isAdded()) return;
+                scheduleDynamicDialog(dialog, input.getMobileNumber());
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                synchronized (DYNAMIC_DIALOG_SESSION_LOCK) {
+                    dynamicDialogRequestFinished = true;
+                    dynamicDialogSessionModel = null;
+                    dynamicDialogSessionMobile = "";
+                }
+                if (!isAdded()) return;
+                Log.e(TAG, "Dynamic dialog match failed: " + statusCode + " " + message);
+            }
+        });
     }
 
     private void checkIsUpdateAvailable() {
@@ -332,7 +397,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         String minVersion = Shecan.ShecanInfo.getMinVersion();
         String latestVersion = Shecan.ShecanInfo.getCurrentVersion();
 
-        if (AppUtils.compareVersionNames(minVersion, currentVersion) == 1) { // min > current
+        if (AppUtils.compareVersionNames(minVersion, currentVersion) == 1) {
             isForce = true;
         }
         if (AppUtils.compareVersionNames(latestVersion, currentVersion) == 1) {
@@ -355,6 +420,33 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         return BuildConfig.TEST_SITE_DIRECT_UPDATE
                 && "Site".equals(BuildConfig.STORE)
                 && !testSiteDirectUpdateDialogShown;
+    }
+
+    private void scheduleDynamicDialog(DynamicDialogViewModel dialog, String mobileNumber) {
+        cancelPendingDynamicDialog();
+        if (dialog == null) return;
+        long appStartedElapsedMs = Shecan.getAppStartedElapsedMs();
+        long dialogDueElapsedMs = appStartedElapsedMs > 0L
+                ? appStartedElapsedMs + dialog.getTimeToShowMs()
+                : SystemClock.elapsedRealtime() + dialog.getTimeToShowMs();
+        long delayMs = Math.max(0L, dialogDueElapsedMs - SystemClock.elapsedRealtime());
+        pendingDynamicDialogRunnable = () -> {
+            pendingDynamicDialogRunnable = null;
+            if (!isAdded()) return;
+            boolean shown = new DynamicAppDialog(requireActivity(), mobileNumber).showIfValid(dialog);
+            if (shown || !dialog.isActive() || !dialog.hasContent()) {
+                synchronized (DYNAMIC_DIALOG_SESSION_LOCK) {
+                    dynamicDialogDisplayed = true;
+                }
+            }
+        };
+        mainHandler.postDelayed(pendingDynamicDialogRunnable, delayMs);
+    }
+
+    private void cancelPendingDynamicDialog() {
+        if (pendingDynamicDialogRunnable == null) return;
+        mainHandler.removeCallbacks(pendingDynamicDialogRunnable);
+        pendingDynamicDialogRunnable = null;
     }
 
     @Override
@@ -472,15 +564,6 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
             scheduler.shutdownNow();
         }
         scheduler = null;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        if (binding != null) binding.bannerSlider.stop();
-        cancelDynamicIpStatusCheck();
-        binding = null;
     }
 
     public void updateBanner() {

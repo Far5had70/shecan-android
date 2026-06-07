@@ -12,6 +12,7 @@ import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -104,6 +105,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
 
     private static Shecan instance = null;
     private SharedPreferences prefs;
+    private long appStartedElapsedMs;
 
     private final Handler handler = new Handler();
 
@@ -119,6 +121,10 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         return vpnStatus;
     }
 
+    public static long getAppStartedElapsedMs() {
+        return instance != null ? instance.appStartedElapsedMs : 0L;
+    }
+
     private final MutableLiveData<Boolean> proActivatedEvent = new MutableLiveData<>();
 
     public MutableLiveData<Boolean> getProActivatedEvent() {
@@ -132,6 +138,7 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         super.onCreate();
 
         instance = this;
+        appStartedElapsedMs = SystemClock.elapsedRealtime();
         MonitoringAppState.initialize(this);
         Fresco.initialize(this);
 

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,14 +27,29 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import ir.shecan.data.modelDto.BannerViewModel;
 
 public class SlideshowView extends RelativeLayout {
 
+    private static final String TAG = "SlideshowView";
     private static final long DEFAULT_SLIDE_DURATION_MS = 5000L;
+    private static final int MAX_IMAGE_REDIRECTS = 5;
+    private static final int IMAGE_CONNECT_TIMEOUT_MS = 10000;
+    private static final int IMAGE_READ_TIMEOUT_MS = 15000;
+    private static final ExecutorService IMAGE_EXECUTOR = Executors.newSingleThreadExecutor();
 
     private ImageView imageView;
     private LinearLayout indicatorLayout;
@@ -51,6 +67,7 @@ public class SlideshowView extends RelativeLayout {
     private int measuredBannerHeight;
     private boolean roundLoadedImage = true;
     private boolean testSlidesEnabled = false;
+    private int loadGeneration = 0;
 
     private final Runnable slideRunnable = new Runnable() {
         @Override
@@ -112,7 +129,8 @@ public class SlideshowView extends RelativeLayout {
         slides.clear();
         if (slideList != null) {
             for (String slide : slideList) {
-                if (slide != null && !slide.trim().isEmpty()) slides.add(slide);
+                String normalized = normalizeSlide(slide);
+                if (normalized != null) slides.add(normalized);
             }
         }
         addTestSlidesIfNeeded();
@@ -122,6 +140,10 @@ public class SlideshowView extends RelativeLayout {
     }
 
     private void showSlide(String item) {
+        item = normalizeSlide(item);
+        if (item == null) return;
+        int generation = ++loadGeneration;
+
         int radius = (int) (30 * getResources().getDisplayMetrics().density);
 
         RequestOptions options = new RequestOptions()
@@ -134,15 +156,15 @@ public class SlideshowView extends RelativeLayout {
             options = options.transform(new FitCenter(), new com.bumptech.glide.load.resource.bitmap.RoundedCorners(radius));
         }
 
-        if (item.startsWith("http")) {
-            Glide.with(getContext())
-                    .load(item)
-                    .listener(imageSizeListener())
-                    .apply(options)
-                    .into(imageView);
+        if (isHttpUrl(item)) {
+            loadRemoteImage(item, options, radius, generation);
         } else {
+            if (!looksLikeBase64Image(item)) {
+                imageView.setImageDrawable(makeRoundRect(Color.argb(28, 39, 69, 58), radius));
+                return;
+            }
             try {
-                byte[] bytes = Base64.decode(item, Base64.DEFAULT);
+                byte[] bytes = Base64.decode(stripDataUriPrefix(item), Base64.DEFAULT);
                 Glide.with(getContext())
                         .load(bytes)
                         .listener(imageSizeListener())
@@ -152,6 +174,99 @@ public class SlideshowView extends RelativeLayout {
                 imageView.setImageDrawable(makeRoundRect(Color.argb(28, 39, 69, 58), radius));
             }
         }
+    }
+
+    private void loadRemoteImage(String url, RequestOptions options, int radius, int generation) {
+        imageView.setImageDrawable(makeRoundRect(Color.argb(28, 39, 69, 58), radius));
+        IMAGE_EXECUTOR.execute(() -> {
+            try {
+                byte[] imageBytes = downloadImageBytes(url);
+                handler.post(() -> {
+                    if (generation != loadGeneration) return;
+                    Glide.with(getContext())
+                            .load(imageBytes)
+                            .listener(imageSizeListener())
+                            .apply(options)
+                            .into(imageView);
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Banner image download failed: " + url, e);
+                handler.post(() -> {
+                    if (generation != loadGeneration) return;
+                    imageView.setImageDrawable(makeRoundRect(Color.argb(28, 39, 69, 58), radius));
+                });
+            }
+        });
+    }
+
+    private byte[] downloadImageBytes(String url) throws Exception {
+        CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+        HttpURLConnection connection = openImageConnection(url, 0, cookieManager);
+        try (InputStream inputStream = connection.getInputStream()) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            return outputStream.toByteArray();
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private HttpURLConnection openImageConnection(String url, int redirects, CookieManager cookieManager) throws Exception {
+        if (redirects > MAX_IMAGE_REDIRECTS) {
+            throw new IllegalStateException("Too many banner image redirects");
+        }
+
+        URL imageUrl = new URL(url);
+        URI uri = imageUrl.toURI();
+        HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+        connection.setInstanceFollowRedirects(false);
+        connection.setConnectTimeout(IMAGE_CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(IMAGE_READ_TIMEOUT_MS);
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android) Shecan");
+        connection.setRequestProperty("Accept", "image/avif,image/webp,image/apng,image/png,image/*,*/*;q=0.8");
+        addCookies(connection, uri, cookieManager);
+
+        int code = connection.getResponseCode();
+        storeCookies(connection, uri, cookieManager);
+        if (code >= 300 && code < 400) {
+            String location = connection.getHeaderField("Location");
+            connection.disconnect();
+            if (location == null || location.trim().isEmpty()) {
+                throw new IllegalStateException("Banner image redirect without location");
+            }
+            URL nextUrl = new URL(imageUrl, location);
+            return openImageConnection(nextUrl.toString(), redirects + 1, cookieManager);
+        }
+
+        if (code < 200 || code >= 300) {
+            connection.disconnect();
+            throw new IllegalStateException("Banner image response code: " + code);
+        }
+        return connection;
+    }
+
+    private void addCookies(HttpURLConnection connection, URI uri, CookieManager cookieManager) throws Exception {
+        Map<String, List<String>> cookieHeaders = cookieManager.get(uri, connection.getRequestProperties());
+        for (Map.Entry<String, List<String>> entry : cookieHeaders.entrySet()) {
+            connection.setRequestProperty(entry.getKey(), joinCookies(entry.getValue()));
+        }
+    }
+
+    private void storeCookies(HttpURLConnection connection, URI uri, CookieManager cookieManager) throws Exception {
+        cookieManager.put(uri, connection.getHeaderFields());
+    }
+
+    private String joinCookies(List<String> cookies) {
+        StringBuilder builder = new StringBuilder();
+        for (String cookie : cookies) {
+            if (builder.length() > 0) builder.append("; ");
+            builder.append(cookie);
+        }
+        return builder.toString();
     }
 
     private void showNext() {
@@ -216,8 +331,8 @@ public class SlideshowView extends RelativeLayout {
 
         if (banners != null) {
             for (BannerViewModel b : banners) {
-                String slide = firstNotEmpty(b.getImageBase64(), b.getImageURL());
-                if (slide == null || slide.trim().isEmpty()) continue;
+                String slide = resolveBannerImage(b);
+                if (slide == null) continue;
                 bannerList.add(b);
                 slides.add(slide);
             }
@@ -237,6 +352,44 @@ public class SlideshowView extends RelativeLayout {
 
     private String firstNotEmpty(String first, String second) {
         return first != null && !first.trim().isEmpty() ? first : second;
+    }
+
+    private String resolveBannerImage(BannerViewModel banner) {
+        if (banner == null) return null;
+
+        String base64 = normalizeSlide(banner.getImageBase64());
+        if (base64 != null && (isHttpUrl(base64) || looksLikeBase64Image(base64))) {
+            return base64;
+        }
+
+        return normalizeSlide(firstNotEmpty(banner.getImageURL(), base64));
+    }
+
+    private String normalizeSlide(String slide) {
+        if (slide == null) return null;
+        String normalized = slide.trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
+    private boolean isHttpUrl(String value) {
+        if (value == null) return false;
+        String lower = value.trim().toLowerCase();
+        return lower.startsWith("http://") || lower.startsWith("https://");
+    }
+
+    private boolean looksLikeBase64Image(String value) {
+        if (value == null) return false;
+        String normalized = value.trim();
+        if (normalized.startsWith("data:image")) return true;
+        return normalized.length() > 32 && normalized.matches("^[A-Za-z0-9+/=\\r\\n]+$");
+    }
+
+    private String stripDataUriPrefix(String value) {
+        int commaIndex = value != null ? value.indexOf(',') : -1;
+        if (commaIndex >= 0 && value.substring(0, commaIndex).contains("base64")) {
+            return value.substring(commaIndex + 1);
+        }
+        return value;
     }
 
     private long getCurrentSlideDurationMs() {

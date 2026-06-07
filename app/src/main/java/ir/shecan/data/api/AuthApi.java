@@ -17,6 +17,9 @@ import java.util.Map;
 
 import ir.shecan.data.modelDio.ExistApiInput;
 import ir.shecan.data.modelDio.BannerMatchApiInput;
+import ir.shecan.data.modelDio.DialogActionApiInput;
+import ir.shecan.data.modelDio.DialogDismissApiInput;
+import ir.shecan.data.modelDio.DialogMatchApiInput;
 import ir.shecan.data.modelDio.DiscountApiInput;
 import ir.shecan.data.modelDio.LoginApiInput;
 import ir.shecan.data.modelDio.PriceApiInput;
@@ -26,6 +29,7 @@ import ir.shecan.data.modelDio.VerifyApiInput;
 import ir.shecan.data.modelDto.AccountViewModel;
 import ir.shecan.data.modelDto.BannerViewModel;
 import ir.shecan.data.modelDto.DiscountViewModel;
+import ir.shecan.data.modelDto.DynamicDialogViewModel;
 import ir.shecan.data.modelDto.EmptyResponse;
 import ir.shecan.data.modelDto.ExistApiViewModel;
 import ir.shecan.data.modelDto.HomePage;
@@ -39,6 +43,17 @@ import ir.shecan.data.modelDto.UserRating;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 
 public class AuthApi {
+
+    private static final Object BANNER_MATCH_LOCK = new Object();
+    private static final List<ApiCallback<BannerViewModel>> BANNER_MATCH_CALLBACKS = new ArrayList<>();
+    private static boolean bannerMatchLoaded = false;
+    private static boolean bannerMatchLoading = false;
+    private static BannerViewModel bannerMatchCache = null;
+    private static final Object DIALOG_MATCH_LOCK = new Object();
+    private static final List<ApiCallback<DynamicDialogViewModel>> DIALOG_MATCH_CALLBACKS = new ArrayList<>();
+    private static boolean dialogMatchLoaded = false;
+    private static boolean dialogMatchLoading = false;
+    private static DynamicDialogViewModel dialogMatchCache = null;
 
     private final ApiRepository repo;
 
@@ -342,6 +357,17 @@ public class AuthApi {
     }
 
     public void bannerMatch(BannerMatchApiInput input, ApiCallback<BannerViewModel> callback) {
+        synchronized (BANNER_MATCH_LOCK) {
+            if (bannerMatchLoaded) {
+                callback.onSuccess(bannerMatchCache, true);
+                return;
+            }
+
+            BANNER_MATCH_CALLBACKS.add(callback);
+            if (bannerMatchLoading) return;
+            bannerMatchLoading = true;
+        }
+
         repo.request(
                 "banner_match_" + (input != null ? input.getApiKey() + "_" + input.getServiceType() + "_" + input.getPlan() : "guest"),
                 input,
@@ -349,9 +375,128 @@ public class AuthApi {
                 "https://n8n.coolify.shcn.ir/webhook/api/banner/match",
                 HttpMethod.POST,
                 false,
-                callback,
+                new ApiCallback<BannerViewModel>() {
+                    @Override
+                    public void onSuccess(BannerViewModel banner, boolean fromCache) {
+                        List<ApiCallback<BannerViewModel>> callbacks = completeBannerMatchSuccess(banner);
+                        for (ApiCallback<BannerViewModel> cb : callbacks) {
+                            cb.onSuccess(banner, fromCache);
+                        }
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        List<ApiCallback<BannerViewModel>> callbacks = completeBannerMatchError();
+                        for (ApiCallback<BannerViewModel> cb : callbacks) {
+                            cb.onError(statusCode, message);
+                        }
+                    }
+                },
                 BannerViewModel.class
         );
+    }
+
+    private static List<ApiCallback<BannerViewModel>> completeBannerMatchSuccess(BannerViewModel banner) {
+        synchronized (BANNER_MATCH_LOCK) {
+            bannerMatchLoaded = true;
+            bannerMatchLoading = false;
+            bannerMatchCache = banner;
+            List<ApiCallback<BannerViewModel>> callbacks = new ArrayList<>(BANNER_MATCH_CALLBACKS);
+            BANNER_MATCH_CALLBACKS.clear();
+            return callbacks;
+        }
+    }
+
+    private static List<ApiCallback<BannerViewModel>> completeBannerMatchError() {
+        synchronized (BANNER_MATCH_LOCK) {
+            bannerMatchLoading = false;
+            List<ApiCallback<BannerViewModel>> callbacks = new ArrayList<>(BANNER_MATCH_CALLBACKS);
+            BANNER_MATCH_CALLBACKS.clear();
+            return callbacks;
+        }
+    }
+
+    public void dialogMatch(DialogMatchApiInput input, ApiCallback<DynamicDialogViewModel> callback) {
+        synchronized (DIALOG_MATCH_LOCK) {
+            if (dialogMatchLoaded) {
+                callback.onSuccess(dialogMatchCache, true);
+                return;
+            }
+
+            DIALOG_MATCH_CALLBACKS.add(callback);
+            if (dialogMatchLoading) return;
+            dialogMatchLoading = true;
+        }
+
+        repo.request(
+                "dialog_match_" + (input != null ? input.getApiKey() + "_" + input.getServiceType() + "_" + input.getPlan() : "guest"),
+                input,
+                "https://n8n.coolify.shcn.ir/webhook/api/dialog/match",
+                HttpMethod.POST,
+                false,
+                new ApiCallback<DynamicDialogViewModel>() {
+                    @Override
+                    public void onSuccess(DynamicDialogViewModel dialog, boolean fromCache) {
+                        List<ApiCallback<DynamicDialogViewModel>> callbacks = completeDialogMatchSuccess(dialog);
+                        for (ApiCallback<DynamicDialogViewModel> cb : callbacks) {
+                            cb.onSuccess(dialog, fromCache);
+                        }
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        List<ApiCallback<DynamicDialogViewModel>> callbacks = completeDialogMatchError();
+                        for (ApiCallback<DynamicDialogViewModel> cb : callbacks) {
+                            cb.onError(statusCode, message);
+                        }
+                    }
+                },
+                DynamicDialogViewModel.class
+        );
+    }
+
+    public void dialogDismiss(DialogDismissApiInput input, ApiCallback<EmptyResponse> callback) {
+        repo.request(
+                "dialog_dismiss",
+                input,
+                "https://n8n.coolify.shcn.ir/webhook/api/dialog/dismiss",
+                HttpMethod.POST,
+                false,
+                callback,
+                EmptyResponse.class
+        );
+    }
+
+    public void dialogAction(DialogActionApiInput input, ApiCallback<EmptyResponse> callback) {
+        repo.request(
+                "dialog_action",
+                input,
+                "https://n8n.coolify.shcn.ir/webhook/api/dialog/action",
+                HttpMethod.POST,
+                false,
+                callback,
+                EmptyResponse.class
+        );
+    }
+
+    private static List<ApiCallback<DynamicDialogViewModel>> completeDialogMatchSuccess(DynamicDialogViewModel dialog) {
+        synchronized (DIALOG_MATCH_LOCK) {
+            dialogMatchLoaded = true;
+            dialogMatchLoading = false;
+            dialogMatchCache = dialog;
+            List<ApiCallback<DynamicDialogViewModel>> callbacks = new ArrayList<>(DIALOG_MATCH_CALLBACKS);
+            DIALOG_MATCH_CALLBACKS.clear();
+            return callbacks;
+        }
+    }
+
+    private static List<ApiCallback<DynamicDialogViewModel>> completeDialogMatchError() {
+        synchronized (DIALOG_MATCH_LOCK) {
+            dialogMatchLoading = false;
+            List<ApiCallback<DynamicDialogViewModel>> callbacks = new ArrayList<>(DIALOG_MATCH_CALLBACKS);
+            DIALOG_MATCH_CALLBACKS.clear();
+            return callbacks;
+        }
     }
 
     // ---------------------------------------------------

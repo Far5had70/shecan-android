@@ -42,6 +42,9 @@ public class TrackingUtils {
     public static final String EVENT_BILLING_PURCHASE_SUCCESS = "billing_purchase_success";
     public static final String EVENT_BILLING_PURCHASE_CANCEL = "billing_purchase_cancel";
     public static final String EVENT_BILLING_PURCHASE_ERROR = "billing_purchase_error";
+    public static final String EVENT_DYNAMIC_DIALOG_DISPLAY = "dynamic_dialog_display";
+    public static final String EVENT_DYNAMIC_DIALOG_DISMISS = "dynamic_dialog_dismiss";
+    public static final String EVENT_DYNAMIC_DIALOG_ACTION = "dynamic_dialog_action";
 
     public static final String PARAM_SOURCE = "source";
     public static final String PARAM_TAB_INDEX = "tab_index";
@@ -59,6 +62,8 @@ public class TrackingUtils {
     public static final String PARAM_AMOUNT = "amount";
     public static final String PARAM_DISCOUNT_APPLIED = "discount_applied";
     public static final String PARAM_ERROR = "error";
+    public static final String PARAM_DIALOG_ID = "dialog_id";
+    public static final String PARAM_BUTTON_TYPE = "button_type";
 
     public static void logEvent(Context context, String eventName) {
         logEvent(context, eventName, null);
@@ -66,12 +71,18 @@ public class TrackingUtils {
 
     public static void logEvent(Context context, String eventName, Bundle params) {
         if (context == null || eventName == null || eventName.trim().isEmpty()) return;
-        FirebaseAnalytics.getInstance(context.getApplicationContext()).logEvent(eventName, params);
+        try {
+            FirebaseAnalytics.getInstance(context.getApplicationContext()).logEvent(eventName, params);
+        } catch (RuntimeException ignored) {
+        }
     }
 
     public static void setUserId(Context context, String userId) {
         if (context == null || userId == null || userId.trim().isEmpty()) return;
-        FirebaseAnalytics.getInstance(context.getApplicationContext()).setUserId(userId);
+        try {
+            FirebaseAnalytics.getInstance(context.getApplicationContext()).setUserId(userId);
+        } catch (RuntimeException ignored) {
+        }
     }
 
     public static Bundle bundleOf(String key, String value) {
