@@ -5,7 +5,7 @@ public interface BillingHost {
 
     boolean isBillingReadyForStore(BillingStore store);
 
-    void launchMyketPurchase(String sku);
+    void launchMyketPurchase(String sku, Long renewalOrderId);
 
-    void launchCafeBazaarPurchase(String sku);
+    void launchCafeBazaarPurchase(String sku, Long renewalOrderId);
 }

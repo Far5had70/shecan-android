@@ -333,9 +333,9 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         );
     }
 
-    public void launchMyketPurchase(String sku) {
+    public void launchMyketPurchase(String sku, Long renewalOrderId) {
         if (myketBillingManager != null) {
-            myketBillingManager.launchPurchaseFlow(this, sku);
+            myketBillingManager.launchPurchaseFlow(this, sku, renewalOrderId);
         }
     }
 
@@ -345,9 +345,9 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         }
     }
 
-    public void launchCafeBazaarPurchase(String sku) {
+    public void launchCafeBazaarPurchase(String sku, Long renewalOrderId) {
         if (cafeBazaarBillingManager != null) {
-            cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku);
+            cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku, renewalOrderId);
         }
     }
 

@@ -6,12 +6,12 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.security.SecureRandom;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import ir.myket.billingclient.IabHelper;
 import ir.myket.billingclient.util.IabResult;
@@ -31,7 +31,6 @@ public class MyketBillingManager {
     private final SharedPreferences preferences;
     private final Set<String> consumableSkus = new HashSet<>();
     private final Set<String> nonConsumableSkus = new HashSet<>();
-    private final SecureRandom secureRandom = new SecureRandom();
 
     private IabHelper helper;
     private Listener listener;
@@ -101,7 +100,7 @@ public class MyketBillingManager {
         }
     }
 
-    public void launchPurchaseFlow(Activity activity, String sku) {
+    public void launchPurchaseFlow(Activity activity, String sku, Long renewalOrderId) {
         if (!isReady()) {
             notifyError("Myket billing is not ready.");
             return;
@@ -112,7 +111,7 @@ public class MyketBillingManager {
             return;
         }
 
-        String payload = createDeveloperPayload(sku);
+        String payload = createDeveloperPayload(renewalOrderId);
         savePendingPayload(sku, payload);
 
         try {
@@ -238,16 +237,16 @@ public class MyketBillingManager {
         return expectedPayload == null || expectedPayload.equals(purchase.getDeveloperPayload());
     }
 
-    private String createDeveloperPayload(String sku) {
-        return appContext.getPackageName()
-                + ":"
-                + sku
-                + ":"
-                + System.currentTimeMillis()
-                + ":"
-                + secureRandom.nextInt(Integer.MAX_VALUE)
-                + ":"
-                + UUID.randomUUID();
+    private String createDeveloperPayload(Long renewalOrderId) {
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("version", 1);
+            if (renewalOrderId != null && renewalOrderId > 0L) {
+                payload.put("order_id", renewalOrderId);
+            }
+        } catch (Exception ignored) {
+        }
+        return payload.toString();
     }
 
     private void savePendingPayload(String sku, String payload) {

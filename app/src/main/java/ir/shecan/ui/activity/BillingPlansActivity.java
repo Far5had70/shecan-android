@@ -33,6 +33,7 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
 
     public static final String EXTRA_PREFILL_SLA = "prefill_sla";
     public static final String EXTRA_PREFILL_PERIOD = "prefill_period";
+    public static final String EXTRA_RENEWAL_ORDER_ID = "renewal_order_id";
 
     private ActivityBillingPlansBinding binding;
     private MyketBillingManager myketBillingManager;
@@ -57,6 +58,7 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
             Bundle args = new Bundle();
             args.putString(BillingPlansFragment.ARG_PREFILL_SLA, getIntent().getStringExtra(EXTRA_PREFILL_SLA));
             args.putString(BillingPlansFragment.ARG_PREFILL_PERIOD, getIntent().getStringExtra(EXTRA_PREFILL_PERIOD));
+            args.putLong(BillingPlansFragment.ARG_RENEWAL_ORDER_ID, getIntent().getLongExtra(EXTRA_RENEWAL_ORDER_ID, 0L));
             fragment.setArguments(args);
 
             getSupportFragmentManager()
@@ -257,16 +259,16 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
     }
 
     @Override
-    public void launchMyketPurchase(String sku) {
+    public void launchMyketPurchase(String sku, Long renewalOrderId) {
         if (myketBillingManager != null) {
-            myketBillingManager.launchPurchaseFlow(this, sku);
+            myketBillingManager.launchPurchaseFlow(this, sku, renewalOrderId);
         }
     }
 
     @Override
-    public void launchCafeBazaarPurchase(String sku) {
+    public void launchCafeBazaarPurchase(String sku, Long renewalOrderId) {
         if (cafeBazaarBillingManager != null) {
-            cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku);
+            cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku, renewalOrderId);
         }
     }
 

@@ -69,6 +69,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private static final String TAG = "BillingPlansFragment";
     public static final String ARG_PREFILL_SLA = "prefill_sla";
     public static final String ARG_PREFILL_PERIOD = "prefill_period";
+    public static final String ARG_RENEWAL_ORDER_ID = "renewal_order_id";
 
     private FragmentBillingPlansBinding binding;
     private AuthApi authApi;
@@ -85,6 +86,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private ServicesViewModel serviceCatalog;
     private BillingSla prefillSla;
     private BillingPeriod prefillPeriod;
+    private long renewalOrderId;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -217,6 +219,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
         this.prefillSla = BillingSla.fromApiValue(prefillSla);
         this.prefillPeriod = BillingPeriod.fromApiValue(prefillPeriod);
+        this.renewalOrderId = args.getLong(ARG_RENEWAL_ORDER_ID, 0L);
     }
 
     private void applyPrefillSelection() {
@@ -630,10 +633,10 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
         switch (store) {
             case CAFE_BAZAAR:
-                host.launchCafeBazaarPurchase(pendingPlan.getSku());
+                host.launchCafeBazaarPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
                 break;
             case MYKET:
-                host.launchMyketPurchase(pendingPlan.getSku());
+                host.launchMyketPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
                 break;
             case SITE:
                 startSitePayment();
@@ -900,6 +903,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 purchaseToken,
                 getIapVerificationAmount(),
                 storeOrderId,
+                getRenewalOrderIdOrNull(),
                 new ApiCallback<IapVerifyViewModel>() {
                     @Override
                     public void onSuccess(IapVerifyViewModel data, boolean fromCache) {
@@ -934,6 +938,10 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         if (selectedItem == null || pendingPlan == null || selectedItem.getPrice() == null) return 0L;
         if (!pendingPlan.getSku().equals(selectedItem.getPlan().getSku())) return 0L;
         return getPayablePrice();
+    }
+
+    private Long getRenewalOrderIdOrNull() {
+        return renewalOrderId > 0L ? renewalOrderId : null;
     }
 
     private void consumeDiscountAfterIapVerifyIfNeeded(VerifyApiViewModel token, IapVerifyViewModel verify, String orderMessage) {

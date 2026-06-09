@@ -250,6 +250,10 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         if (period != null) {
             intent.putExtra(BillingPlansActivity.EXTRA_PREFILL_PERIOD, period.getApiValue());
         }
+        long orderId = currentServiceItem != null ? currentServiceItem.id : 0L;
+        if (orderId > 0L) {
+            intent.putExtra(BillingPlansActivity.EXTRA_RENEWAL_ORDER_ID, orderId);
+        }
 
         startActivity(intent);
     }

@@ -641,11 +641,16 @@ public class AuthApi {
             String purchaseToken,
             long amount,
             String storeOrderId,
+            Long renewalOrderId,
             ApiCallback<IapVerifyViewModel> callback
     ) {
         repo.apiManager.setApiKey(apiKey);
 
         Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("version", 1);
+        if (renewalOrderId != null && renewalOrderId > 0L) {
+            payload.put("order_id", renewalOrderId);
+        }
         payload.put("api_key", apiKey);
         payload.put("market", market);
         if (issueId > 0) {

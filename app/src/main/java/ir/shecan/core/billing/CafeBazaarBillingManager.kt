@@ -12,15 +12,13 @@ import ir.cafebazaar.poolakey.entity.PurchaseInfo
 import ir.cafebazaar.poolakey.request.PurchaseRequest
 import ir.shecan.BuildConfig
 import ir.shecan.core.constant.Constant
-import java.security.SecureRandom
-import java.util.UUID
+import org.json.JSONObject
 
 class CafeBazaarBillingManager(context: Context) {
 
     private val appContext = context.applicationContext
     private val preferences: SharedPreferences =
         appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    private val secureRandom = SecureRandom()
     private val consumableSkus = mutableSetOf<String>()
     private val nonConsumableSkus = mutableSetOf<String>()
 
@@ -84,7 +82,7 @@ class CafeBazaarBillingManager(context: Context) {
         queryPurchasedProducts()
     }
 
-    fun launchPurchaseFlow(registry: ActivityResultRegistry, sku: String) {
+    fun launchPurchaseFlow(registry: ActivityResultRegistry, sku: String, renewalOrderId: Long?) {
         val currentPayment = payment
         if (!isReady() || currentPayment == null) {
             notifyError("Cafe Bazaar billing is not ready.")
@@ -96,7 +94,7 @@ class CafeBazaarBillingManager(context: Context) {
             return
         }
 
-        val payload = createDeveloperPayload(sku)
+        val payload = createDeveloperPayload(renewalOrderId)
         savePendingPayload(sku, payload)
         val request = PurchaseRequest(productId = sku, payload = payload)
 
@@ -204,9 +202,13 @@ class CafeBazaarBillingManager(context: Context) {
         return expectedPayload == null || expectedPayload == purchaseInfo.payload
     }
 
-    private fun createDeveloperPayload(sku: String): String {
-        return "${appContext.packageName}:$sku:${System.currentTimeMillis()}:" +
-            "${secureRandom.nextInt(Int.MAX_VALUE)}:${UUID.randomUUID()}"
+    private fun createDeveloperPayload(renewalOrderId: Long?): String {
+        val payload = JSONObject()
+            .put("version", 1)
+        if (renewalOrderId != null && renewalOrderId > 0L) {
+            payload.put("order_id", renewalOrderId)
+        }
+        return payload.toString()
     }
 
     private fun savePendingPayload(sku: String, payload: String) {
