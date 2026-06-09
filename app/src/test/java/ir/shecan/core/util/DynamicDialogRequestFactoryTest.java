@@ -13,7 +13,9 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Collections;
+import java.util.Locale;
 
+import ir.shecan.BuildConfig;
 import ir.shecan.core.constant.RequestStatus;
 import ir.shecan.data.modelDio.DialogMatchApiInput;
 import ir.shecan.data.modelDto.IssuesViewModel;
@@ -73,7 +75,7 @@ public class DynamicDialogRequestFactoryTest {
         assertEquals("silver", input.getPlan());
         assertEquals("2026-01-01", input.getStartDate());
         assertEquals("2026-05-25", input.getDueDate());
-        assertEquals(Collections.singletonList("site"), input.getStore());
+        assertEquals(Collections.singletonList(expectedStore()), input.getStore());
         assertTrue(input.isRated());
         assertEquals("active", input.getPlanStatus());
     }
@@ -91,5 +93,11 @@ public class DynamicDialogRequestFactoryTest {
         assertEquals("09351234567", input.getMobileNumber());
         assertEquals("commercial", input.getPlan());
         assertEquals("inactive", input.getPlanStatus());
+    }
+
+    private static String expectedStore() {
+        String store = BuildConfig.STORE != null ? BuildConfig.STORE.toLowerCase(Locale.US) : "";
+        if ("cafebazaar".equals(store)) return "bazar";
+        return store;
     }
 }

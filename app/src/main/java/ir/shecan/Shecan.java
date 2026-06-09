@@ -55,6 +55,7 @@ import ir.shecan.core.util.Configurations;
 import ir.shecan.core.util.LanguageHelper;
 import ir.shecan.core.util.Logger;
 import ir.shecan.core.util.Rule;
+import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.core.util.server.DNSServer;
 import ir.shecan.core.util.server.DNSServerHelper;
 import ir.shecan.core.util.server.LocaleHelper;
@@ -562,6 +563,19 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         private static final String DYNAMIC_IP_GUIDE_LINK = "DYNAMIC_IP_GUIDE_LINK";
         private static final String TICKETING_LINK = "TICKETING_LINK";
         private static final String PURCHASE_LINK = "PURCHASE_LINK";
+        private static final String DYNAMIC_BANNER_URL = "DYNAMIC_BANNER_URL";
+        private static final String DIALOG_MATCH_URL = "DIALOG_MATCH_URL";
+        private static final String DIALOG_DISMISS_URL = "DIALOG_DISMISS_URL";
+        private static final String DIALOG_ACTION_URL = "DIALOG_ACTION_URL";
+        private static final String MONITORING_TARGET_URL = "MONITORING_TARGET_URL";
+        private static final String MONITORING_LOGS_URL = "MONITORING_LOGS_URL";
+
+        private static final String DEFAULT_DYNAMIC_BANNER_URL = "https://my.shecan.ir/api/banner/match";
+        private static final String DEFAULT_DIALOG_MATCH_URL = "https://n8n.coolify.shcn.ir/webhook/api/dialog/match";
+        private static final String DEFAULT_DIALOG_DISMISS_URL = "https://n8n.coolify.shcn.ir/webhook/api/dialog/dismiss";
+        private static final String DEFAULT_DIALOG_ACTION_URL = "https://n8n.coolify.shcn.ir/webhook/api/dialog/action";
+        private static final String DEFAULT_MONITORING_TARGET_URL = "https://my.shecan.ir/monitoring/targets";
+        private static final String DEFAULT_MONITORING_LOGS_URL = "https://my.shecan.ir/monitoring/logs";
 
         public static void fetchData(Context context, BaseApiResponseListener listener) {
             RequestQueue requestQueue = VolleyHelper.getSecureRequestQueue(context);
@@ -587,6 +601,8 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                                 setDynamicIpGuideLink(jsonObject.getString("dynamic_ip_guide_link"));
                                 setTicketingLink(jsonObject.getString("ticketing_link"));
                                 setPurchaseLink(jsonObject.getString("purchase_link"));
+                                saveDynamicData(jsonObject.optJSONObject("dynamic_data"));
+                                saveMonitoring(jsonObject.optJSONObject("monitoring"));
 
                                 listener.onSuccess();
                             } catch (JSONException e) {
@@ -656,6 +672,76 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
                     .apply();
         }
 
+        private static void setDynamicBannerUrl(String url) {
+            setString(DYNAMIC_BANNER_URL, url);
+        }
+
+        private static void setDialogMatchUrl(String url) {
+            setString(DIALOG_MATCH_URL, url);
+        }
+
+        private static void setDialogDismissUrl(String url) {
+            setString(DIALOG_DISMISS_URL, url);
+        }
+
+        private static void setDialogActionUrl(String url) {
+            setString(DIALOG_ACTION_URL, url);
+        }
+
+        private static void setMonitoringTargetUrl(String url) {
+            setString(MONITORING_TARGET_URL, url);
+        }
+
+        private static void setMonitoringLogsUrl(String url) {
+            setString(MONITORING_LOGS_URL, url);
+        }
+
+        private static void setString(String key, String value) {
+            if (isBlank(value)) return;
+            getPrefs().edit()
+                    .putString(key, value.trim())
+                    .apply();
+        }
+
+        private static void saveDynamicData(JSONObject dynamicData) {
+            if (dynamicData == null) return;
+            setDynamicBannerUrl(dynamicData.optString("banner", null));
+
+            JSONObject dialog = dynamicData.optJSONObject("dialog");
+            if (dialog == null) return;
+            setDialogMatchUrl(dialog.optString("match", null));
+            setDialogDismissUrl(dialog.optString("dismiss", null));
+            setDialogActionUrl(dialog.optString("action", null));
+        }
+
+        private static void saveMonitoring(JSONObject monitoring) {
+            if (monitoring == null) return;
+            setMonitoringTargetUrl(monitoring.optString("target", null));
+            setMonitoringLogsUrl(monitoring.optString("logs", null));
+        }
+
+        public static void saveHomePageConfig(HomePage homePage) {
+            if (homePage == null) return;
+
+            HomePage.DynamicDataDTO dynamicData = homePage.getDynamicData();
+            if (dynamicData != null) {
+                setDynamicBannerUrl(dynamicData.getBanner());
+
+                HomePage.DynamicDataDTO.DialogDTO dialog = dynamicData.getDialog();
+                if (dialog != null) {
+                    setDialogMatchUrl(dialog.getMatch());
+                    setDialogDismissUrl(dialog.getDismiss());
+                    setDialogActionUrl(dialog.getAction());
+                }
+            }
+
+            HomePage.MonitoringDTO monitoring = homePage.getMonitoring();
+            if (monitoring != null) {
+                setMonitoringTargetUrl(monitoring.getTarget());
+                setMonitoringLogsUrl(monitoring.getLogs());
+            }
+        }
+
         public static String getCurrentVersion() {
             return Shecan.getPrefs().getString(CURRENT_VERSION, "1.0.0");
         }
@@ -685,7 +771,35 @@ public class Shecan extends Application implements ConnectionStatusApiListener {
         }
 
         public static String getPurchaseLink() {
-            return Shecan.getPrefs().getString(TICKETING_LINK, "https://shecan.ir/order?order=9");
+            return Shecan.getPrefs().getString(PURCHASE_LINK, "https://shecan.ir/order?order=9");
+        }
+
+        public static String getDynamicBannerUrl() {
+            return Shecan.getPrefs().getString(DYNAMIC_BANNER_URL, DEFAULT_DYNAMIC_BANNER_URL);
+        }
+
+        public static String getDialogMatchUrl() {
+            return Shecan.getPrefs().getString(DIALOG_MATCH_URL, DEFAULT_DIALOG_MATCH_URL);
+        }
+
+        public static String getDialogDismissUrl() {
+            return Shecan.getPrefs().getString(DIALOG_DISMISS_URL, DEFAULT_DIALOG_DISMISS_URL);
+        }
+
+        public static String getDialogActionUrl() {
+            return Shecan.getPrefs().getString(DIALOG_ACTION_URL, DEFAULT_DIALOG_ACTION_URL);
+        }
+
+        public static String getMonitoringTargetUrl() {
+            return Shecan.getPrefs().getString(MONITORING_TARGET_URL, DEFAULT_MONITORING_TARGET_URL);
+        }
+
+        public static String getMonitoringLogsUrl() {
+            return Shecan.getPrefs().getString(MONITORING_LOGS_URL, DEFAULT_MONITORING_LOGS_URL);
+        }
+
+        private static boolean isBlank(String value) {
+            return value == null || value.trim().isEmpty();
         }
     }
 }

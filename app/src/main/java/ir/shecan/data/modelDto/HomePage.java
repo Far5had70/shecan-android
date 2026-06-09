@@ -22,6 +22,8 @@ public class HomePage {
     private List<String> freeDns;
     private List<String> proDnsUdp;
     private List<String> freeDnsUdp;
+    private DynamicDataDTO dynamicData;
+    private MonitoringDTO monitoring;
 
     public String getCurrentVersion() {
         return currentVersion;
@@ -165,6 +167,22 @@ public class HomePage {
 
     public void setFreeDnsUdp(List<String> freeDnsUdp) {
         this.freeDnsUdp = freeDnsUdp;
+    }
+
+    public DynamicDataDTO getDynamicData() {
+        return dynamicData;
+    }
+
+    public void setDynamicData(DynamicDataDTO dynamicData) {
+        this.dynamicData = dynamicData;
+    }
+
+    public MonitoringDTO getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(MonitoringDTO monitoring) {
+        this.monitoring = monitoring;
     }
 
     public static class VersionDTO {
@@ -376,6 +394,78 @@ public class HomePage {
 
         public void setGrpc(String grpc) {
             this.grpc = grpc;
+        }
+    }
+
+    public static class DynamicDataDTO {
+        private String banner;
+        private DialogDTO dialog;
+
+        public String getBanner() {
+            return banner;
+        }
+
+        public void setBanner(String banner) {
+            this.banner = banner;
+        }
+
+        public DialogDTO getDialog() {
+            return dialog;
+        }
+
+        public void setDialog(DialogDTO dialog) {
+            this.dialog = dialog;
+        }
+
+        public static class DialogDTO {
+            private String match;
+            private String dismiss;
+            private String action;
+
+            public String getMatch() {
+                return match;
+            }
+
+            public void setMatch(String match) {
+                this.match = match;
+            }
+
+            public String getDismiss() {
+                return dismiss;
+            }
+
+            public void setDismiss(String dismiss) {
+                this.dismiss = dismiss;
+            }
+
+            public String getAction() {
+                return action;
+            }
+
+            public void setAction(String action) {
+                this.action = action;
+            }
+        }
+    }
+
+    public static class MonitoringDTO {
+        private String target;
+        private String logs;
+
+        public String getTarget() {
+            return target;
+        }
+
+        public void setTarget(String target) {
+            this.target = target;
+        }
+
+        public String getLogs() {
+            return logs;
+        }
+
+        public void setLogs(String logs) {
+            this.logs = logs;
         }
     }
 }

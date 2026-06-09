@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ir.shecan.Shecan;
 import ir.shecan.data.modelDio.ExistApiInput;
 import ir.shecan.data.modelDio.BannerMatchApiInput;
 import ir.shecan.data.modelDio.DialogActionApiInput;
@@ -371,7 +372,7 @@ public class AuthApi {
         repo.request(
                 "banner_match_" + (input != null ? input.getApiKey() + "_" + input.getServiceType() + "_" + input.getPlan() : "guest"),
                 input,
-                "https://my.shecan.ir/api/banner/match",
+                Shecan.ShecanInfo.getDynamicBannerUrl(),
                 HttpMethod.POST,
                 false,
                 new ApiCallback<BannerViewModel>() {
@@ -430,7 +431,7 @@ public class AuthApi {
         repo.request(
                 "dialog_match_" + (input != null ? input.getApiKey() + "_" + input.getServiceType() + "_" + input.getPlan() : "guest"),
                 input,
-                "https://n8n.coolify.shcn.ir/webhook/api/dialog/match",
+                Shecan.ShecanInfo.getDialogMatchUrl(),
                 HttpMethod.POST,
                 false,
                 new ApiCallback<DynamicDialogViewModel>() {
@@ -458,7 +459,7 @@ public class AuthApi {
         repo.request(
                 "dialog_dismiss",
                 input,
-                "https://n8n.coolify.shcn.ir/webhook/api/dialog/dismiss",
+                Shecan.ShecanInfo.getDialogDismissUrl(),
                 HttpMethod.POST,
                 false,
                 callback,
@@ -470,7 +471,7 @@ public class AuthApi {
         repo.request(
                 "dialog_action",
                 input,
-                "https://n8n.coolify.shcn.ir/webhook/api/dialog/action",
+                Shecan.ShecanInfo.getDialogActionUrl(),
                 HttpMethod.POST,
                 false,
                 callback,
@@ -509,7 +510,18 @@ public class AuthApi {
                 "https://shecan.ir/app/home-page/",
                 HttpMethod.GET,
                 false,
-                callback,
+                new ApiCallback<HomePage>() {
+                    @Override
+                    public void onSuccess(HomePage homePage, boolean fromCache) {
+                        Shecan.ShecanInfo.saveHomePageConfig(homePage);
+                        callback.onSuccess(homePage, fromCache);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        callback.onError(statusCode, message);
+                    }
+                },
                 HomePage.class
         );
     }
