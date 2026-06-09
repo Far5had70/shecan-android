@@ -15,7 +15,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import ir.shecan.R;
-import ir.shecan.core.service.ShecanVpnService;
 import ir.shecan.databinding.ViewServiceStatusBinding;
 
 public class VpnStatusView extends FrameLayout {
@@ -76,7 +75,7 @@ public class VpnStatusView extends FrameLayout {
                 },
                 error -> {
                     stopLoadingAnimation();
-                    setFallbackStatus();
+                    setUnavailableStatus();
                 }
         );
 
@@ -99,21 +98,12 @@ public class VpnStatusView extends FrameLayout {
                 setFree();
                 break;
             default:
-                setFallbackStatus();
+                setUnavailableStatus();
         }
     }
 
-    private void setFallbackStatus() {
-        if (!ShecanVpnService.isActivated()) {
-            setDisconnected();
-            return;
-        }
-
-        if (ShecanVpnService.isProMode()) {
-            setPro();
-        } else {
-            setFree();
-        }
+    private void setUnavailableStatus() {
+        setDisconnected();
     }
 
     private void startLoadingAnimation() {
