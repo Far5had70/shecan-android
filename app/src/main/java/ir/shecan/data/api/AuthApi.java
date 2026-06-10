@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import ir.shecan.Shecan;
+import ir.shecan.core.billing.BillingPlan;
+import ir.shecan.core.billing.BillingPlanCatalog;
 import ir.shecan.data.modelDio.ExistApiInput;
 import ir.shecan.data.modelDio.BannerMatchApiInput;
 import ir.shecan.data.modelDio.DialogActionApiInput;
@@ -658,6 +660,11 @@ public class AuthApi {
         }
         payload.put("package_name", packageName);
         payload.put("product_id", productId);
+        BillingPlan plan = BillingPlanCatalog.findBySku(productId);
+        if (plan != null) {
+            payload.put("sla", plan.getSla().getApiValue());
+            payload.put("period", plan.getPeriod().getApiValue());
+        }
         payload.put("purchase_token", purchaseToken);
         if (amount > 0) {
             payload.put("amount", amount);

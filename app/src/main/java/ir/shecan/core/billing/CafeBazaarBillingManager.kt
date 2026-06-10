@@ -94,7 +94,7 @@ class CafeBazaarBillingManager(context: Context) {
             return
         }
 
-        val payload = createDeveloperPayload(renewalOrderId)
+        val payload = createDeveloperPayload(sku, renewalOrderId)
         savePendingPayload(sku, payload)
         val request = PurchaseRequest(productId = sku, payload = payload)
 
@@ -202,9 +202,13 @@ class CafeBazaarBillingManager(context: Context) {
         return expectedPayload == null || expectedPayload == purchaseInfo.payload
     }
 
-    private fun createDeveloperPayload(renewalOrderId: Long?): String {
+    private fun createDeveloperPayload(sku: String, renewalOrderId: Long?): String {
         val payload = JSONObject()
             .put("version", 1)
+        BillingPlanCatalog.findBySku(sku)?.let { plan ->
+            payload.put("sla", plan.sla.apiValue)
+            payload.put("period", plan.period.apiValue)
+        }
         if (renewalOrderId != null && renewalOrderId > 0L) {
             payload.put("order_id", renewalOrderId)
         }

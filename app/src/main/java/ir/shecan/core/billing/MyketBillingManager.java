@@ -111,7 +111,7 @@ public class MyketBillingManager {
             return;
         }
 
-        String payload = createDeveloperPayload(renewalOrderId);
+        String payload = createDeveloperPayload(sku, renewalOrderId);
         savePendingPayload(sku, payload);
 
         try {
@@ -237,10 +237,15 @@ public class MyketBillingManager {
         return expectedPayload == null || expectedPayload.equals(purchase.getDeveloperPayload());
     }
 
-    private String createDeveloperPayload(Long renewalOrderId) {
+    private String createDeveloperPayload(String sku, Long renewalOrderId) {
         JSONObject payload = new JSONObject();
         try {
             payload.put("version", 1);
+            BillingPlan plan = BillingPlanCatalog.findBySku(sku);
+            if (plan != null) {
+                payload.put("sla", plan.getSla().getApiValue());
+                payload.put("period", plan.getPeriod().getApiValue());
+            }
             if (renewalOrderId != null && renewalOrderId > 0L) {
                 payload.put("order_id", renewalOrderId);
             }

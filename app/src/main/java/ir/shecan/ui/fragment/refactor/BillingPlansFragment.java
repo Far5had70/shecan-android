@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -67,6 +68,8 @@ import saman.zamani.persiandate.PersianDateFormat;
 public class BillingPlansFragment extends ToolbarFragment implements BillingPurchaseObserver {
 
     private static final String TAG = "BillingPlansFragment";
+    private static final String IAP_PREFS_NAME = "billing_iap_state";
+    private static final String VERIFIED_PURCHASE_PREFIX = "verified_purchase_";
     public static final String ARG_PREFILL_SLA = "prefill_sla";
     public static final String ARG_PREFILL_PERIOD = "prefill_period";
     public static final String ARG_RENEWAL_ORDER_ID = "renewal_order_id";
@@ -820,6 +823,9 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     @Override
     public void onMarketplacePurchaseReady(BillingStore store, Object purchase, boolean restoredFromInventory) {
         if (binding == null) return;
+        if (restoredFromInventory && isMarketplacePurchaseAlreadyHandled(store, purchase)) {
+            return;
+        }
         if (pendingPlan == null) {
             showStatus(getString(R.string.billing_restored_purchase_found, store.getTitle()), false);
             pendingPlan = BillingPlanCatalog.findBySku(getMarketplaceProductId(store, purchase));
@@ -909,6 +915,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     public void onSuccess(IapVerifyViewModel data, boolean fromCache) {
                         if (binding == null) return;
                         if (data != null && data.isOk()) {
+                            markMarketplacePurchaseHandled(store, purchase);
                             String order = data.getOrderId() != null
                                     ? getString(R.string.billing_order_code, String.valueOf(data.getOrderId()))
                                     : "";
@@ -932,6 +939,27 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     }
                 }
         );
+    }
+
+    private boolean isMarketplacePurchaseAlreadyHandled(BillingStore store, Object purchase) {
+        String key = marketplacePurchaseKey(store, purchase);
+        return key != null && iapPreferences().getBoolean(key, false);
+    }
+
+    private void markMarketplacePurchaseHandled(BillingStore store, Object purchase) {
+        String key = marketplacePurchaseKey(store, purchase);
+        if (key == null) return;
+        iapPreferences().edit().putBoolean(key, true).apply();
+    }
+
+    private String marketplacePurchaseKey(BillingStore store, Object purchase) {
+        String purchaseToken = getMarketplacePurchaseToken(store, purchase);
+        if (purchaseToken == null || purchaseToken.trim().isEmpty()) return null;
+        return VERIFIED_PURCHASE_PREFIX + store.name() + "_" + purchaseToken;
+    }
+
+    private SharedPreferences iapPreferences() {
+        return requireContext().getSharedPreferences(IAP_PREFS_NAME, android.content.Context.MODE_PRIVATE);
     }
 
     private long getIapVerificationAmount() {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
@@ -44,6 +45,7 @@ public class APIManager {
     private static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded; charset=UTF-8";
     private static final String CONTENT_TYPE_RAW_FORM = "application/x-www-form-urlencoded";
     private static final String REDACTED = "******";
+    private static final int IAP_VERIFY_TIMEOUT_MS = 60000;
     private static final Pattern META_REFRESH_URL_PATTERN = Pattern.compile("(?is)<meta[^>]+http-equiv\\s*=\\s*['\"]?refresh['\"]?[^>]+content\\s*=\\s*['\"][^'\"]*url\\s*=\\s*([^'\"]+)['\"]");
     private static final Pattern FORM_ACTION_PATTERN = Pattern.compile("(?is)<form[^>]+action\\s*=\\s*['\"]([^'\"]+)['\"]");
     private static final Pattern WINDOW_LOCATION_PATTERN = Pattern.compile("(?is)(?:window\\.location\\.replace|window\\.location\\.href)\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*\\)");
@@ -683,6 +685,7 @@ public class APIManager {
                 }
             };
 
+            applyEndpointRetryPolicy(request, url);
             logRequest(method, url, headers, payload != null ? payload.toString() : null, CONTENT_TYPE_JSON);
             requestQueue.add(request);
 
@@ -1137,6 +1140,16 @@ public class APIManager {
                 || url.contains("/payment")
                 || url.contains("/iap/verify")
                 || url.contains("/use-discount"));
+    }
+
+    private void applyEndpointRetryPolicy(Request<?> request, String url) {
+        if (url == null || !url.contains("/api/iap/verify")) return;
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                IAP_VERIFY_TIMEOUT_MS,
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
     }
 
     private String appendErrorDetail(String message, String detail) {
