@@ -162,6 +162,12 @@ public class ConfigListFragment extends ToolbarFragment {
             return;
         }
         ServiceItem savedItem = appStorage.getServiceStatus(ServiceItem.class);
+        ServiceItem preferredItem = findPreferredActivePaidService(items);
+        if ((savedItem == null || isFreeService(savedItem) || !containsOrder(items, savedItem.getOrderCode()))
+                && preferredItem != null) {
+            savedItem = preferredItem;
+            appStorage.saveServiceStatus(preferredItem);
+        }
 
         int defaultSelected = -1;
         if (savedItem != null) {
@@ -212,6 +218,38 @@ public class ConfigListFragment extends ToolbarFragment {
 
         adapter.setSelectedPosition(defaultSelected);
         return adapter;
+    }
+
+    private boolean containsOrder(List<ServiceItem> items, String orderCode) {
+        if (items == null || orderCode == null) return false;
+        for (ServiceItem item : items) {
+            if (item != null && orderCode.equals(item.getOrderCode())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ServiceItem findPreferredActivePaidService(List<ServiceItem> items) {
+        if (items == null) return null;
+        for (ServiceItem item : items) {
+            if (isActivePaidService(item)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private boolean isActivePaidService(ServiceItem item) {
+        if (item == null || isFreeService(item)) return false;
+        RequestStatus status = RequestStatus.fromValue(item.statusId);
+        return status == RequestStatus.ACTIVE
+                || status == RequestStatus.IN_USE
+                || status == RequestStatus.EXPIRING;
+    }
+
+    private boolean isFreeService(ServiceItem item) {
+        return item == null || "0".equals(item.getOrderCode());
     }
 
     private boolean shouldOpenRenewal(ServiceItem item) {

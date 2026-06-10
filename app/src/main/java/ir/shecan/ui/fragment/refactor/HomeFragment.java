@@ -48,6 +48,7 @@ import ir.shecan.data.modelDto.DynamicDialogViewModel;
 import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.ServiceItem;
+import ir.shecan.data.modelDto.ServiceItemMapper;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentHomeBinding;
 import ir.shecan.ui.activity.BillingPlansActivity;
@@ -110,6 +111,7 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
 
         AppStorage appStorage = new AppStorage(getContext());
         currentServiceItem = appStorage.getServiceStatus(ServiceItem.class);
+        currentServiceItem = resolveCurrentServiceItem(appStorage, currentServiceItem);
 
 //        ServiceItem finalServiceItem = serviceItem;
 
@@ -204,6 +206,38 @@ public class HomeFragment extends ToolbarFragment implements CoreApiResponseList
         });
 
         return root;
+    }
+
+    private ServiceItem resolveCurrentServiceItem(AppStorage storage, ServiceItem savedItem) {
+        if (storage == null || !isFreeService(savedItem)) {
+            return savedItem;
+        }
+
+        IssuesViewModel issues = storage.getIssue(IssuesViewModel.class);
+        if (issues == null || issues.getIssues() == null) {
+            return savedItem;
+        }
+
+        for (IssuesViewModel.IssuesDTO issue : issues.getIssues()) {
+            ServiceItem item = ServiceItemMapper.map(getContext(), issue);
+            if (isActivePaidService(item)) {
+                storage.saveServiceStatus(item);
+                return item;
+            }
+        }
+        return savedItem;
+    }
+
+    private boolean isActivePaidService(ServiceItem item) {
+        if (item == null || isFreeService(item)) return false;
+        RequestStatus status = RequestStatus.fromValue(item.statusId);
+        return status == RequestStatus.ACTIVE
+                || status == RequestStatus.IN_USE
+                || status == RequestStatus.EXPIRING;
+    }
+
+    private boolean isFreeService(ServiceItem item) {
+        return item == null || "0".equals(item.getOrderCode());
     }
 
     private boolean shouldOpenRenewalBeforeConnect() {

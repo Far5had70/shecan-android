@@ -98,23 +98,25 @@ public class ProfileFragment extends ToolbarFragment {
         list.add(new ProfileItem(0, R.drawable.ic_info, getString(R.string.profile_account)));
         list.add(new ProfileItem(1, R.drawable.ic_info, getString(R.string.profile_appearance)));
         list.add(new ProfileItem(5, R.drawable.ic_vip, getString(R.string.title_billing_plans)));
+        list.add(new ProfileItem(2, R.drawable.ic_info, getString(R.string.profile_transactions)));
 
         if (Constant.IsSiteMode) {
             binding.myketInfoView.setVisibility(View.GONE);
             binding.cafeBazaarInfoView.setVisibility(View.GONE);
-            list.add(new ProfileItem(2, R.drawable.ic_info, getString(R.string.profile_transactions)));
             list.add(new ProfileItem(3, R.drawable.ic_info, getString(R.string.profile_domain_support)));
             list.add(new ProfileItem(4, R.drawable.ic_info, getString(R.string.profile_tickets)));
         }
 
         if (Constant.IsMyketMode) {
-            binding.myketInfoView.setVisibility(View.VISIBLE);
+            binding.myketInfoView.setVisibility(View.GONE);
+            binding.cafeBazaarInfoView.setVisibility(View.GONE);
             list.add(new ProfileItem(3, R.drawable.ic_info, getString(R.string.profile_domain_support)));
             list.add(new ProfileItem(4, R.drawable.ic_info, getString(R.string.profile_tickets)));
         }
 
         if (Constant.IsCafeBazaarMode) {
-            binding.cafeBazaarInfoView.setVisibility(View.VISIBLE);
+            binding.myketInfoView.setVisibility(View.GONE);
+            binding.cafeBazaarInfoView.setVisibility(View.GONE);
             list.add(new ProfileItem(3, R.drawable.ic_info, getString(R.string.profile_domain_support)));
             list.add(new ProfileItem(4, R.drawable.ic_info, getString(R.string.profile_tickets)));
         }

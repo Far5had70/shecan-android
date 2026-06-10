@@ -195,11 +195,15 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
     }
 
     private void vipClickHandler() {
-        binding.toolbar.vip.setVisibility(Constant.IsSiteMode ? VISIBLE : GONE);
+        binding.toolbar.vip.setVisibility(VISIBLE);
         binding.toolbar.vip.setOnClickListener(view -> {
             TrackingUtils.logEvent(this, TrackingUtils.EVENT_VIP_CLICK,
                     TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "main_toolbar"));
-            AppUtils.openUrl(Constant.PlanUrl, this);
+            if (Constant.IsSiteMode) {
+                AppUtils.openUrl(Constant.PlanUrl, this);
+            } else {
+                startActivity(new Intent(this, BillingPlansActivity.class));
+            }
         });
     }
 
