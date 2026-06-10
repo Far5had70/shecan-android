@@ -31,6 +31,7 @@ public class PanelWebActivity extends AppCompatActivity {
     private static final String EXTRA_URL = "url";
     private static final String EXTRA_TITLE_RES = "title_res";
     private static final String EXTRA_REQUIRES_AUTH = "requires_auth";
+    private static final String EXTRA_HIDE_HEADER = "hide_header";
     private static final String PANEL_HOST = "my.shecan.ir";
     private static final String EMBEDDED_PANEL_SCRIPT =
             "(function(){"
@@ -57,11 +58,22 @@ public class PanelWebActivity extends AppCompatActivity {
                     + "window.__shecanAndroidEmbeddedObserver=new MutationObserver(apply);"
                     + "window.__shecanAndroidEmbeddedObserver.observe(document.documentElement,{childList:true,subtree:true});}"
                     + "})();";
+    private static final String HIDE_PUBLIC_HEADER_SCRIPT =
+            "(function(){"
+                    + "var styleId='shecan-android-no-header-style';"
+                    + "if(document.getElementById(styleId)){return;}"
+                    + "var style=document.createElement('style');"
+                    + "style.id=styleId;"
+                    + "style.textContent='header,nav,#header,.header,.site-header,.navbar{display:none!important;}'"
+                    + "+'body{padding-top:0!important;margin-top:0!important;}';"
+                    + "(document.head||document.documentElement).appendChild(style);"
+                    + "})();";
 
     private ActivityPanelWebBinding binding;
     private String panelEntryUrl;
     private String entryHost;
     private boolean panelEntryHistoryCleared;
+    private boolean hideHeader;
 
     public static void openTickets(Context context) {
         openAuthenticated(context, Constant.TicketUrlRaw, R.string.profile_tickets);
@@ -79,6 +91,10 @@ public class PanelWebActivity extends AppCompatActivity {
         openPublic(context, Constant.TermsUrl, R.string.billing_rules_link_text);
     }
 
+    public static void openTermsNoHeader(Context context) {
+        open(context, Constant.TermsUrl, R.string.billing_rules_link_text, false, true);
+    }
+
     public static void openPlans(Context context) {
         openPublic(context, Constant.PlanUrl, R.string.title_billing_plans);
     }
@@ -92,10 +108,15 @@ public class PanelWebActivity extends AppCompatActivity {
     }
 
     private static void open(Context context, String url, int titleRes, boolean requiresAuth) {
+        open(context, url, titleRes, requiresAuth, false);
+    }
+
+    private static void open(Context context, String url, int titleRes, boolean requiresAuth, boolean hideHeader) {
         Intent intent = new Intent(context, PanelWebActivity.class);
         intent.putExtra(EXTRA_URL, url);
         intent.putExtra(EXTRA_TITLE_RES, titleRes);
         intent.putExtra(EXTRA_REQUIRES_AUTH, requiresAuth);
+        intent.putExtra(EXTRA_HIDE_HEADER, hideHeader);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -114,6 +135,7 @@ public class PanelWebActivity extends AppCompatActivity {
 
         panelEntryUrl = getIntent().getStringExtra(EXTRA_URL);
         entryHost = getHost(panelEntryUrl);
+        hideHeader = getIntent().getBooleanExtra(EXTRA_HIDE_HEADER, false);
         boolean requiresAuth = getIntent().getBooleanExtra(EXTRA_REQUIRES_AUTH, true);
         String redirectUrl = requiresAuth ? AppUtils.buildRedirect(panelEntryUrl, this) : panelEntryUrl;
         if (redirectUrl == null || redirectUrl.trim().isEmpty()) {
@@ -125,6 +147,10 @@ public class PanelWebActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
+//        if (getIntent().getBooleanExtra(EXTRA_HIDE_HEADER, false)) {
+//            binding.toolbar.appBarLayout.setVisibility(GONE);
+//            return;
+//        }
         binding.toolbar.back.setVisibility(VISIBLE);
         binding.toolbar.back.setOnClickListener(v -> navigateBack());
         binding.toolbar.toolbarLogo.setVisibility(GONE);
@@ -154,6 +180,9 @@ public class PanelWebActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 if (isPanelHost(url)) {
                     view.evaluateJavascript(EMBEDDED_PANEL_SCRIPT, null);
+                }
+                if (hideHeader) {
+                    view.evaluateJavascript(HIDE_PUBLIC_HEADER_SCRIPT, null);
                 }
                 clearAuthenticationHistoryAtEntry(view, url);
                 binding.progress.setVisibility(GONE);

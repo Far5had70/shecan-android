@@ -76,9 +76,9 @@
     <color name="greenLightBack">#F5FAF9</color>
     <color name="orangeMain">#EE5F1D</color>
     <color name="billingPayButtonEnabledText">#FFFFFF</color>
-    <color name="billingPayButtonDisabledText">#8D9C96</color>
-    <color name="billingPayButtonDisabledBackground">#F5FAF9</color>
-    <color name="billingPayButtonDisabledStroke">#DFE8E5</color>
+    <color name="billingPayButtonDisabledText">#FFFFFF</color>
+    <color name="billingPayButtonDisabledBackground">#AEB8B5</color>
+    <color name="billingPayButtonDisabledStroke">#AEB8B5</color>
     <color name="billingPaymentOverlayBackground">#CCF5FAF9</color>
     <color name="greenAvatarBack">#D9E9E3</color>
     <color name="tabButtonGrayNotSelectedColor">#EAECEC</color>

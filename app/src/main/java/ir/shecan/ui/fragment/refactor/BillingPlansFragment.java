@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -136,6 +137,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.tvDiscountMessage.setVisibility(GONE);
         setupRulesLink();
         binding.checkboxRules.setOnCheckedChangeListener((buttonView, isChecked) -> updatePayButtonState());
+        updatePayButtonState();
         binding.btnPay.setOnClickListener(v -> {
             logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_CLICK);
             if (payButtonReady) {
@@ -166,7 +168,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         text.setSpan(new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                PanelWebActivity.openTerms(requireContext());
+                PanelWebActivity.openTermsNoHeader(requireContext());
             }
 
             @Override
@@ -207,7 +209,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.spinnerPeriod.setOnItemSelectedListener(listener);
 
         selectSpinnerValues(
-                selectedSla != null ? selectedSla : (prefillSla != null ? prefillSla.getApiValue() : null),
+                selectedSla != null ? selectedSla : (prefillSla != null ? prefillSla.getApiValue() : BillingSla.SILVER.getApiValue()),
                 selectedPeriod != null ? selectedPeriod : (prefillPeriod != null ? prefillPeriod.getApiValue() : null)
         );
         suppressSelectionEvents = false;
@@ -444,7 +446,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private void forceRtlSpinnerItem(View view) {
         view.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         view.setTextDirection(View.TEXT_DIRECTION_RTL);
-        view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.lightBack));
+        view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.transparent));
         if (view instanceof TextView) {
             TextView textView = (TextView) view;
             textView.setGravity(android.view.Gravity.RIGHT | android.view.Gravity.CENTER_VERTICAL);
@@ -801,12 +803,14 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
     private void updatePayButtonState(boolean enabled) {
         payButtonReady = enabled;
+        boolean visuallyEnabled = binding.checkboxRules.isChecked() && !paymentInProgress;
         binding.btnPay.setEnabled(true);
         binding.btnPay.setAlpha(1f);
-        binding.btnPay.setBackgroundResource(enabled ? R.drawable.primary_button : R.drawable.bg_billing_button_disabled);
+        binding.btnPay.setBackgroundResource(visuallyEnabled ? R.drawable.bg_billing_button_enabled : R.drawable.bg_billing_button_disabled);
+        ViewCompat.setBackgroundTintList(binding.btnPay, null);
         binding.btnPay.setTextColor(ContextCompat.getColor(
                 requireContext(),
-                enabled ? R.color.billingPayButtonEnabledText : R.color.billingPayButtonDisabledText
+                visuallyEnabled ? R.color.billingPayButtonEnabledText : R.color.billingPayButtonDisabledText
         ));
     }
 
