@@ -33,9 +33,16 @@ public class OtpReceiver extends BroadcastReceiver {
 
                 case CommonStatusCodes.SUCCESS:
                     String message = (String) extras.get(SmsRetriever.EXTRA_SMS_MESSAGE);
+                    if (message == null) {
+                        break;
+                    }
 
                     // استخراج 6 رقم
-                    String otp = message.replaceAll("\\D+", "").substring(0, 6);
+                    String digits = message.replaceAll("\\D+", "");
+                    if (digits.length() < 6) {
+                        break;
+                    }
+                    String otp = digits.substring(0, 6);
 
                     if (listener != null) listener.onOtpReceived(otp);
                     break;

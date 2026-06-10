@@ -49,6 +49,7 @@ public class OtpFragment extends Fragment {
 
     private boolean isSendingOtp = false;
     private boolean isVerifyingOtp = false;
+    private boolean suppressOtpChanges = false;
 
 
 
@@ -157,26 +158,27 @@ public class OtpFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable s) {
+                    if (suppressOtpChanges) return;
 
-                    // اگر ۶ رقم یکجا پیست شد:
-                    if (s.length() == 6 && index == 0) {
-                        for (int j = 0; j < 6; j++) {
-                            otpFields[j].setText(String.valueOf(s.charAt(j)));
-                        }
-                        otpFields[5].requestFocus();
-                        validateOtp(); // ← اتوماتیک بعد از paste هم
+                    String digits = s.toString().replaceAll("\\D+", "");
+                    if (digits.length() > 1) {
+                        fillOtpFrom(index, digits);
+                        return;
+                    }
+
+                    if (!digits.equals(s.toString())) {
+                        setOtpField(index, digits);
                         return;
                     }
 
                     // وقتی یک رقم زده شد → برو فیلد بعد
-                    if (s.length() == 1) {
-
+                    if (digits.length() == 1) {
                         if (index < otpFields.length - 1) {
                             otpFields[index + 1].requestFocus();
                         }
 
                         // اگر فیلد آخر پر شد → اتوماتیک verify
-                        if (index == otpFields.length - 1) {
+                        if (index == otpFields.length - 1 && isOtpComplete()) {
                             validateOtp();
                         }
                     }
@@ -209,6 +211,45 @@ public class OtpFragment extends Fragment {
                 return false;
             });
         }
+    }
+
+    private void fillOtpFrom(int startIndex, String rawDigits) {
+        String digits = rawDigits == null ? "" : rawDigits.replaceAll("\\D+", "");
+        if (digits.isEmpty()) return;
+
+        suppressOtpChanges = true;
+        try {
+            int target = Math.max(0, Math.min(startIndex, otpFields.length - 1));
+            for (int i = 0; i < digits.length() && target < otpFields.length; i++, target++) {
+                otpFields[target].setText(String.valueOf(digits.charAt(i)));
+            }
+            int focusIndex = Math.min(target, otpFields.length - 1);
+            otpFields[focusIndex].requestFocus();
+        } finally {
+            suppressOtpChanges = false;
+        }
+
+        if (isOtpComplete()) {
+            validateOtp();
+        }
+    }
+
+    private void setOtpField(int index, String value) {
+        suppressOtpChanges = true;
+        try {
+            otpFields[index].setText(value);
+        } finally {
+            suppressOtpChanges = false;
+        }
+    }
+
+    private boolean isOtpComplete() {
+        for (EditText otpField : otpFields) {
+            if (otpField.getText() == null || otpField.getText().length() != 1) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void startSmsListener() {
@@ -429,10 +470,7 @@ public class OtpFragment extends Fragment {
     }
 
     private void autoFillOtp(String otp) {
-        for (int i = 0; i < otp.length(); i++) {
-            otpFields[i].setText(String.valueOf(otp.charAt(i)));
-        }
-        otpFields[5].requestFocus();
+        fillOtpFrom(0, otp);
     }
 
     @Override
