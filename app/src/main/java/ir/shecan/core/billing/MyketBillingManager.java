@@ -233,8 +233,35 @@ public class MyketBillingManager {
 
     private boolean verifyPendingDeveloperPayload(Purchase purchase) {
         String expectedPayload = preferences.getString(payloadKey(purchase.getSku()), null);
-        // The backend remains authoritative if the active request was lost on process recreation.
-        return expectedPayload == null || expectedPayload.equals(purchase.getDeveloperPayload());
+        // The backend remains authoritative. Some Myket responses omit or normalize developerPayload,
+        // so only reject when both payloads are present and clearly conflict.
+        return isDeveloperPayloadCompatible(expectedPayload, purchase.getDeveloperPayload());
+    }
+
+    private boolean isDeveloperPayloadCompatible(String expectedPayload, String actualPayload) {
+        if (TextUtils.isEmpty(expectedPayload) || TextUtils.isEmpty(actualPayload)) return true;
+        if (expectedPayload.equals(actualPayload)) return true;
+
+        try {
+            JSONObject expected = new JSONObject(expectedPayload);
+            JSONObject actual = new JSONObject(actualPayload);
+            return matchesStringField(expected, actual, "sla")
+                    && matchesStringField(expected, actual, "period")
+                    && matchesLongField(expected, actual, "order_id");
+        } catch (Exception e) {
+            Log.w(TAG, "Could not compare Myket developer payload. Continuing with backend verification.", e);
+            return true;
+        }
+    }
+
+    private boolean matchesStringField(JSONObject expected, JSONObject actual, String key) {
+        if (!expected.has(key) || !actual.has(key)) return true;
+        return expected.optString(key, "").equals(actual.optString(key, ""));
+    }
+
+    private boolean matchesLongField(JSONObject expected, JSONObject actual, String key) {
+        if (!expected.has(key) || !actual.has(key)) return true;
+        return expected.optLong(key, 0L) == actual.optLong(key, 0L);
     }
 
     private String createDeveloperPayload(String sku, Long renewalOrderId) {

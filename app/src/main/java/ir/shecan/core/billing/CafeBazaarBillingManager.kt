@@ -198,8 +198,35 @@ class CafeBazaarBillingManager(context: Context) {
 
     private fun verifyPendingDeveloperPayload(purchaseInfo: PurchaseInfo): Boolean {
         val expectedPayload = preferences.getString(payloadKey(purchaseInfo.productId), null)
-        // Backend verification is authoritative if the active request was lost on recreation.
-        return expectedPayload == null || expectedPayload == purchaseInfo.payload
+        // Backend verification is authoritative. Some stores may omit or normalize payloads,
+        // so only reject when both payloads are present and clearly conflict.
+        return isDeveloperPayloadCompatible(expectedPayload, purchaseInfo.payload)
+    }
+
+    private fun isDeveloperPayloadCompatible(expectedPayload: String?, actualPayload: String?): Boolean {
+        if (expectedPayload.isNullOrBlank() || actualPayload.isNullOrBlank()) return true
+        if (expectedPayload == actualPayload) return true
+
+        return try {
+            val expected = JSONObject(expectedPayload)
+            val actual = JSONObject(actualPayload)
+            matchesStringField(expected, actual, "sla") &&
+                matchesStringField(expected, actual, "period") &&
+                matchesLongField(expected, actual, "order_id")
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not compare Cafe Bazaar developer payload. Continuing with backend verification.", e)
+            true
+        }
+    }
+
+    private fun matchesStringField(expected: JSONObject, actual: JSONObject, key: String): Boolean {
+        if (!expected.has(key) || !actual.has(key)) return true
+        return expected.optString(key) == actual.optString(key)
+    }
+
+    private fun matchesLongField(expected: JSONObject, actual: JSONObject, key: String): Boolean {
+        if (!expected.has(key) || !actual.has(key)) return true
+        return expected.optLong(key, 0L) == actual.optLong(key, 0L)
     }
 
     private fun createDeveloperPayload(sku: String, renewalOrderId: Long?): String {
