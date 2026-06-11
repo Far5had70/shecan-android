@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ir.shecan.BuildConfig;
 import ir.shecan.Shecan;
 import ir.shecan.core.billing.BillingPlan;
 import ir.shecan.core.billing.BillingPlanCatalog;
@@ -554,6 +555,7 @@ public class AuthApi {
             String phone,
             String code,
             int durationId,
+            String market,
             ApiCallback<DiscountViewModel> callback
     ) {
         Map<String, Object> input = new HashMap<>();
@@ -563,6 +565,9 @@ public class AuthApi {
         input.put("phone", phone);
         input.put("code", code);
         input.put("duration_id", durationId);
+        input.put("market", market);
+        input.put("app_version_name", BuildConfig.VERSION_NAME);
+        input.put("app_version_code", BuildConfig.VERSION_CODE);
 
         repo.request(
                 "discount_" + planId + "_" + durationId + "_" + code,

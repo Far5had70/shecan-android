@@ -545,6 +545,9 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         }
         BillingStore store = BillingStore.current();
         binding.tvServicePrice.setText(formatToman(selectedItem.getServicePrice(store)));
+        Long discountAmount = resolveDisplayDiscountAmount(store);
+        binding.discountAmountRow.setVisibility(discountAmount != null && discountAmount > 0L ? VISIBLE : GONE);
+        binding.tvDiscountAmount.setText(discountAmount != null ? formatToman(discountAmount) : "");
         binding.tvTax.setText(formatToman(selectedItem.getTaxPrice(store)));
         binding.tvTotal.setText(formatToman(selectedItem.getTotalPrice(store)));
         PriceViewModel priceViewModel = selectedItem.getPrice();
@@ -557,6 +560,8 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
     private void clearPriceUi() {
         binding.tvServicePrice.setText(formatToman(0));
+        binding.discountAmountRow.setVisibility(GONE);
+        binding.tvDiscountAmount.setText("");
         binding.tvTax.setText(formatToman(0));
         binding.tvTotal.setText(formatToman(0));
         binding.tvDueDate.setText("");
@@ -732,20 +737,32 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 normalizeIranMobile(token.getLogin()),
                 code,
                 selectedItem.getPlan().getDurationId(),
+                getDiscountMarket(),
                 new ApiCallback<DiscountViewModel>() {
                     @Override
                     public void onSuccess(DiscountViewModel data, boolean fromCache) {
                         if (binding == null || selectedItem == null) return;
                         selectedItem.setDiscountLoading(false);
-                        Long finalPrice = resolveDiscountedPrice(data, selectedItem.getPrice().getSafePrice());
+                        long originalPrice = selectedItem.getPrice().getSafePrice();
+                        Long finalPrice = resolveDiscountedPrice(data, originalPrice);
+                        Long discountAmount = resolveDiscountAmount(data, originalPrice, finalPrice);
                         String message = data != null && data.getMessage() != null
                                 ? data.getMessage()
                                 : getString(R.string.billing_discount_applied);
-                        selectedItem.applyDiscount(code, finalPrice, message);
+                        if (!isDiscountAccepted(data, finalPrice, discountAmount)) {
+                            selectedItem.clearDiscount(message);
+                            binding.btnApplyDiscount.setText(R.string.billing_apply_discount);
+                            binding.btnClearDiscount.setVisibility(GONE);
+                            showDiscountMessage(message, false);
+                            renderPrice();
+                            updatePayButtonState();
+                            return;
+                        }
+                        selectedItem.applyDiscount(code, finalPrice, discountAmount, message);
                         logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_DISCOUNT_SUCCESS);
                         binding.btnApplyDiscount.setText(R.string.billing_apply_discount);
                         binding.btnClearDiscount.setVisibility(VISIBLE);
-                        showDiscountMessage(message);
+                        showDiscountMessage(message, true);
                         renderPrice();
                         updatePayButtonState();
                     }
@@ -754,10 +771,10 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     public void onError(int statusCode, String message) {
                         if (binding == null || selectedItem == null) return;
                         selectedItem.setDiscountLoading(false);
-                        selectedItem.clearDiscount(formatBillingApiError(statusCode, message, R.string.billing_discount_invalid));
+                        selectedItem.clearDiscount(formatDiscountApiError(message));
                         binding.btnApplyDiscount.setText(R.string.billing_apply_discount);
                         binding.btnClearDiscount.setVisibility(GONE);
-                        showDiscountMessage(selectedItem.getDiscountMessage());
+                        showDiscountMessage(selectedItem.getDiscountMessage(), false);
                         renderPrice();
                         updatePayButtonState();
                     }
@@ -783,9 +800,56 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         return discount != null ? Math.max(0L, originalPrice - discount) : null;
     }
 
+    private Long resolveDiscountAmount(DiscountViewModel data, long originalPrice, Long finalPrice) {
+        if (data == null) return null;
+        Long discount = data.getDiscount();
+        if (discount != null) return Math.max(0L, discount);
+        if (finalPrice != null) return Math.max(0L, originalPrice - finalPrice);
+        return null;
+    }
+
+    private Long resolveDisplayDiscountAmount(BillingStore store) {
+        if (selectedItem == null || selectedItem.getPrice() == null || selectedItem.getDiscountedPrice() == null) {
+            return null;
+        }
+        Long explicitDiscount = selectedItem.getDiscountAmount();
+        if (explicitDiscount != null && explicitDiscount > 0L) return explicitDiscount;
+        BillingPlanPrice originalItem = new BillingPlanPrice(selectedItem.getPlan());
+        originalItem.setPrice(selectedItem.getPrice());
+        return Math.max(0L, originalItem.getTotalPrice(store) - selectedItem.getTotalPrice(store));
+    }
+
+    private String getDiscountMarket() {
+        switch (BillingStore.current()) {
+            case CAFE_BAZAAR:
+                return "bazaar";
+            case MYKET:
+                return "myket";
+            case SITE:
+            default:
+                return "site";
+        }
+    }
+
+    private boolean isDiscountAccepted(DiscountViewModel data, Long finalPrice, Long discountAmount) {
+        if (data == null) return false;
+        if (Boolean.FALSE.equals(data.getStatus())) return false;
+        return data.isSuccessful()
+                || finalPrice != null
+                || discountAmount != null && discountAmount > 0L;
+    }
+
     private void showDiscountMessage(String message) {
+        showDiscountMessage(message, false);
+    }
+
+    private void showDiscountMessage(String message, boolean success) {
         binding.tvDiscountMessage.setVisibility(message == null || message.isEmpty() ? GONE : VISIBLE);
         binding.tvDiscountMessage.setText(message == null ? "" : message);
+        binding.tvDiscountMessage.setTextColor(ContextCompat.getColor(
+                requireContext(),
+                success ? R.color.greenMain : R.color.red
+        ));
     }
 
     private void updatePayButtonState() {
@@ -1119,6 +1183,12 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         return statusCode > 0
                 ? getString(R.string.billing_error_with_http_status, safeMessage, statusCode)
                 : safeMessage;
+    }
+
+    private String formatDiscountApiError(String message) {
+        return message != null && !message.trim().isEmpty()
+                ? message
+                : getString(R.string.billing_discount_invalid);
     }
 
     private void setPaymentLoading(boolean loading) {

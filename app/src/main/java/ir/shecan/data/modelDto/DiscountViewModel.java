@@ -15,6 +15,10 @@ public class DiscountViewModel {
         return Boolean.TRUE.equals(status);
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
+
     public String getMessage() {
         return message;
     }

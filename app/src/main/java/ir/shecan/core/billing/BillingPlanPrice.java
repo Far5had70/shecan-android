@@ -8,6 +8,7 @@ public class BillingPlanPrice {
     private boolean loading;
     private String errorMessage;
     private Long discountedPrice;
+    private Long discountAmount;
     private String discountCode;
     private String discountMessage;
     private boolean discountLoading;
@@ -28,6 +29,7 @@ public class BillingPlanPrice {
         this.price = price;
         this.errorMessage = null;
         this.discountedPrice = null;
+        this.discountAmount = null;
         this.discountCode = null;
         this.discountMessage = null;
     }
@@ -52,6 +54,10 @@ public class BillingPlanPrice {
         return discountedPrice;
     }
 
+    public Long getDiscountAmount() {
+        return discountAmount;
+    }
+
     public String getDiscountCode() {
         return discountCode;
     }
@@ -68,15 +74,17 @@ public class BillingPlanPrice {
         this.discountLoading = discountLoading;
     }
 
-    public void applyDiscount(String code, Long discountedPrice, String message) {
+    public void applyDiscount(String code, Long discountedPrice, Long discountAmount, String message) {
         this.discountCode = code;
         this.discountedPrice = discountedPrice;
+        this.discountAmount = discountAmount;
         this.discountMessage = message;
     }
 
     public void clearDiscount(String message) {
         this.discountCode = null;
         this.discountedPrice = null;
+        this.discountAmount = null;
         this.discountMessage = message;
     }
 

@@ -1009,15 +1009,32 @@ public class APIManager {
         JSONObject json;
         if (response.startsWith("{")) {
             json = new JSONObject(response);
+        } else if (isDiscountResponse(clazz) && response.matches("-?\\d+")) {
+            json = new JSONObject()
+                    .put("status", true)
+                    .put("discount", Long.parseLong(response));
         } else {
             String redirectUrl = extractRedirectUrl(response);
             json = new JSONObject().put("url", redirectUrl != null ? redirectUrl : response);
+        }
+
+        if (isDiscountResponse(clazz) && json.has("data") && !(json.opt("data") instanceof JSONObject)) {
+            Object rawData = json.opt("data");
+            if (rawData instanceof Number || String.valueOf(rawData).matches("-?\\d+")) {
+                json = new JSONObject()
+                        .put("status", true)
+                        .put("discount", Long.parseLong(String.valueOf(rawData)));
+            }
         }
 
         JSONObject data = json.optJSONObject("data");
         if (data == null) data = json;
 
         return gson.fromJson(data.toString(), clazz);
+    }
+
+    private boolean isDiscountResponse(Class<?> clazz) {
+        return clazz != null && "ir.shecan.data.modelDto.DiscountViewModel".equals(clazz.getName());
     }
 
     private String extractRedirectUrl(String response) {
@@ -1136,7 +1153,6 @@ public class APIManager {
 
     private boolean isBillingEndpoint(String url) {
         return url != null && (url.contains("/price")
-                || url.contains("/discount")
                 || url.contains("/payment")
                 || url.contains("/iap/verify")
                 || url.contains("/use-discount"));

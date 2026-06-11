@@ -227,6 +227,7 @@
     <string name="billing_service_amount">مبلغ سرویس</string>
     <string name="billing_tax">۱۰٪ مالیات</string>
     <string name="billing_total">جمع هزینه</string>
+    <string name="billing_discount_amount">مبلغ تخفیف</string>
     <string name="billing_pay">پرداخت</string>
     <string name="billing_accept_rules">همه قوانین را خوانده‌ام و قبول دارم</string>
     <string name="billing_rules_link_text">قوانین</string>
