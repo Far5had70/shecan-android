@@ -562,11 +562,11 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.tvServicePrice.setText(formatToman(getOriginalServicePrice(store)));
         Long discountAmount = resolveDisplayDiscountAmount(store);
         binding.discountAmountRow.setVisibility(discountAmount != null && discountAmount > 0L ? VISIBLE : GONE);
-        binding.tvDiscountAmount.setText(discountAmount != null ? formatToman(discountAmount) : "");
+        binding.tvDiscountAmount.setText(discountAmount != null ? formatNegativeToman(discountAmount) : "");
         boolean showDiscountedServicePrice = selectedItem.getDiscountedPrice() != null;
         binding.discountedServiceAmountRow.setVisibility(showDiscountedServicePrice ? VISIBLE : GONE);
         binding.tvDiscountedServicePrice.setText(showDiscountedServicePrice ? formatToman(selectedItem.getServicePrice(store)) : "");
-        binding.tvTax.setText(formatToman(selectedItem.getTaxPrice(store)));
+        binding.tvTax.setText(formatPositiveToman(selectedItem.getTaxPrice(store)));
         binding.tvTotal.setText(formatToman(selectedItem.getTotalPrice(store)));
         PriceViewModel priceViewModel = selectedItem.getPrice();
         if (priceViewModel.getDueDate() != null) {
@@ -982,6 +982,14 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
     private String formatToman(long rial) {
         return getString(R.string.billing_price_toman, numberFormat.format(Math.max(0L, rial)));
+    }
+
+    private String formatNegativeToman(long rial) {
+        return "- " + formatToman(rial);
+    }
+
+    private String formatPositiveToman(long rial) {
+        return "+ " + formatToman(rial);
     }
 
     private long getPayablePrice() {
