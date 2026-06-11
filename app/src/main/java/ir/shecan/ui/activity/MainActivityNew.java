@@ -54,6 +54,7 @@ import ir.shecan.data.api.AuthApi;
 import ir.shecan.data.modelDto.AccountViewModel;
 import ir.shecan.data.modelDto.BannerViewModel;
 import ir.shecan.data.modelDto.IssuesViewModel;
+import ir.shecan.data.modelDto.PaymentIssueViewModel;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.ActivityMainNewBinding;
@@ -649,10 +650,21 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
 
     private void handlePaymentResult(Intent intent) {
         String result = resolvePaymentResult(intent);
-        if (result == null || binding == null || isFinishing()) return;
+        if (result == null) {
+            handlePanelPaymentResult(intent);
+            return;
+        }
+        if (binding == null || isFinishing()) return;
 
         new BillingPaymentReturnState(this).clear();
         updateConfigsIfSignedIn();
+        showResolvedPaymentResult(result);
+        intent.removeExtra(LAUNCH_PAYMENT_RESULT);
+        intent.setData(null);
+    }
+
+    private void showResolvedPaymentResult(String result) {
+        if (binding == null || isFinishing()) return;
         if (PAYMENT_RESULT_SUCCESS.equals(result)) {
             showPaymentResultDialog(
                     getString(R.string.billing_payment_success_title),
@@ -668,8 +680,51 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
                     null
             );
         }
-        intent.removeExtra(LAUNCH_PAYMENT_RESULT);
+    }
+
+    private void handlePanelPaymentResult(Intent intent) {
+        long paymentId = resolvePanelPaymentId(intent);
+        if (paymentId <= 0 || binding == null || isFinishing()) return;
+
+        new BillingPaymentReturnState(this).clear();
         intent.setData(null);
+        new AuthApi(getApplicationContext()).paymentIssue(
+                paymentId,
+                new ApiCallback<PaymentIssueViewModel>() {
+                    @Override
+                    public void onSuccess(PaymentIssueViewModel data, boolean fromCache) {
+                        if (binding == null || isFinishing()) return;
+                        updateConfigsIfSignedIn();
+                        int statusId = data != null
+                                && data.getIssue() != null
+                                && data.getIssue().getStatus() != null
+                                ? data.getIssue().getStatus().getId()
+                                : 0;
+                        showResolvedPaymentResult(statusId == 20 ? PAYMENT_RESULT_SUCCESS : PAYMENT_RESULT_FAILED);
+                    }
+
+                    @Override
+                    public void onError(int statusCode, String message) {
+                        if (binding == null || isFinishing()) return;
+                        updateConfigsIfSignedIn();
+                        showResolvedPaymentResult(PAYMENT_RESULT_FAILED);
+                    }
+                }
+        );
+    }
+
+    private long resolvePanelPaymentId(Intent intent) {
+        if (intent == null || intent.getData() == null) return 0L;
+        Uri data = intent.getData();
+        if (!"my.shecan.ir".equalsIgnoreCase(data.getHost())) return 0L;
+        List<String> segments = data.getPathSegments();
+        if (segments == null || segments.size() < 3) return 0L;
+        if (!"panel".equals(segments.get(0)) || !"payment".equals(segments.get(1))) return 0L;
+        try {
+            return Long.parseLong(segments.get(2));
+        } catch (NumberFormatException ignored) {
+            return 0L;
+        }
     }
 
     private String resolvePaymentResult(Intent intent) {

@@ -39,6 +39,7 @@ import ir.shecan.data.modelDto.ExistApiViewModel;
 import ir.shecan.data.modelDto.HomePage;
 import ir.shecan.data.modelDto.IssuesViewModel;
 import ir.shecan.data.modelDto.IapVerifyViewModel;
+import ir.shecan.data.modelDto.PaymentIssueViewModel;
 import ir.shecan.data.modelDto.PriceViewModel;
 import ir.shecan.data.modelDto.SendOtpApiViewModel;
 import ir.shecan.data.modelDto.ServicesViewModel;
@@ -279,6 +280,19 @@ public class AuthApi {
                 false,
                 callback,
                 IssuesViewModel.class
+        );
+    }
+
+    public void paymentIssue(long paymentId, ApiCallback<PaymentIssueViewModel> callback) {
+        repo.request(
+                "payment_issue_" + paymentId,
+                null,
+                storeHeader(),
+                "https://my.shecan.ir/payments/" + paymentId + ".json",
+                HttpMethod.GET,
+                false,
+                callback,
+                PaymentIssueViewModel.class
         );
     }
 
