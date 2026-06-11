@@ -7,6 +7,8 @@ import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -73,6 +75,8 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private static final String TAG = "BillingPlansFragment";
     private static final String IAP_PREFS_NAME = "billing_iap_state";
     private static final String VERIFIED_PURCHASE_PREFIX = "verified_purchase_";
+    private static final int MARKET_READY_MAX_RETRIES = 12;
+    private static final long MARKET_READY_RETRY_DELAY_MS = 500L;
     public static final String ARG_PREFILL_SLA = "prefill_sla";
     public static final String ARG_PREFILL_PERIOD = "prefill_period";
     public static final String ARG_RENEWAL_ORDER_ID = "renewal_order_id";
@@ -80,6 +84,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private FragmentBillingPlansBinding binding;
     private AuthApi authApi;
     private AppStorage storage;
+    private final Handler billingRetryHandler = new Handler(Looper.getMainLooper());
     private final NumberFormat numberFormat = NumberFormat.getInstance(new Locale("fa", "IR"));
     private final List<BillingSla> serviceOptions = new ArrayList<>();
     private final List<BillingPeriod> periodOptions = new ArrayList<>();
@@ -93,6 +98,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     private BillingSla prefillSla;
     private BillingPeriod prefillPeriod;
     private long renewalOrderId;
+    private int billingReadyRetrySeq;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -647,25 +653,48 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
             return;
         }
 
-        if (!host.isBillingReadyForStore(store)) {
-            String message = getString(R.string.billing_not_ready, store.getTitle());
-            showError(message);
-            pendingPlan = null;
+        if (store == BillingStore.SITE) {
+            startSitePayment();
+        } else {
+            launchMarketplacePurchaseWhenReady(host, store, 0, ++billingReadyRetrySeq);
+        }
+    }
+
+    private void launchMarketplacePurchaseWhenReady(BillingHost host, BillingStore store, int attempt, int seq) {
+        if (binding == null || seq != billingReadyRetrySeq) return;
+        if (host == null || pendingPlan == null) {
             setPaymentLoading(false);
             return;
         }
 
-        switch (store) {
-            case CAFE_BAZAAR:
-                host.launchCafeBazaarPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
-                break;
-            case MYKET:
-                host.launchMyketPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
-                break;
-            case SITE:
-                startSitePayment();
-                break;
+        if (host.isBillingReadyForStore(store)) {
+            switch (store) {
+                case CAFE_BAZAAR:
+                    host.launchCafeBazaarPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
+                    break;
+                case MYKET:
+                    host.launchMyketPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
+                    break;
+                case SITE:
+                    startSitePayment();
+                    break;
+            }
+            return;
         }
+
+        if (attempt < MARKET_READY_MAX_RETRIES) {
+            showStatus(getString(R.string.billing_payment_loading), false);
+            billingRetryHandler.postDelayed(
+                    () -> launchMarketplacePurchaseWhenReady(host, store, attempt + 1, seq),
+                    MARKET_READY_RETRY_DELAY_MS
+            );
+            return;
+        }
+
+        String message = getString(R.string.billing_not_ready, store.getTitle());
+        showError(message);
+        pendingPlan = null;
+        setPaymentLoading(false);
     }
 
     private void startSitePayment() {
@@ -1281,6 +1310,8 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     public void onDestroyView() {
         BillingHost host = getBillingHost();
         if (host != null) host.setBillingPurchaseObserver(null);
+        billingReadyRetrySeq++;
+        billingRetryHandler.removeCallbacksAndMessages(null);
         binding = null;
         super.onDestroyView();
     }
