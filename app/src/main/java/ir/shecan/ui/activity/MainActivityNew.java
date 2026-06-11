@@ -6,6 +6,7 @@ import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +37,7 @@ import java.util.Stack;
 
 import ir.shecan.R;
 import ir.shecan.Shecan;
+import ir.shecan.core.billing.BillingPaymentReturnState;
 import ir.shecan.core.billing.CafeBazaarBillingManager;
 import ir.shecan.core.billing.CafeBazaarBillingProducts;
 import ir.shecan.core.billing.BillingHost;
@@ -80,6 +82,9 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
     public static final String LAUNCH_ACTION = "ir.shecan.ui.activity.MainActivityNew.LAUNCH_ACTION";
     public static final String LAUNCH_FRAGMENT = "ir.shecan.ui.activity.MainActivityNew.LAUNCH_FRAGMENT";
     public static final String LAUNCH_NEED_RECREATE = "ir.shecan.ui.activity.MainActivityNew.LAUNCH_NEED_RECREATE";
+    public static final String LAUNCH_PAYMENT_RESULT = "ir.shecan.ui.activity.MainActivityNew.LAUNCH_PAYMENT_RESULT";
+    public static final String PAYMENT_RESULT_SUCCESS = "success";
+    public static final String PAYMENT_RESULT_FAILED = "failed";
     public static final String LAST_TAB = "LAST_TAB_KEY";
 
     public int currentTab = 1;
@@ -169,6 +174,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         binding.customBar.select(selectedTab);
 
         LaunchHandler.handle(this, getIntent());
+        handlePaymentResult(getIntent());
         onBackPressedHandler();
         vipClickHandler();
         setupMyketBilling();
@@ -538,7 +544,9 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
         LaunchHandler.handle(this, intent);
+        handlePaymentResult(intent);
     }
 
     @Override
@@ -631,6 +639,90 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
 
     public void activateService() {
         if (vpnManager != null) vpnManager.startVpnActivation();
+    }
+
+    private void handlePaymentResult(Intent intent) {
+        String result = resolvePaymentResult(intent);
+        if (result == null || binding == null || isFinishing()) return;
+
+        new BillingPaymentReturnState(this).clear();
+        updateConfigsIfSignedIn();
+        if (PAYMENT_RESULT_SUCCESS.equals(result)) {
+            showPaymentResultDialog(
+                    getString(R.string.billing_payment_success_title),
+                    getString(R.string.billing_payment_success_message),
+                    getString(R.string.billing_payment_start_using),
+                    () -> activateService()
+            );
+        } else if (PAYMENT_RESULT_FAILED.equals(result)) {
+            showPaymentResultDialog(
+                    getString(R.string.billing_payment_failed_title),
+                    getString(R.string.billing_payment_failed_refund_message),
+                    getString(R.string.billing_payment_confirm),
+                    null
+            );
+        }
+        intent.removeExtra(LAUNCH_PAYMENT_RESULT);
+        intent.setData(null);
+    }
+
+    private String resolvePaymentResult(Intent intent) {
+        if (intent == null) return null;
+
+        String extraResult = intent.getStringExtra(LAUNCH_PAYMENT_RESULT);
+        String result = normalizePaymentResult(extraResult);
+        if (result != null) return result;
+
+        Uri data = intent.getData();
+        if (data == null) return null;
+
+        result = normalizePaymentResult(data.getQueryParameter("status"));
+        if (result != null) return result;
+        result = normalizePaymentResult(data.getQueryParameter("result"));
+        if (result != null) return result;
+        result = normalizePaymentResult(data.getQueryParameter("success"));
+        if (result != null) return result;
+        result = normalizePaymentResult(data.getQueryParameter("payment_status"));
+        if (result != null) return result;
+
+        String path = data.getPath();
+        return normalizePaymentResult(path);
+    }
+
+    private String normalizePaymentResult(String value) {
+        if (value == null) return null;
+        String normalized = value.trim().toLowerCase(java.util.Locale.US);
+        if (normalized.isEmpty()) return null;
+        if (normalized.contains("success")
+                || normalized.contains("paid")
+                || normalized.contains("ok")
+                || "1".equals(normalized)
+                || "true".equals(normalized)) {
+            return PAYMENT_RESULT_SUCCESS;
+        }
+        if (normalized.contains("fail")
+                || normalized.contains("cancel")
+                || normalized.contains("error")
+                || "0".equals(normalized)
+                || "false".equals(normalized)) {
+            return PAYMENT_RESULT_FAILED;
+        }
+        return null;
+    }
+
+    private void showPaymentResultDialog(String title, String message, String actionText, Runnable action) {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(actionText, (dialogInterface, which) -> {
+                    if (action != null) action.run();
+                })
+                .create();
+        dialog.setOnShowListener(d ->
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setTextColor(ContextCompat.getColor(this, R.color.greenMain))
+        );
+        dialog.show();
     }
 
     public void applyThemeForRecreate() {

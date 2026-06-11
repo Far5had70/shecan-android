@@ -178,17 +178,11 @@ public class AuthApi {
     private Map<String, String> storeHeader() {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Referer", APIManager.getStoreHeaderValue());
-        headers.put("X-App-Market", getAppMarketHeader());
+        headers.put("X-App-Market", APIManager.getAppMarketHeaderValue());
         headers.put("X-App-Version", BuildConfig.VERSION_NAME);
         headers.put("X-App-Build", String.valueOf(BuildConfig.VERSION_CODE));
         headers.put("X-App-Platform", "android");
         return headers;
-    }
-
-    private String getAppMarketHeader() {
-        if (Constant.IsCafeBazaarMode) return "bazaar";
-        if (Constant.IsMyketMode) return "myket";
-        return "site";
     }
 
     // ---------------------------------------------------
@@ -631,12 +625,14 @@ public class AuthApi {
         payload.put("sla", sla);
         payload.put("period", period);
         payload.put("discount", discount);
+        payload.put("callback_url", Constant.AppPaymentCallbackUrl);
 
         String rawBody = "api_key=" + apiKey
                 + "&amount=" + amount
                 + "&sla=" + sla
                 + "&period=" + period
                 + "&discount=" + discount
+                + "&callback_url=" + Constant.AppPaymentCallbackUrl
                 + "&payload=" + gson.toJson(payload)
                 + "&user=" + gson.toJson(createWebPaymentUserPayload(apiKey, user));
 

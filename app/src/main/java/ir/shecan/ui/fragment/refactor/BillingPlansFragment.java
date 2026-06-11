@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -60,6 +61,7 @@ import ir.shecan.data.modelDto.SitePaymentViewModel;
 import ir.shecan.data.modelDto.VerifyApiViewModel;
 import ir.shecan.data.storage.AppStorage;
 import ir.shecan.databinding.FragmentBillingPlansBinding;
+import ir.shecan.ui.activity.BillingPlansActivity;
 import ir.shecan.ui.activity.MainActivityNew;
 import ir.shecan.ui.activity.PanelWebActivity;
 import ir.shecan.ui.fragment.ToolbarFragment;
@@ -934,6 +936,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BILLING_PURCHASE_CANCEL, params);
         pendingPlan = null;
         setPaymentLoading(false);
+        openPaymentResult(MainActivityNew.PAYMENT_RESULT_FAILED);
     }
 
     @Override
@@ -945,6 +948,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         TrackingUtils.put(params, TrackingUtils.PARAM_ERROR, message);
         TrackingUtils.logEvent(requireContext(), TrackingUtils.EVENT_BILLING_PURCHASE_ERROR, params);
         setPaymentLoading(false);
+        openPaymentResult(MainActivityNew.PAYMENT_RESULT_FAILED);
     }
 
     private String formatToman(long rial) {
@@ -1010,6 +1014,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                             showError(detail);
                             pendingPlan = null;
                             setPaymentLoading(false);
+                            openPaymentResult(MainActivityNew.PAYMENT_RESULT_FAILED);
                         }
                     }
 
@@ -1019,6 +1024,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                         showPaymentError(statusCode, message, R.string.billing_iap_verify_failed);
                         pendingPlan = null;
                         setPaymentLoading(false);
+                        openPaymentResult(MainActivityNew.PAYMENT_RESULT_FAILED);
                     }
                 }
         );
@@ -1090,6 +1096,18 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_SUCCESS);
         pendingPlan = null;
         setPaymentLoading(false);
+        openPaymentResult(MainActivityNew.PAYMENT_RESULT_SUCCESS);
+    }
+
+    private void openPaymentResult(String result) {
+        if (!isAdded()) return;
+        Intent intent = new Intent(requireContext(), MainActivityNew.class)
+                .putExtra(MainActivityNew.LAUNCH_PAYMENT_RESULT, result)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        if (getActivity() instanceof BillingPlansActivity) {
+            requireActivity().finish();
+        }
     }
 
     private boolean hasAppliedDiscount() {

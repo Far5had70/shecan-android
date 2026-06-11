@@ -140,6 +140,11 @@ public class APIManager {
             headers.put("x-api-secret", secretKey);
         }
 
+        headers.put("X-App-Market", getAppMarketHeaderValue());
+        headers.put("X-App-Version", BuildConfig.VERSION_NAME);
+        headers.put("X-App-Build", String.valueOf(BuildConfig.VERSION_CODE));
+        headers.put("X-App-Platform", "android");
+
         if (extraHeaders != null) {
             headers.putAll(extraHeaders);
         }
@@ -152,6 +157,20 @@ public class APIManager {
         switch (store.toLowerCase(Locale.US)) {
             case "cafebazaar":
                 return "cafebazaar";
+            case "myket":
+                return "myket";
+            case "site":
+                return "site";
+            default:
+                return store.toLowerCase(Locale.US);
+        }
+    }
+
+    public static String getAppMarketHeaderValue() {
+        String store = BuildConfig.STORE != null ? BuildConfig.STORE : "";
+        switch (store.toLowerCase(Locale.US)) {
+            case "cafebazaar":
+                return "bazaar";
             case "myket":
                 return "myket";
             case "site":
