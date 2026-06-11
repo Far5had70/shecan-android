@@ -544,10 +544,13 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
             return;
         }
         BillingStore store = BillingStore.current();
-        binding.tvServicePrice.setText(formatToman(selectedItem.getServicePrice(store)));
+        binding.tvServicePrice.setText(formatToman(getOriginalServicePrice(store)));
         Long discountAmount = resolveDisplayDiscountAmount(store);
         binding.discountAmountRow.setVisibility(discountAmount != null && discountAmount > 0L ? VISIBLE : GONE);
         binding.tvDiscountAmount.setText(discountAmount != null ? formatToman(discountAmount) : "");
+        boolean showDiscountedServicePrice = selectedItem.getDiscountedPrice() != null;
+        binding.discountedServiceAmountRow.setVisibility(showDiscountedServicePrice ? VISIBLE : GONE);
+        binding.tvDiscountedServicePrice.setText(showDiscountedServicePrice ? formatToman(selectedItem.getServicePrice(store)) : "");
         binding.tvTax.setText(formatToman(selectedItem.getTaxPrice(store)));
         binding.tvTotal.setText(formatToman(selectedItem.getTotalPrice(store)));
         PriceViewModel priceViewModel = selectedItem.getPrice();
@@ -562,6 +565,8 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.tvServicePrice.setText(formatToman(0));
         binding.discountAmountRow.setVisibility(GONE);
         binding.tvDiscountAmount.setText("");
+        binding.discountedServiceAmountRow.setVisibility(GONE);
+        binding.tvDiscountedServicePrice.setText("");
         binding.tvTax.setText(formatToman(0));
         binding.tvTotal.setText(formatToman(0));
         binding.tvDueDate.setText("");
@@ -812,11 +817,14 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         if (selectedItem == null || selectedItem.getPrice() == null || selectedItem.getDiscountedPrice() == null) {
             return null;
         }
-        Long explicitDiscount = selectedItem.getDiscountAmount();
-        if (explicitDiscount != null && explicitDiscount > 0L) return explicitDiscount;
+        return Math.max(0L, getOriginalServicePrice(store) - selectedItem.getServicePrice(store));
+    }
+
+    private long getOriginalServicePrice(BillingStore store) {
+        if (selectedItem == null || selectedItem.getPrice() == null) return 0L;
         BillingPlanPrice originalItem = new BillingPlanPrice(selectedItem.getPlan());
         originalItem.setPrice(selectedItem.getPrice());
-        return Math.max(0L, originalItem.getTotalPrice(store) - selectedItem.getTotalPrice(store));
+        return originalItem.getServicePrice(store);
     }
 
     private String getDiscountMarket() {
