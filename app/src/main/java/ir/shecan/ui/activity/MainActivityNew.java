@@ -337,24 +337,28 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         );
     }
 
+    @Override
     public void launchMyketPurchase(String sku, Long renewalOrderId) {
         if (myketBillingManager != null) {
             myketBillingManager.launchPurchaseFlow(this, sku, renewalOrderId);
         }
     }
 
+    @Override
     public void consumeMyketPurchase(Object purchase) {
         if (myketBillingManager != null) {
             myketBillingManager.consumePurchase(purchase);
         }
     }
 
+    @Override
     public void launchCafeBazaarPurchase(String sku, Long renewalOrderId) {
         if (cafeBazaarBillingManager != null) {
             cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku, renewalOrderId);
         }
     }
 
+    @Override
     public void consumeCafeBazaarPurchase(String purchaseToken) {
         if (cafeBazaarBillingManager != null) {
             cafeBazaarBillingManager.consumePurchase(purchaseToken);

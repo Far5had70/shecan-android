@@ -273,6 +273,20 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
     }
 
     @Override
+    public void consumeMyketPurchase(Object purchase) {
+        if (myketBillingManager != null) {
+            myketBillingManager.consumePurchase(purchase);
+        }
+    }
+
+    @Override
+    public void consumeCafeBazaarPurchase(String purchaseToken) {
+        if (cafeBazaarBillingManager != null) {
+            cafeBazaarBillingManager.consumePurchase(purchaseToken);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         if (myketBillingManager != null) myketBillingManager.dispose();
         if (cafeBazaarBillingManager != null) cafeBazaarBillingManager.dispose();

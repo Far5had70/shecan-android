@@ -920,6 +920,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                         if (binding == null) return;
                         if (data != null && data.isOk()) {
                             markMarketplacePurchaseHandled(store, purchase);
+                            consumeMarketplacePurchase(store, purchase);
                             String order = data.getOrderId() != null
                                     ? getString(R.string.billing_order_code, String.valueOf(data.getOrderId()))
                                     : "";
@@ -964,6 +965,19 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
 
     private SharedPreferences iapPreferences() {
         return requireContext().getSharedPreferences(IAP_PREFS_NAME, android.content.Context.MODE_PRIVATE);
+    }
+
+    private void consumeMarketplacePurchase(BillingStore store, Object purchase) {
+        BillingHost host = getBillingHost();
+        if (host == null) return;
+        if (store == BillingStore.CAFE_BAZAAR) {
+            String purchaseToken = getMarketplacePurchaseToken(store, purchase);
+            if (purchaseToken != null && !purchaseToken.trim().isEmpty()) {
+                host.consumeCafeBazaarPurchase(purchaseToken);
+            }
+        } else if (store == BillingStore.MYKET) {
+            host.consumeMyketPurchase(purchase);
+        }
     }
 
     private long getIapVerificationAmount() {
