@@ -49,6 +49,7 @@ import ir.shecan.core.billing.BillingPlanPrice;
 import ir.shecan.core.billing.BillingPurchaseObserver;
 import ir.shecan.core.billing.BillingSla;
 import ir.shecan.core.billing.BillingStore;
+import ir.shecan.core.billing.MyketBillingProducts;
 import ir.shecan.core.constant.Constant;
 import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.TrackingUtils;
@@ -673,7 +674,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                     host.launchCafeBazaarPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
                     break;
                 case MYKET:
-                    host.launchMyketPurchase(pendingPlan.getSku(), getRenewalOrderIdOrNull());
+                    host.launchMyketPurchase(getMarketplacePlanSku(store, pendingPlan), getRenewalOrderIdOrNull());
                     break;
                 case SITE:
                     startSitePayment();
@@ -943,7 +944,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         }
         if (pendingPlan == null) {
             showStatus(getString(R.string.billing_restored_purchase_found, store.getTitle()), false);
-            pendingPlan = BillingPlanCatalog.findBySku(getMarketplaceProductId(store, purchase));
+            pendingPlan = findPlanByMarketplaceSku(store, getMarketplaceProductId(store, purchase));
             if (pendingPlan == null) {
                 showError(getString(R.string.billing_iap_unknown_product));
                 setPaymentLoading(false);
@@ -1193,6 +1194,22 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
             return ((Purchase) purchase).getSku();
         }
         return null;
+    }
+
+    private String getMarketplacePlanSku(BillingStore store, BillingPlan plan) {
+        if (plan == null) return "";
+        if (store == BillingStore.MYKET) {
+            return MyketBillingProducts.legacySku(plan.getSku());
+        }
+        return plan.getSku();
+    }
+
+    private BillingPlan findPlanByMarketplaceSku(BillingStore store, String sku) {
+        BillingPlan plan = BillingPlanCatalog.findBySku(sku);
+        if (plan != null || store != BillingStore.MYKET || sku == null || sku.endsWith("_v2")) {
+            return plan;
+        }
+        return BillingPlanCatalog.findBySku(sku + "_v2");
     }
 
     private String getMarketplacePurchaseToken(BillingStore store, Object purchase) {

@@ -322,7 +322,7 @@ public class MyketBillingManager {
         JSONObject payload = new JSONObject();
         try {
             payload.put("version", 1);
-            BillingPlan plan = BillingPlanCatalog.findBySku(sku);
+            BillingPlan plan = findPlanBySku(sku);
             if (plan != null) {
                 payload.put("sla", plan.getSla().getApiValue());
                 payload.put("period", plan.getPeriod().getApiValue());
@@ -333,6 +333,12 @@ public class MyketBillingManager {
         } catch (Exception ignored) {
         }
         return payload.toString();
+    }
+
+    private BillingPlan findPlanBySku(String sku) {
+        BillingPlan plan = BillingPlanCatalog.findBySku(sku);
+        if (plan != null || TextUtils.isEmpty(sku) || sku.endsWith("_v2")) return plan;
+        return BillingPlanCatalog.findBySku(sku + "_v2");
     }
 
     private void savePendingPayload(String sku, String payload) {
