@@ -11,6 +11,9 @@ import ir.shecan.data.storage.AppStorage;
 public class ServiceItemMapper {
 
     public static ServiceItem map(Context context, IssuesViewModel.IssuesDTO dto) {
+        if (dto == null) {
+            dto = IssuesViewModel.IssuesDTO.createDefault();
+        }
 
         String orderCode = String.valueOf(dto.getId());
 
@@ -22,7 +25,7 @@ public class ServiceItemMapper {
 
         String updateLink = getCustomFieldString(dto, 95);
 
-        RequestStatus status = RequestStatus.fromValue(dto.getStatus().getId());
+        RequestStatus status = RequestStatus.fromValue(dto.getStatus() != null ? dto.getStatus().getId() : 0);
         if (status == null) status = RequestStatus.READY_TO_CONNECT;
 
         String statusText = getStatusTitle(context, status);
@@ -44,29 +47,29 @@ public class ServiceItemMapper {
         // 🎉‌ ست کردن تمام فیلدهای جدید
         item.id = dto.getId();
 
-        item.projectId = dto.getProject().getId();
-        item.projectName = dto.getProject().getName();
+        item.projectId = dto.getProject() != null ? dto.getProject().getId() : 0;
+        item.projectName = dto.getProject() != null ? safeString(dto.getProject().getName()) : "";
 
-        item.trackerId = dto.getTracker().getId();
-        item.trackerName = dto.getTracker().getName();
+        item.trackerId = dto.getTracker() != null ? dto.getTracker().getId() : 0;
+        item.trackerName = dto.getTracker() != null ? safeString(dto.getTracker().getName()) : "";
 
-        item.statusId = dto.getStatus().getId();
-        item.statusName = dto.getStatus().getName();
+        item.statusId = dto.getStatus() != null ? dto.getStatus().getId() : 0;
+        item.statusName = dto.getStatus() != null ? safeString(dto.getStatus().getName()) : statusText;
 
-        item.priorityId = dto.getPriority().getId();
-        item.priorityName = dto.getPriority().getName();
+        item.priorityId = dto.getPriority() != null ? dto.getPriority().getId() : 0;
+        item.priorityName = dto.getPriority() != null ? safeString(dto.getPriority().getName()) : "";
 
-        item.authorId = dto.getAuthor().getId();
-        item.authorName = dto.getAuthor().getName();
+        item.authorId = dto.getAuthor() != null ? dto.getAuthor().getId() : 0;
+        item.authorName = dto.getAuthor() != null ? safeString(dto.getAuthor().getName()) : "";
 
-        item.subject = dto.getSubject();
-        item.description = dto.getDescription();
-        item.startDate = dto.getStartDate();
-        item.dueDate = dto.getDueDate();
+        item.subject = safeString(dto.getSubject());
+        item.description = safeString(dto.getDescription());
+        item.startDate = safeString(dto.getStartDate());
+        item.dueDate = safeString(dto.getDueDate());
         item.doneRatio = dto.getDoneRatio();
         item.isPrivate = dto.isIsPrivate();
-        item.createdOn = dto.getCreatedOn();
-        item.updatedOn = dto.getUpdatedOn();
+        item.createdOn = safeString(dto.getCreatedOn());
+        item.updatedOn = safeString(dto.getUpdatedOn());
         item.closedOn = dto.getClosedOn();
 
         // custom fields
@@ -123,10 +126,14 @@ public class ServiceItemMapper {
         if (dto.getCustomFields() == null) return "";
         for (IssuesViewModel.IssuesDTO.CustomFieldsDTO c : dto.getCustomFields()) {
             if (c.getId() == id) {
-                return c.getValue();
+                return safeString(c.getValue());
             }
         }
         return "";
+    }
+
+    private static String safeString(String value) {
+        return value != null ? value : "";
     }
 
     private static String getStatusTitle(Context context, RequestStatus status) {

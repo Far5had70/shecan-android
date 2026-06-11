@@ -172,7 +172,9 @@ public class ConfigListFragment extends ToolbarFragment {
         int defaultSelected = -1;
         if (savedItem != null) {
             for (int i = 0; i < items.size(); i++) {
-                if (items.get(i).getOrderCode().equals(savedItem.getOrderCode())) {
+                ServiceItem item = items.get(i);
+                String itemOrderCode = item != null ? item.getOrderCode() : null;
+                if (itemOrderCode != null && itemOrderCode.equals(savedItem.getOrderCode())) {
                     defaultSelected = i;
                     break;
                 }

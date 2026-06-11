@@ -77,7 +77,7 @@ public class ServiceItem {
     public String getOrderCode() { return orderCode; }
     public String getServiceType() { return serviceType; }
     public String getDurationTitle() { return durationTitle; }
-    public String getStatusText() { return statusName; }
+    public String getStatusText() { return statusName != null && !statusName.isEmpty() ? statusName : statusText; }
     public String getUpdateLink() { return updateLink; }
     public int getStatusIcon() { return statusIcon; }
     public int getStatusColor() { return statusColor; }

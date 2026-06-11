@@ -48,10 +48,12 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
         }
 
         public void bind(Context context, ServiceItem item, boolean isSelected, OnMoreClickListener listener) {
+            if (item == null) return;
 
-            boolean isFreeMode = item.getOrderCode().equals("0");
+            String orderCode = item.getOrderCode() != null ? item.getOrderCode() : "";
+            boolean isFreeMode = "0".equals(orderCode);
 
-            binding.txtOrderCode.setText(isFreeMode ? "-" : item.getOrderCode());
+            binding.txtOrderCode.setText(isFreeMode ? "-" : orderCode);
             binding.txtServiceType.setText(item.getServiceType());
             binding.txtStatus.setText(isFreeMode ? context.getString(R.string.readyToConnect) : item.getStatusText());
             binding.txtStatus.setTextColor(item.getStatusColor());
