@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -99,7 +100,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         });
 
         binding.toolbar.vip.setVisibility(Constant.IsSiteMode? VISIBLE : GONE);
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
+        binding.toolbar.vip.setOnClickListener(view -> startActivity(new Intent(this, BillingPlansActivity.class)));
 
     }
 

@@ -209,10 +209,17 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         binding.spinnerPeriod.setOnItemSelectedListener(listener);
 
         selectSpinnerValues(
-                selectedSla != null ? selectedSla : (prefillSla != null ? prefillSla.getApiValue() : BillingSla.SILVER.getApiValue()),
+                selectedSla != null ? selectedSla : (prefillSla != null ? prefillSla.getApiValue() : getDefaultServiceValue()),
                 selectedPeriod != null ? selectedPeriod : (prefillPeriod != null ? prefillPeriod.getApiValue() : null)
         );
         suppressSelectionEvents = false;
+    }
+
+    private String getDefaultServiceValue() {
+        BillingSla defaultSla = serviceCatalog != null
+                ? BillingSla.fromApiValue(serviceCatalog.getDefaultService())
+                : null;
+        return (defaultSla != null ? defaultSla : BillingSla.SILVER).getApiValue();
     }
 
     private void readPrefillArgs() {

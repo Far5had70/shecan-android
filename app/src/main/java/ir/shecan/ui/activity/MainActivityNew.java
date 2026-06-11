@@ -44,7 +44,6 @@ import ir.shecan.core.billing.BillingStore;
 import ir.shecan.core.billing.MyketBillingManager;
 import ir.shecan.core.billing.MyketBillingProducts;
 import ir.shecan.core.constant.Constant;
-import ir.shecan.core.util.AppUtils;
 import ir.shecan.core.util.TrackingUtils;
 import ir.shecan.data.api.ApiCallback;
 import ir.shecan.data.api.AuthApi;
@@ -160,6 +159,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         });
 
         updateLoginInformation();
+        preloadServiceCatalog();
         updateConfigsIfSignedIn();
 
         setupCustomBottomBar();
@@ -199,10 +199,22 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         binding.toolbar.vip.setOnClickListener(view -> {
             TrackingUtils.logEvent(this, TrackingUtils.EVENT_VIP_CLICK,
                     TrackingUtils.bundleOf(TrackingUtils.PARAM_SOURCE, "main_toolbar"));
-            if (Constant.IsSiteMode) {
-                AppUtils.openUrl(Constant.PlanUrl, this);
-            } else {
-                startActivity(new Intent(this, BillingPlansActivity.class));
+            startActivity(new Intent(this, BillingPlansActivity.class));
+        });
+    }
+
+    private void preloadServiceCatalog() {
+        new AuthApi(this).services(new ApiCallback<ir.shecan.data.modelDto.ServicesViewModel>() {
+            @Override
+            public void onSuccess(ir.shecan.data.modelDto.ServicesViewModel res, boolean fromCache) {
+                if (res != null) {
+                    new AppStorage(getApplicationContext()).saveServiceCatalog(res);
+                }
+            }
+
+            @Override
+            public void onError(int statusCode, String message) {
+                Log.w("MainActivityNew", "Failed to preload services catalog: " + message);
             }
         });
     }

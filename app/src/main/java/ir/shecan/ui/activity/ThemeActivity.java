@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 
 import static ir.shecan.core.util.AppUtils.adjustUIForFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -25,7 +26,6 @@ import ir.shecan.databinding.ActivityThemeBinding;
 import ir.shecan.data.modelDto.AppConfig;
 import ir.shecan.data.modelDto.ThemeItem;
 import ir.shecan.data.storage.AppStorage;
-import ir.shecan.core.util.AppUtils;
 
 public class ThemeActivity extends AppCompatActivity {
 
@@ -58,7 +58,7 @@ public class ThemeActivity extends AppCompatActivity {
 
     private void vipClickHandler() {
         binding.toolbar.vip.setVisibility(Constant.IsSiteMode? VISIBLE : GONE);
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
+        binding.toolbar.vip.setOnClickListener(view -> startActivity(new Intent(this, BillingPlansActivity.class)));
     }
 
     private void setupRecycler() {

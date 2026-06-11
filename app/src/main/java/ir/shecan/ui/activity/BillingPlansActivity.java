@@ -25,7 +25,6 @@ import ir.shecan.core.billing.CafeBazaarBillingProducts;
 import ir.shecan.core.billing.MyketBillingManager;
 import ir.shecan.core.billing.MyketBillingProducts;
 import ir.shecan.core.constant.Constant;
-import ir.shecan.core.util.AppUtils;
 import ir.shecan.databinding.ActivityBillingPlansBinding;
 import ir.shecan.ui.fragment.refactor.BillingPlansFragment;
 
@@ -108,8 +107,7 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
         binding.toolbar.toolbarTitle.setVisibility(VISIBLE);
         binding.toolbar.toolbarTitle.setText(R.string.title_billing_plans);
 
-        binding.toolbar.vip.setVisibility(Constant.IsSiteMode ? VISIBLE : GONE);
-        binding.toolbar.vip.setOnClickListener(view -> AppUtils.openUrl(Constant.PlanUrl, this));
+        binding.toolbar.vip.setVisibility(GONE);
     }
 
     private void setupMyketBilling() {
