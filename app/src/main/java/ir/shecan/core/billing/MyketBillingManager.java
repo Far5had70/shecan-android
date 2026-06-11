@@ -38,6 +38,8 @@ public class MyketBillingManager {
     private IabHelper helper;
     private Listener listener;
     private boolean ready;
+    private String activePurchaseSku;
+    private String inventoryRecoverySku;
 
     public MyketBillingManager(Context context) {
         appContext = context.getApplicationContext();
@@ -123,6 +125,7 @@ public class MyketBillingManager {
 
         String payload = createDeveloperPayload(sku, renewalOrderId);
         savePendingPayload(sku, payload);
+        activePurchaseSku = sku;
 
         try {
             helper.launchPurchaseFlow(activity, sku, purchaseFinishedListener, payload);
@@ -164,6 +167,8 @@ public class MyketBillingManager {
 
     public void dispose() {
         ready = false;
+        activePurchaseSku = null;
+        inventoryRecoverySku = null;
         ownedPurchases.clear();
         if (helper != null) {
             try {
@@ -194,12 +199,23 @@ public class MyketBillingManager {
                 listener.onSkuDetailsLoaded(inventory.getAllProducts());
             }
 
+            String recoveringSku = inventoryRecoverySku;
+            boolean recoveredFailedPurchase = false;
             ownedPurchases.clear();
             for (Purchase purchase : inventory.getAllPurchases()) {
                 if (purchase != null && !TextUtils.isEmpty(purchase.getSku())) {
                     ownedPurchases.put(purchase.getSku(), purchase);
+                    if (purchase.getSku().equals(recoveringSku)) {
+                        recoveredFailedPurchase = true;
+                    }
                 }
                 handleVerifiedPurchase(purchase, true);
+            }
+            if (!TextUtils.isEmpty(recoveringSku)) {
+                inventoryRecoverySku = null;
+                if (!recoveredFailedPurchase) {
+                    notifyError("Myket purchase failed: item was not returned in inventory after purchase error.");
+                }
             }
         }
     };
@@ -212,13 +228,17 @@ public class MyketBillingManager {
             if (result.isFailure()) {
                 if (shouldRefreshInventoryAfterPurchaseFailure(result)) {
                     Log.w(TAG, "Myket purchase failed with recoverable response. Querying inventory: " + result);
+                    inventoryRecoverySku = activePurchaseSku;
+                    activePurchaseSku = null;
                     queryInventory();
                     return;
                 }
+                activePurchaseSku = null;
                 notifyError("Myket purchase failed: " + result);
                 return;
             }
 
+            activePurchaseSku = null;
             handleVerifiedPurchase(purchase, false);
         }
     };
