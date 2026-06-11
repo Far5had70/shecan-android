@@ -5,7 +5,6 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.Collections;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +18,7 @@ import ir.shecan.BuildConfig;
 import ir.shecan.Shecan;
 import ir.shecan.core.billing.BillingPlan;
 import ir.shecan.core.billing.BillingPlanCatalog;
+import ir.shecan.core.constant.Constant;
 import ir.shecan.data.modelDio.ExistApiInput;
 import ir.shecan.data.modelDio.BannerMatchApiInput;
 import ir.shecan.data.modelDio.DialogActionApiInput;
@@ -176,7 +176,19 @@ public class AuthApi {
     }
 
     private Map<String, String> storeHeader() {
-        return Collections.singletonMap("Referer", APIManager.getStoreHeaderValue());
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Referer", APIManager.getStoreHeaderValue());
+        headers.put("X-App-Market", getAppMarketHeader());
+        headers.put("X-App-Version", BuildConfig.VERSION_NAME);
+        headers.put("X-App-Build", String.valueOf(BuildConfig.VERSION_CODE));
+        headers.put("X-App-Platform", "android");
+        return headers;
+    }
+
+    private String getAppMarketHeader() {
+        if (Constant.IsCafeBazaarMode) return "bazaar";
+        if (Constant.IsMyketMode) return "myket";
+        return "site";
     }
 
     // ---------------------------------------------------
