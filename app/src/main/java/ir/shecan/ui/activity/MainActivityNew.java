@@ -11,6 +11,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -670,14 +671,16 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
                     getString(R.string.billing_payment_success_title),
                     getString(R.string.billing_payment_success_message),
                     getString(R.string.billing_payment_start_using),
-                    () -> activateService()
+                    null,
+                    R.color.connectionIsActiveColor
             );
         } else if (PAYMENT_RESULT_FAILED.equals(result)) {
             showPaymentResultDialog(
                     getString(R.string.billing_payment_failed_title),
                     getString(R.string.billing_payment_failed_refund_message),
                     getString(R.string.billing_payment_confirm),
-                    null
+                    null,
+                    R.color.orangeMain
             );
         }
     }
@@ -771,7 +774,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         return null;
     }
 
-    private void showPaymentResultDialog(String title, String message, String actionText, Runnable action) {
+    private void showPaymentResultDialog(String title, String message, String actionText, Runnable action, int buttonColorRes) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_payment_result, null, false);
         TextView titleView = dialogView.findViewById(R.id.txtPaymentResultTitle);
         TextView messageView = dialogView.findViewById(R.id.txtPaymentResultMessage);
@@ -780,6 +783,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         titleView.setText(title);
         messageView.setText(message);
         actionButton.setText(actionText);
+        actionButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, buttonColorRes)));
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)

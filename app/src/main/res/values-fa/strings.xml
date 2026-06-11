@@ -136,10 +136,10 @@
     <string name="billing_payment_loading">در حال آماده‌سازی پرداخت...</string>
     <string name="billing_payment_login_required">برای پرداخت ابتدا وارد حساب شوید.</string>
     <string name="billing_payment_success_title">پرداخت موفق بود</string>
-    <string name="billing_payment_success_message">سرویس شما با موفقیت فعال شد.</string>
+    <string name="billing_payment_success_message">پرداخت شما موفق بود. تا دقایقی دیگر سرویس شما فعال خواهد شد.</string>
     <string name="billing_payment_start_using">شروع استفاده</string>
     <string name="billing_payment_failed_title">پرداخت ناموفق بود</string>
-    <string name="billing_payment_failed_refund_message">تا ۷۲ ساعت دیگر مبلغ پرداختی به حساب بانکی شما برگشت داده می‌شود.</string>
+    <string name="billing_payment_failed_refund_message">پرداخت شما ناموفق بود. در صورتی که وجه از حساب شما کسر شده است، تا ۷۲ ساعت دیگر به حساب شما برگشت داده خواهد شد.</string>
     <string name="billing_payment_confirm">تایید</string>
     <string name="billing_discount_required">کد تخفیف را وارد کنید.</string>
     <string name="billing_discount_price_required">قبل از اعمال تخفیف باید قیمت پلن دریافت شود.</string>
