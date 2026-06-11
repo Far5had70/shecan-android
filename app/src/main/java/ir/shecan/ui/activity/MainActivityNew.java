@@ -344,7 +344,6 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         }
     }
 
-    @Override
     public void consumeMyketPurchase(Object purchase) {
         if (myketBillingManager != null) {
             myketBillingManager.consumePurchase(purchase);
@@ -358,7 +357,6 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         }
     }
 
-    @Override
     public void consumeCafeBazaarPurchase(String purchaseToken) {
         if (cafeBazaarBillingManager != null) {
             cafeBazaarBillingManager.consumePurchase(purchaseToken);
