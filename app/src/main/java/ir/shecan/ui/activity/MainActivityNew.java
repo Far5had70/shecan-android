@@ -22,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -711,18 +713,31 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
     }
 
     private void showPaymentResultDialog(String title, String message, String actionText, Runnable action) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_payment_result, null, false);
+        TextView titleView = dialogView.findViewById(R.id.txtPaymentResultTitle);
+        TextView messageView = dialogView.findViewById(R.id.txtPaymentResultMessage);
+        Button actionButton = dialogView.findViewById(R.id.btnPaymentResultAction);
+
+        titleView.setText(title);
+        messageView.setText(message);
+        actionButton.setText(actionText);
+
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(actionText, (dialogInterface, which) -> {
-                    if (action != null) action.run();
-                })
+                .setView(dialogView)
                 .create();
-        dialog.setOnShowListener(d ->
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setTextColor(ContextCompat.getColor(this, R.color.greenMain))
-        );
+        actionButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (action != null) action.run();
+        });
         dialog.show();
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int width = getResources().getDisplayMetrics().widthPixels
+                    - (int) (48 * getResources().getDisplayMetrics().density);
+            window.setLayout(Math.max(width, 0), ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     public void applyThemeForRecreate() {
