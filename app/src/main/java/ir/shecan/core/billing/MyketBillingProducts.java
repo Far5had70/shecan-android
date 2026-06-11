@@ -9,11 +9,11 @@ public final class MyketBillingProducts {
     }
 
     public static List<String> consumableSkus() {
-        return Collections.emptyList();
+        return BillingPlanCatalog.purchasableSkus();
     }
 
     public static List<String> nonConsumableSkus() {
-        return BillingPlanCatalog.purchasableSkus();
+        return Collections.emptyList();
     }
 
     public static List<String> allSkus() {

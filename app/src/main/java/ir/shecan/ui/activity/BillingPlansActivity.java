@@ -264,6 +264,13 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
     }
 
     @Override
+    public void consumeMyketPurchase(Object purchase) {
+        if (myketBillingManager != null) {
+            myketBillingManager.consumePurchase(purchase);
+        }
+    }
+
+    @Override
     public void launchCafeBazaarPurchase(String sku, Long renewalOrderId) {
         if (cafeBazaarBillingManager != null) {
             cafeBazaarBillingManager.launchPurchaseFlow(getActivityResultRegistry(), sku, renewalOrderId);

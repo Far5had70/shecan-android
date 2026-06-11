@@ -7,5 +7,7 @@ public interface BillingHost {
 
     void launchMyketPurchase(String sku, Long renewalOrderId);
 
+    void consumeMyketPurchase(Object purchase);
+
     void launchCafeBazaarPurchase(String sku, Long renewalOrderId);
 }

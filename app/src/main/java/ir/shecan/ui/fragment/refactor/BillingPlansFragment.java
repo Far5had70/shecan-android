@@ -938,6 +938,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
     public void onMarketplacePurchaseReady(BillingStore store, Object purchase, boolean restoredFromInventory) {
         if (binding == null) return;
         if (restoredFromInventory && isMarketplacePurchaseAlreadyHandled(store, purchase)) {
+            consumeVerifiedMarketplacePurchaseIfNeeded(store, purchase);
             return;
         }
         if (pendingPlan == null) {
@@ -1043,7 +1044,7 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                             String order = data.getOrderId() != null
                                     ? getString(R.string.billing_order_code, String.valueOf(data.getOrderId()))
                                     : "";
-                            consumeDiscountAfterIapVerifyIfNeeded(token, data, order);
+                            consumeDiscountAfterIapVerifyIfNeeded(store, purchase, token, data, order);
                         } else {
                             String detail = data != null && data.getDetail() != null
                                     ? data.getDetail()
@@ -1098,9 +1099,15 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
         return renewalOrderId > 0L ? renewalOrderId : null;
     }
 
-    private void consumeDiscountAfterIapVerifyIfNeeded(VerifyApiViewModel token, IapVerifyViewModel verify, String orderMessage) {
+    private void consumeDiscountAfterIapVerifyIfNeeded(
+            BillingStore store,
+            Object purchase,
+            VerifyApiViewModel token,
+            IapVerifyViewModel verify,
+            String orderMessage
+    ) {
         if (!hasAppliedDiscount() || verify.getOrderId() == null) {
-            finishVerifiedIap(orderMessage);
+            finishVerifiedIap(store, purchase, orderMessage);
             return;
         }
 
@@ -1112,28 +1119,37 @@ public class BillingPlansFragment extends ToolbarFragment implements BillingPurc
                 new ApiCallback<EmptyResponse>() {
                     @Override
                     public void onSuccess(EmptyResponse data, boolean fromCache) {
-                        finishVerifiedIap(orderMessage);
+                        finishVerifiedIap(store, purchase, orderMessage);
                     }
 
                     @Override
                     public void onError(int statusCode, String message) {
                         String error = formatBillingApiError(statusCode, message, R.string.billing_discount_consume_failed);
                         Log.w(TAG, "Failed to consume discount code after IAP verify: " + error);
-                        finishVerifiedIap(orderMessage);
+                        finishVerifiedIap(store, purchase, orderMessage);
                         showError(error);
                     }
                 }
         );
     }
 
-    private void finishVerifiedIap(String orderMessage) {
+    private void finishVerifiedIap(BillingStore store, Object purchase, String orderMessage) {
         if (binding == null) return;
+        consumeVerifiedMarketplacePurchaseIfNeeded(store, purchase);
         showStatus(getString(R.string.billing_iap_verified, orderMessage), false);
         showMessage(getString(R.string.billing_purchase_verified));
         logSelectedPlanEvent(TrackingUtils.EVENT_BILLING_PURCHASE_SUCCESS);
         pendingPlan = null;
         setPaymentLoading(false);
         openPaymentResult(MainActivityNew.PAYMENT_RESULT_SUCCESS);
+    }
+
+    private void consumeVerifiedMarketplacePurchaseIfNeeded(BillingStore store, Object purchase) {
+        if (store != BillingStore.MYKET || purchase == null) return;
+        BillingHost host = getBillingHost();
+        if (host != null) {
+            host.consumeMyketPurchase(purchase);
+        }
     }
 
     private void openPaymentResult(String result) {

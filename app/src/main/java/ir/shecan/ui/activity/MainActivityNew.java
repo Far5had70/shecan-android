@@ -364,6 +364,7 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
         }
     }
 
+    @Override
     public void consumeMyketPurchase(Object purchase) {
         if (myketBillingManager != null) {
             myketBillingManager.consumePurchase(purchase);
