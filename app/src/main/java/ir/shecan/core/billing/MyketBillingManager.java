@@ -9,8 +9,10 @@ import android.util.Log;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ir.myket.billingclient.IabHelper;
@@ -31,6 +33,7 @@ public class MyketBillingManager {
     private final SharedPreferences preferences;
     private final Set<String> consumableSkus = new HashSet<>();
     private final Set<String> nonConsumableSkus = new HashSet<>();
+    private final Map<String, Purchase> ownedPurchases = new HashMap<>();
 
     private IabHelper helper;
     private Listener listener;
@@ -111,6 +114,13 @@ public class MyketBillingManager {
             return;
         }
 
+        Purchase ownedPurchase = ownedPurchases.get(sku);
+        if (ownedPurchase != null) {
+            Log.d(TAG, "Myket sku is already owned. Redelivering before launching purchase: " + sku);
+            handleVerifiedPurchase(ownedPurchase, true);
+            return;
+        }
+
         String payload = createDeveloperPayload(sku, renewalOrderId);
         savePendingPayload(sku, payload);
 
@@ -145,8 +155,16 @@ public class MyketBillingManager {
         }
     }
 
+    public void redeliverOwnedPurchases() {
+        if (ownedPurchases.isEmpty()) return;
+        for (Purchase purchase : new ArrayList<>(ownedPurchases.values())) {
+            handleVerifiedPurchase(purchase, true);
+        }
+    }
+
     public void dispose() {
         ready = false;
+        ownedPurchases.clear();
         if (helper != null) {
             try {
                 helper.dispose();
@@ -176,7 +194,11 @@ public class MyketBillingManager {
                 listener.onSkuDetailsLoaded(inventory.getAllProducts());
             }
 
+            ownedPurchases.clear();
             for (Purchase purchase : inventory.getAllPurchases()) {
+                if (purchase != null && !TextUtils.isEmpty(purchase.getSku())) {
+                    ownedPurchases.put(purchase.getSku(), purchase);
+                }
                 handleVerifiedPurchase(purchase, true);
             }
         }
@@ -188,6 +210,11 @@ public class MyketBillingManager {
             if (helper == null) return;
 
             if (result.isFailure()) {
+                if (shouldRefreshInventoryAfterPurchaseFailure(result)) {
+                    Log.w(TAG, "Myket purchase failed with recoverable response. Querying inventory: " + result);
+                    queryInventory();
+                    return;
+                }
                 notifyError("Myket purchase failed: " + result);
                 return;
             }
@@ -202,6 +229,9 @@ public class MyketBillingManager {
             if (helper == null) return;
 
             if (result.isSuccess()) {
+                if (purchase != null && !TextUtils.isEmpty(purchase.getSku())) {
+                    ownedPurchases.remove(purchase.getSku());
+                }
                 if (listener != null) listener.onPurchaseConsumed(purchase);
             } else {
                 notifyError("Error while consuming Myket purchase: " + result);
@@ -229,6 +259,10 @@ public class MyketBillingManager {
         } else {
             if (listener != null) listener.onNonConsumablePurchaseReady(purchase, restoredFromInventory);
         }
+    }
+
+    private boolean shouldRefreshInventoryAfterPurchaseFailure(IabResult result) {
+        return result != null && result.toString() != null && result.toString().contains("response: 6");
     }
 
     private boolean verifyPendingDeveloperPayload(Purchase purchase) {

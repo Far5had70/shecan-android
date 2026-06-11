@@ -116,6 +116,9 @@ public class MainActivityNew extends AppCompatActivity implements BillingHost {
 
     public void setBillingPurchaseObserver(BillingPurchaseObserver billingPurchaseObserver) {
         this.billingPurchaseObserver = billingPurchaseObserver;
+        if (billingPurchaseObserver != null && myketBillingManager != null) {
+            myketBillingManager.redeliverOwnedPurchases();
+        }
     }
 
     public boolean isBillingReadyForStore(BillingStore store) {

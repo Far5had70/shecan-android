@@ -241,6 +241,9 @@ public class BillingPlansActivity extends AppCompatActivity implements BillingHo
     @Override
     public void setBillingPurchaseObserver(BillingPurchaseObserver billingPurchaseObserver) {
         this.billingPurchaseObserver = billingPurchaseObserver;
+        if (billingPurchaseObserver != null && myketBillingManager != null) {
+            myketBillingManager.redeliverOwnedPurchases();
+        }
     }
 
     @Override
